@@ -1,5 +1,5 @@
-import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
-import { createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
+import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { createItalianState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
@@ -88,6 +88,11 @@ const updateReconstruction = (reconstruction, changes = {}) => {
 const updateRegional = (regional, changes = {}) => {
   if (!regional) return regional
   return Object.fromEntries(Object.entries(regional).map(([key, value]) => [key, typeof value === 'number' ? Math.max(0, value + (changes[key] ?? 0)) : value]))
+}
+
+const updateItalian = (italian, changes = {}) => {
+  if (!italian) return italian
+  return Object.fromEntries(Object.entries(italian).map(([key, value]) => [key, typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value]))
 }
 
 export function republicForecast(state) {
@@ -228,6 +233,41 @@ export function regionalForecast(state) {
   }
 }
 
+export function italianForecast(state) {
+  if (state.era < 5 || !state.italian) return null
+  const roadComplete = state.italian.projects.viaAppia.completed
+  const waterComplete = state.italian.projects.aquaAppia.completed
+  const allianceSupport = Math.round((state.regional?.allianceDoctrine ?? 0) / 4)
+  const reserveSupport = Math.round((state.resources.grain + state.resources.treasury) / 18)
+  const changes = {
+    samnitePressure: state.turn <= 26 ? -Math.max(1, Math.round((state.italian.campaignPersistence + allianceSupport - 45) / 18)) : 0,
+    allianceDepth: state.factions.allies >= 55 ? 1 : state.factions.allies < 35 ? -2 : 0,
+    campaignPersistence: state.metrics.readiness >= 55 ? 1 : -1,
+    reserveDepth: reserveSupport - (state.workforceAllocation?.levy >= 35 ? 3 : 1),
+    coalitionRisk: state.turn === 26 ? Math.max(-5, 4 - allianceSupport) : state.turn > 26 ? -1 : 1,
+    pyrrhicPressure: state.turn >= 27 ? -Math.max(1, Math.round((state.italian.campaignPersistence + state.italian.allianceDepth - 80) / 20)) : 0,
+    maintenanceDebt: roadComplete || waterComplete ? 1 : 0,
+  }
+  const treasuryUpkeep = -Math.ceil(state.italian.maintenanceDebt / 20)
+  const resourceDelta = { treasury: treasuryUpkeep, grain: state.italian.reserveDepth >= 60 ? 1 : state.italian.reserveDepth < 30 ? -2 : 0 }
+  const metricDelta = {
+    readiness: Math.round((state.italian.campaignPersistence + state.italian.reserveDepth - state.italian.samnitePressure - state.italian.pyrrhicPressure) / 40),
+    order: state.italian.maintenanceDebt >= 55 ? -3 : state.italian.coalitionRisk >= 65 ? -2 : 0,
+    water: waterComplete ? 1 : 0,
+    trade: roadComplete ? 1 : 0,
+  }
+  return {
+    changes,
+    resourceDelta,
+    metricDelta,
+    projected: updateItalian(state.italian, changes),
+    notes: [
+      roadComplete ? 'The Via Appia strengthens southern supply and response while leaving the same corridor open to hostile movement.' : 'The southern road remains incomplete, limiting sustained response beyond Latium.',
+      waterComplete ? 'The Aqua Appia supports denser urban life, but inspection and repair now make permanent claims on public accounts.' : 'Urban water still depends on the older network while crews debate the Appian program.',
+    ],
+  }
+}
+
 export function allocateWorkforce(state, lane, delta) {
   if (!['farming', 'works', 'levy'].includes(lane) || !Number.isFinite(delta) || delta === 0) return state
   const allocation = { ...(state.workforceAllocation ?? { farming: 50, works: 30, levy: 20 }) }
@@ -359,6 +399,56 @@ export function continueRegionalRoad(state, routeId) {
       actionLog: appendAction(state, { type: 'regional-road-work', route: route.name }),
     },
     message: completed ? `${route.name} completed; supply and response improve, and the same corridor is now open to hostile movement.` : `${route.name} advanced to ${progress} of ${project.requiredSeasons} seasons.`,
+  }
+}
+
+export function italianProjectAvailability(state, projectId) {
+  if (!state.italian || state.era < 5) return { ok: false, reason: 'The Appian works are not yet available.' }
+  const definition = ITALIAN_PROJECTS[projectId]
+  const project = state.italian.projects?.[projectId]
+  if (!definition || !project) return { ok: false, reason: 'Choose a valid Italian public work.' }
+  if (project.completed) return { ok: false, reason: `${definition.name} is complete.` }
+  if (project.lastWorkedTurn === state.turn) return { ok: false, reason: `${definition.name} has already received the shared crews this season.` }
+  if (actionRemaining(state) < 1) return { ok: false, reason: 'No shared public capacity remains this season.' }
+  const favored = state.flags?.appianPriority === (projectId === 'viaAppia' ? 'road' : 'water')
+  const cost = { ...definition.cost, treasury: Math.max(1, definition.cost.treasury - (favored && project.progress === 0 ? 1 : 0)) }
+  const affordability = affordabilityFailure(state, cost)
+  if (affordability) return { ok: false, reason: affordability }
+  return { ok: true, definition, project, cost }
+}
+
+export function workItalianProject(state, projectId) {
+  const availability = italianProjectAvailability(state, projectId)
+  if (!availability.ok) return { state, error: availability.reason }
+  const { definition, project, cost } = availability
+  const progress = project.progress + 1
+  const completed = progress >= project.requiredSeasons
+  const nextProject = { ...project, progress, completed, lastWorkedTurn: state.turn }
+  let metrics = state.metrics
+  let regional = state.regional
+  let italian = { ...state.italian, projects: { ...state.italian.projects, [projectId]: nextProject } }
+  if (completed && projectId === 'viaAppia') {
+    const route = REGIONAL_ROUTES.find((item) => item.id === 'appian-corridor')
+    const roads = regional?.roads.includes(route.id) ? regional.roads : [...(regional?.roads ?? []), route.id]
+    regional = regional ? { ...regional, roads } : regional
+    italian = updateItalian(italian, { campaignPersistence: 8, hostileAccess: route.hostileAccess })
+    metrics = addMap(metrics, { trade: 6, readiness: 4 })
+  }
+  if (completed && projectId === 'aquaAppia') {
+    italian = updateItalian(italian, { waterCapacity: 18, maintenanceDebt: 6 })
+    metrics = addMap(metrics, { water: 12, sanitation: 4 })
+  }
+  return {
+    state: {
+      ...state,
+      resources: addResources(state.resources, reverseChanges(cost)),
+      metrics,
+      regional,
+      italian,
+      actionsUsed: (state.actionsUsed ?? 0) + 1,
+      actionLog: appendAction(state, { type: 'italian-project', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
+    },
+    message: completed ? `${definition.name} completed after ${project.requiredSeasons} seasons of shared crews and materials.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} seasons.`,
   }
 }
 
@@ -717,8 +807,9 @@ export function resolveCouncil(state, optionId) {
   const nextWar = updateWar(state.war, impacts.war)
   const nextReconstruction = updateReconstruction(state.reconstruction, impacts.reconstruction)
   const nextRegional = updateRegional(state.regional, impacts.regional)
+  const nextItalian = updateItalian(state.italian, impacts.italian)
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
-  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, flags: nextFlags }
+  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, flags: nextFlags }
   return {
     ...state,
     resources: addResources(state.resources, impacts.resources),
@@ -729,6 +820,7 @@ export function resolveCouncil(state, optionId) {
     war: nextWar,
     reconstruction: nextReconstruction,
     regional: nextRegional,
+    italian: nextItalian,
     nextWorksBonus,
     actionsMax: Math.max(state.actionsUsed ?? 0, workforceSummary(capacityState).constructionCapacity),
     councilResolved: true,
@@ -963,8 +1055,9 @@ export function forecastSeason(state) {
   const war = warForecast(state)
   const reconstruction = reconstructionForecast(state)
   const regional = regionalForecast(state)
+  const italian = italianForecast(state)
   return {
-    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta),
+    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta),
     pressures: civicPressures(state),
     actionsRemaining: actionRemaining(state),
     population: projectPopulation(state),
@@ -974,6 +1067,7 @@ export function forecastSeason(state) {
     war,
     reconstruction,
     regional,
+    italian,
   }
 }
 
@@ -1214,7 +1308,7 @@ export function advanceTurn(state) {
   const pressures = forecast.pressures
   const event = timedEvent(state)
   const resourceDelta = mergeChanges(forecast.resourceDelta, event?.resources)
-  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta)
+  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta)
   const nextResources = addResources(state.resources, resourceDelta)
   let nextMetrics = addMap(state.metrics, metricDelta)
   const shortages = Object.entries(nextResources).filter(([key, value]) => value === 0 && ['grain', 'timber', 'treasury'].includes(key))
@@ -1248,6 +1342,7 @@ export function advanceTurn(state) {
   const nextWar = forecast.war ? forecast.war.projected : state.war
   const nextReconstruction = forecast.reconstruction ? forecast.reconstruction.projected : state.reconstruction
   const nextRegional = forecast.regional ? forecast.regional.projected : state.regional
+  const nextItalian = forecast.italian ? forecast.italian.projected : state.italian
   report.republicChanges = mergeChanges(forecast.republic?.changes, warRepublicChanges)
   report.warChanges = forecast.war?.changes ?? null
   report.reconstructionChanges = forecast.reconstruction?.changes ?? null
@@ -1258,9 +1353,12 @@ export function advanceTurn(state) {
     revoltRisk: forecast.regional.revoltRisk,
   } : null
   if (forecast.regional) report.notes.push(...forecast.regional.notes)
+  report.italianChanges = forecast.italian?.changes ?? null
+  if (forecast.italian) report.notes.push(...forecast.italian.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, reports: [...state.reports, report] }
-  if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'complete' }, report }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, reports: [...state.reports, report] }
+  if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
+  if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }
   if (state.turn === 16) return {
     state: {
@@ -1408,6 +1506,27 @@ export function enterRegionalStrategy(state) {
     councilResolved: false,
     resources: addResources(state.resources, { stone: 3, treasury: 3, grain: 2 }),
     metrics: addMap(state.metrics, { trade: 2, readiness: 2 }),
+  }
+  return { ...transitioned, actionsMax: workforceSummary(transitioned).constructionCapacity }
+}
+
+export function enterItalianStrategy(state) {
+  if (!state.italianTransition) return state
+  const nextTurn = 24
+  const transitioned = {
+    ...state,
+    turn: nextTurn,
+    era: 5,
+    outcome: null,
+    italianTransition: false,
+    italian: createItalianState(state.regional, state.flags?.caudineResponse),
+    actionsUsed: 0,
+    nextWorksBonus: 0,
+    selectedBuildingId: null,
+    council: getCouncil(nextTurn),
+    councilResolved: false,
+    resources: addResources(state.resources, { stone: 5, treasury: 6, grain: 3 }),
+    metrics: addMap(state.metrics, { order: 2, readiness: 2 }),
   }
   return { ...transitioned, actionsMax: workforceSummary(transitioned).constructionCapacity }
 }

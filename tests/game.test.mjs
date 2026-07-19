@@ -1,8 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createInitialState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
-import { BUILDING_FAMILIES, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary } from '../src/game/simulation.js'
+import { createInitialState, createItalianState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
+import { BUILDING_FAMILIES, TURN_YEARS, getCouncil } from '../src/game/data.js'
+import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
 import { calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
@@ -340,7 +340,7 @@ test('version three saves remove legacy labor and gain workforce and projects', 
   delete old.workforceAllocation
   delete old.projects
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 7)
+  assert.equal(migrated.version, 8)
   assert.equal('labor' in migrated.resources, false)
   assert.equal(Object.values(migrated.workforceAllocation).reduce((sum, value) => sum + value, 0), 100)
   assert.deepEqual(migrated.projects, [])
@@ -352,7 +352,7 @@ test('version one saves migrate to the current population state', () => {
   delete old.actionsMax
   delete old.actionLog
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 7)
+  assert.equal(migrated.version, 8)
   assert.equal(migrated.actionsMax, 2)
   assert.deepEqual(migrated.actionLog, [])
   assert.equal(migrated.population.total, 1030)
@@ -362,7 +362,7 @@ test('version two saves retain mechanics while gaining population', () => {
   const old = { ...createInitialState(), version: 2, actionsUsed: 1, actionLog: [{ type: 'build' }] }
   delete old.population
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 7)
+  assert.equal(migrated.version, 8)
   assert.equal(migrated.actionsUsed, 1)
   assert.equal(migrated.actionLog.length, 1)
   assert.equal(migrated.population.districts.palatine, 450)
@@ -553,7 +553,7 @@ test('three Act III reference strategies complete cleanly at C or better', () =>
 
 test('a completed version four campaign migrates to a resumable republic transition', () => {
   const migrated = migrateState({ ...createInitialState(), version: 4, turn: 10, era: 1, outcome: 'complete' })
-  assert.equal(migrated.version, 7)
+  assert.equal(migrated.version, 8)
   assert.equal(migrated.outcome, 'acts-complete')
   assert.equal(migrated.republicTransition, true)
   assert.equal(enterEarlyRepublic(migrated).turn, 11)
@@ -602,7 +602,7 @@ test('Tier IV works remain locked until reconstruction', () => {
 test('a version five save completed at turn sixteen opens reconstruction', () => {
   const saved = { ...createInitialState(), version: 5, era: 2, turn: 16, republic: createRepublicState(), war: createWarState(), outcome: 'complete' }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 7)
+  assert.equal(migrated.version, 8)
   assert.equal(migrated.outcome, 'act-three-complete')
   assert.equal(migrated.reconstructionTransition, true)
 })
@@ -685,8 +685,111 @@ test('unsupported regional commitments produce overextension', () => {
 test('three regional doctrines finish with viable but distinct compacts', () => {
   const results = runAllRegionalStrategies()
   assert.equal(results.length, 3)
-  assert.ok(results.every((result) => result.state.turn === 23 && result.state.outcome === 'complete'))
+  assert.ok(results.every((result) => result.state.turn === 23 && result.state.outcome === 'regional-complete' && result.state.italianTransition))
   assert.ok(results.every((result) => result.regionalScore.score >= 70 && result.skipped.length === 0))
   assert.equal(new Set(results.map((result) => result.state.flags.regionalDoctrine)).size, 3)
   assert.ok(results.every((result) => calculateRegionalScore(result.state).forecast.overextension < 45))
+})
+
+test('Act V chronology runs from the Samnite opening through the 264 BC threshold', () => {
+  assert.deepEqual(TURN_YEARS.slice(20), [338, 326, 321, 312, 304, 295, 280, 275, 264])
+  assert.equal(getCouncil(23).id, 'regional-obligations')
+  assert.match(getCouncil(23).title, /Caudine/i)
+  assert.equal(getCouncil(29).id, 'mediterranean-threshold')
+})
+
+test('version seven regional completion migrates to the Italian transition', () => {
+  const saved = {
+    ...createInitialState(),
+    version: 7,
+    era: 4,
+    turn: 23,
+    outcome: 'complete',
+    regional: createRegionalState('differentiated-compacts'),
+    italianTransition: undefined,
+  }
+  const migrated = migrateState(saved)
+  assert.equal(migrated.version, 8)
+  assert.equal(migrated.outcome, 'regional-complete')
+  assert.equal(migrated.italianTransition, true)
+  assert.equal(migrated.turn, 23)
+  assert.ok(migrated.regional)
+})
+
+function italianTestState() {
+  const regional = createRegionalState('differentiated-compacts')
+  return {
+    ...createInitialState(),
+    era: 5,
+    turn: 24,
+    council: getCouncil(24),
+    councilResolved: false,
+    outcome: null,
+    regional,
+    italian: createItalianState(regional, 'preserve-army'),
+    resources: { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 },
+    actionsMax: 2,
+    actionsUsed: 0,
+  }
+}
+
+test('Appian works compete for shared capacity and require three distinct seasons', () => {
+  let state = resolveCouncil(italianTestState(), 'road-first')
+  state = workItalianProject(state, 'viaAppia').state
+  assert.equal(state.italian.projects.viaAppia.progress, 1)
+  assert.equal(state.actionsUsed, 1)
+  const blocked = workItalianProject(state, 'viaAppia')
+  assert.match(blocked.error, /already received/i)
+  state = workItalianProject(state, 'aquaAppia').state
+  assert.equal(state.actionsUsed, 2)
+  assert.equal(italianProjectAvailability(state, 'aquaAppia').ok, false)
+  state = { ...state, turn: 25, actionsUsed: 0 }
+  state = workItalianProject(state, 'viaAppia').state
+  state = { ...state, turn: 26, actionsUsed: 0 }
+  state = workItalianProject(state, 'viaAppia').state
+  assert.equal(state.italian.projects.viaAppia.completed, true)
+  assert.ok(state.regional.roads.includes('appian-corridor'))
+  assert.ok(state.italian.hostileAccess > 0)
+})
+
+test('Aqua Appia increases water capacity and creates maintenance debt', () => {
+  let state = resolveCouncil(italianTestState(), 'water-first')
+  for (const turn of [24, 25, 26]) {
+    state = { ...state, turn, actionsUsed: 0 }
+    state = workItalianProject(state, 'aquaAppia').state
+  }
+  assert.equal(state.italian.projects.aquaAppia.completed, true)
+  assert.ok(state.italian.waterCapacity >= 18)
+  assert.ok(state.italian.maintenanceDebt >= 6)
+  assert.ok(state.metrics.water > italianTestState().metrics.water)
+  assert.ok(italianForecast(state).resourceDelta.treasury < 0)
+})
+
+test('the deterministic Act V engine reaches a complete 264 BC endpoint', () => {
+  const regional = createRegionalState('differentiated-compacts')
+  let state = enterItalianStrategy({
+    ...createInitialState(),
+    era: 4,
+    turn: 23,
+    council: getCouncil(23),
+    councilResolved: true,
+    outcome: 'regional-complete',
+    italianTransition: true,
+    regional,
+    flags: { caudineResponse: 'preserve-army' },
+    resources: { grain: 60, timber: 50, stone: 60, bronze: 50, treasury: 60 },
+  })
+  const choices = ['road-first', 'bounded-peace', 'divide-coalition', 'learn-and-reform', 'refuse-terms', 'italian-consolidation']
+  const projects = ['viaAppia', 'aquaAppia', 'viaAppia', 'aquaAppia', 'viaAppia', 'aquaAppia']
+  for (let index = 0; index < choices.length; index += 1) {
+    state = resolveCouncil(state, choices[index])
+    state = workItalianProject(state, projects[index]).state
+    const advanced = advanceTurn(state)
+    assert.equal(advanced.error, undefined)
+    state = advanced.state
+  }
+  assert.equal(state.turn, 29)
+  assert.equal(state.outcome, 'complete')
+  assert.equal(state.italian.projects.viaAppia.completed, true)
+  assert.equal(state.italian.projects.aquaAppia.completed, true)
 })

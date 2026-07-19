@@ -90,7 +90,7 @@ export const HISTORICAL_NOTES = [
     evidence: 'Livy 8.11-14; later institutional evidence for Latin, citizen, partial-citizen, and allied relationships. The game compresses the road from sack to settlement.',
   },
   {
-    id: 'roads-status-and-service', title: 'Roads, Status, and Military Service', category: 'Institutional history', turns: [21, 22],
+    id: 'roads-status-and-service', title: 'Roads, Status, and Military Service', category: 'Institutional history', turns: [21, 22, 24],
     text: 'Roman expansion joined physical routes to differentiated political relationships. Citizenship, partial rights, Latin status, and treaties did not produce identical burdens. Roads could speed supply, trade, and response while also creating avenues an enemy might use.',
     evidence: 'Livy 8.11-14 and 9.29 for the settlement tradition and Via Appia; Polybius 6.21-26 for later military obligation, used cautiously for institutional development.',
   },
@@ -98,6 +98,36 @@ export const HISTORICAL_NOTES = [
     id: 'colonies-and-compacts', title: 'Colonies Were Commitments, Not Free Territory', category: 'Structural inference', turns: [22, 23],
     text: 'A colony required settlers, land settlement, defense, roads, supplies, and continued political attention. It could anchor control and reward service while reducing a community\'s autonomy and exposing Rome to new garrison and maintenance demands.',
     evidence: 'Livy books 8-10 for fourth-century colonies and settlements; later colonial records clarify the institution but should not be projected backward without caution.',
+  },
+  {
+    id: 'caudine-forks', title: 'Caudine Forks: Defeat and Recovery', category: 'Literary tradition + strategic inference', turns: [23],
+    text: 'Livy describes a Roman army trapped in 321 BC, compelled to pass under the yoke, and released under terms later disputed at Rome. The exact diplomatic sequence and speeches are uncertain. Encirclement, humiliation, preservation of trained manpower, and the political cost of repudiating terms remain valid strategic pressures.',
+    evidence: 'Livy 9.1-12; Appian, Samnite Wars fragments. Both accounts are later than the event, so the game does not treat the dramatic details as a verbatim record.',
+  },
+  {
+    id: 'appian-works', title: 'Via Appia and Aqua Appia', category: 'Institutional history + material evidence', turns: [24],
+    text: 'The censorship of Appius Claudius Caecus in 312 BC was remembered for both a road toward Capua and Rome\'s first aqueduct. These were not decorative monuments: each required surveys, labor, material, accounts, and continuing maintenance. The early Aqua Appia was mostly underground, unlike the towering arcades of later centuries.',
+    evidence: 'Livy 9.29; Frontinus, De aquaeductu 1.5; surviving route and engineering evidence. Later rebuilding complicates any claim that the visible remains preserve the original works unchanged.',
+  },
+  {
+    id: 'samnite-endurance', title: 'The Samnite Wars and Repeated Armies', category: 'Narrative history + structural inference', turns: [22, 23, 25, 26],
+    text: 'The wars in central and southern Italy were not a single march of uninterrupted Roman success. Mountain terrain, fortified communities, allied contingents, colonies, and the ability to raise new forces after defeat mattered more than one perfect commander or battle.',
+    evidence: 'Livy books 8-10 provide the main continuous narrative. Treaty details, numbers, and speeches require caution; the broad expansion of Roman alliances, settlements, and military reach is better secured.',
+  },
+  {
+    id: 'sentinum', title: 'Sentinum and the Italian Coalition', category: 'Roman narrative + strategic inference', turns: [26],
+    text: 'Roman tradition cast Sentinum in 295 BC as a great decision against a coalition of Samnites, Gauls, Etruscans, and Umbrians. The literary scale and the devotio story are shaped by later memory. The strategic problem is firmer: Rome sought to keep several enemies from joining their full strength.',
+    evidence: 'Livy 10.16-31; later summaries. The game models coalition timing, roads, reserves, and allied depth rather than reproducing the battle narrative as certain.',
+  },
+  {
+    id: 'pyrrhic-war', title: 'Pyrrhus and the Price of Victory', category: 'Later literary tradition + strategic structure', turns: [27, 28],
+    text: 'Pyrrhus brought a practiced Hellenistic army and elephants to Italy. Ancient writers remembered costly Roman defeats and his inability to turn battlefield success into a durable political settlement. Rome\'s advantage was not immunity from defeat, but deeper access to replacement armies and an allied system that did not immediately dissolve.',
+    evidence: 'Plutarch, Life of Pyrrhus 13-25; Dionysius of Halicarnassus, Roman Antiquities fragments; Polybius 1.6 for the later strategic retrospective. The famous sayings are literary and should not be treated as transcripts.',
+  },
+  {
+    id: 'threshold-264', title: 'Why the Core Ends in 264 BC', category: 'Historical threshold', turns: [29],
+    text: 'The opening of the First Punic War marks a change in scale. Rome had become the leading power in Italy, but an Italian alliance-and-road system did not automatically provide fleets, overseas commands, or provincial institutions. Ending here lets the player judge the system before a different Mediterranean game begins.',
+    evidence: 'Polybius 1.5-12; Diodorus Siculus fragments for the opening crisis. The causes and immediate decisions remain disputed, but 264 BC is a defensible institutional boundary.',
   },
 ]
 

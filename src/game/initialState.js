@@ -73,6 +73,26 @@ export const createRegionalState = (latinSettlement = 'differentiated-compacts')
   garrisonDemand: 0,
 })
 
+export const createItalianState = (regional = null, caudineResponse = 'preserve-army') => {
+  const allianceBase = regional ? Math.min(80, 40 + Math.round((regional.allianceDoctrine ?? 0) * 1.5)) : 45
+  const pressureAdjustment = caudineResponse === 'allied-ratification' ? -4 : caudineResponse === 'ransom-and-rebuild' ? -2 : 0
+  return {
+    samnitePressure: 62 + pressureAdjustment,
+    allianceDepth: allianceBase,
+    campaignPersistence: caudineResponse === 'preserve-army' ? 56 : 50,
+    reserveDepth: 48,
+    coalitionRisk: 42,
+    pyrrhicPressure: 0,
+    maintenanceDebt: 0,
+    waterCapacity: 0,
+    hostileAccess: regional?.hostileAccess ?? 0,
+    projects: {
+      viaAppia: { id: 'viaAppia', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+      aquaAppia: { id: 'aquaAppia', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+    },
+  }
+}
+
 const withoutLegacyLabor = (resources = {}) => Object.fromEntries(
   Object.entries(resources).filter(([key]) => key !== 'labor'),
 )
@@ -88,7 +108,7 @@ const migratedWorksCapacity = (population, allocation, bonus = 0, republic = nul
 }
 
 export const createInitialState = () => ({
-  version: 7,
+  version: 8,
   turn: 1,
   era: 0,
   resources: { grain: 12, timber: 12, stone: 4, bronze: 2, treasury: 7 },
@@ -114,28 +134,31 @@ export const createInitialState = () => ({
   republicTransition: false,
   reconstructionTransition: false,
   regionalTransition: false,
+  italianTransition: false,
   republic: null,
   war: null,
   reconstruction: null,
   regional: null,
+  italian: null,
   outcome: null,
   consultedNotes: [],
   walkthroughSeen: false,
 })
 
 export function migrateState(saved) {
-  if (!saved || saved.turn < 1 || saved.turn > 23) return null
-  if (![1, 2, 3, 4, 5, 6, 7].includes(saved.version)) return null
+  if (!saved || saved.turn < 1 || saved.turn > 29) return null
+  if (![1, 2, 3, 4, 5, 6, 7, 8].includes(saved.version)) return null
   const population = saved.population ?? createInitialPopulation()
   const workforceAllocation = saved.workforceAllocation ?? createInitialWorkforceAllocation()
-  if ([5, 6, 7].includes(saved.version)) {
+  if ([5, 6, 7, 8].includes(saved.version)) {
     const completedOldRepublic = saved.era >= 2 && saved.turn === 13 && saved.outcome === 'complete'
     const completedOldActThree = saved.era === 2 && saved.turn === 16 && saved.outcome === 'complete'
     const completedOldActFour = saved.era === 3 && saved.turn === 20 && saved.outcome === 'complete'
+    const completedOldRegional = saved.version === 7 && saved.era === 4 && saved.turn === 23 && saved.outcome === 'complete'
     return {
       ...saved,
-      version: 7,
-      outcome: completedOldRepublic ? null : completedOldActThree ? 'act-three-complete' : completedOldActFour ? 'act-four-complete' : saved.outcome,
+      version: 8,
+      outcome: completedOldRepublic ? null : completedOldActThree ? 'act-three-complete' : completedOldActFour ? 'act-four-complete' : completedOldRegional ? 'regional-complete' : saved.outcome,
       resources: withoutLegacyLabor(saved.resources),
       population,
       workforceAllocation,
@@ -144,17 +167,19 @@ export function migrateState(saved) {
       republicTransition: saved.republicTransition ?? false,
       reconstructionTransition: completedOldActThree ? true : saved.reconstructionTransition ?? false,
       regionalTransition: completedOldActFour ? true : saved.regionalTransition ?? false,
+      italianTransition: completedOldRegional ? true : saved.italianTransition ?? false,
       republic: saved.republic ?? (saved.era >= 2 ? createRepublicState() : null),
       war: saved.war ?? (saved.era >= 2 ? createWarState() : null),
       reconstruction: saved.reconstruction ?? (saved.era >= 3 ? createReconstructionState() : null),
       regional: saved.regional ?? (saved.era >= 4 ? createRegionalState(saved.flags?.latinSettlement) : null),
+      italian: saved.italian ?? (saved.era >= 5 ? createItalianState(saved.regional, saved.flags?.caudineResponse) : null),
       actionsMax: Math.max(saved.actionsUsed ?? 0, migratedWorksCapacity(population, workforceAllocation, saved.nextWorksBonus ?? 0, saved.republic, saved.flags?.magistrateMode)),
     }
   }
   const completedRoyalCampaign = saved.version === 4 && saved.turn === 10 && saved.outcome
   return {
     ...saved,
-    version: 7,
+    version: 8,
     resources: withoutLegacyLabor(saved.resources),
     selectedBuildingId: saved.selectedBuildingId ?? null,
     actionsUsed: saved.actionsUsed ?? 0,
@@ -167,10 +192,12 @@ export function migrateState(saved) {
     republicTransition: Boolean(completedRoyalCampaign),
     reconstructionTransition: false,
     regionalTransition: false,
+    italianTransition: false,
     republic: null,
     war: null,
     reconstruction: null,
     regional: null,
+    italian: null,
     outcome: completedRoyalCampaign ? 'acts-complete' : saved.outcome ?? null,
     buildings: saved.version === 4
       ? (saved.buildings ?? [])

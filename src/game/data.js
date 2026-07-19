@@ -30,13 +30,33 @@ export const ERAS = [
   {
     id: 'regional-planning',
     name: 'Regional Planning',
-    span: '338-304 BC',
+    span: '338-321 BC',
     turns: [21, 23],
-    summary: 'Turn the Latin settlement into roads, obligations, colonies, and regional depth without exhausting the city that supports them.',
+    summary: 'Turn the Latin settlement into obligations and strategic depth, then survive the Samnite test at the Caudine Forks.',
+  },
+  {
+    id: 'roads-to-italy',
+    name: 'Roads to Italy',
+    span: '312-264 BC',
+    turns: [24, 29],
+    summary: 'Bind roads, water, allies, reserves, and repeated armies into an Italian system capable of outlasting coalitions and kings.',
   },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 312, 304]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264]
+
+export const ITALIAN_PROJECTS = {
+  viaAppia: {
+    id: 'viaAppia', name: 'Via Appia', requiredSeasons: 3,
+    cost: { stone: 2, treasury: 2, grain: 1 },
+    summary: 'A durable military and commercial road toward Capua. It accelerates Roman response and the movement of an enemy using the same corridor.',
+  },
+  aquaAppia: {
+    id: 'aquaAppia', name: 'Aqua Appia', requiredSeasons: 3,
+    cost: { stone: 2, treasury: 3 },
+    summary: 'A mostly underground water work whose urban capacity carries a permanent treasury and maintenance obligation.',
+  },
+}
 
 export const RESOURCE_META = {
   grain: { label: 'Grain', color: '#d8aa42' },
@@ -354,23 +374,83 @@ export const COUNCILS = [
     ],
   },
   {
-    turn: 22, id: 'roads-and-colonies', title: 'Road Crews and Colonial Drafts', speaker: 'Surveyors, veterans, allied delegates, and household assessors',
-    prompt: 'Roads need seasons of labor. Colonies need families, garrisons, grain, and lawful claims. Who bears the first expansion burden?',
-    context: 'Roman roads and colonies were logistical and political institutions, not free map ownership. The Via Appia tradition begins in 312 BC under Appius Claudius Caecus.',
+    turn: 22, id: 'roads-and-colonies', title: 'The Samnite War Opens', speaker: 'Commanders, colonial delegates, Campanian envoys, and household assessors',
+    prompt: 'War in the central Apennines cannot be carried by one field decision. Which burden should prepare Rome for difficult roads, fortified communities, and repeated levies?',
+    context: 'The Second Samnite War began in 326 BC. Livy supplies a continuous narrative, but its speeches and exact operations are literary constructions; terrain, allied obligations, and sustained campaigning are the durable strategic facts.',
     options: [
-      { id: 'public-road-crews', label: 'Fund public road crews from Roman accounts', detail: 'Move one road season faster while placing material and labor costs on the city.', impacts: { resources: { stone: 2, treasury: -4 }, republic: { senateStanding: 3, debtStrain: 2 }, regional: { roadCrewBonus: 1 }, flags: { regionalCharter: 'public-roads' } } },
-      { id: 'veteran-colonial-draft', label: 'Offer veteran families colonial allotments', detail: 'Lower the first colony\'s settler requirement while raising expectations for garrisoned land.', impacts: { resources: { grain: -3 }, factions: { levy: 7, commons: -2 }, regional: { colonySettlerRelief: 18, garrisonDemand: 5 }, flags: { regionalCharter: 'veteran-colonies' } } },
-      { id: 'allied-road-bargain', label: 'Bargain for allied crews and local roads', detail: 'Reduce Roman material cost in exchange for autonomy and a share of commercial access.', impacts: { resources: { treasury: -2 }, factions: { allies: 6, traders: 3 }, regional: { allianceDoctrine: 6, roadCostRelief: 1 }, flags: { regionalCharter: 'allied-roads' } } },
+      { id: 'public-road-crews', label: 'Survey military roads and supply depots', detail: 'Spend public accounts on reliable movement and stores before seeking a decisive battle.', impacts: { resources: { stone: 2, treasury: -4 }, republic: { senateStanding: 3, debtStrain: 2 }, regional: { roadCrewBonus: 1 }, flags: { regionalCharter: 'public-roads', samniteOpening: 'logistics' } } },
+      { id: 'veteran-colonial-draft', label: 'Anchor exposed ground with veteran settlements', detail: 'Offer allotments and garrison duties, creating depth while increasing expectations for land and relief.', impacts: { resources: { grain: -3 }, factions: { levy: 7, commons: -2 }, regional: { colonySettlerRelief: 18, garrisonDemand: 5 }, flags: { regionalCharter: 'veteran-colonies', samniteOpening: 'colonies' } } },
+      { id: 'allied-road-bargain', label: 'Bargain for allied contingents and local guides', detail: 'Preserve local knowledge and reduce Roman cost in exchange for autonomy and negotiated command.', impacts: { resources: { treasury: -2 }, factions: { allies: 6, traders: 3 }, regional: { allianceDoctrine: 6, roadCostRelief: 1 }, flags: { regionalCharter: 'allied-roads', samniteOpening: 'allies' } } },
     ],
   },
   {
-    turn: 23, id: 'regional-obligations', title: 'The First Regional Reckoning', speaker: 'Censors, commanders, and delegates from the associated communities',
-    prompt: 'Roads and commitments now expose who supplies men, who keeps local judgment, and who profits from access. What rule closes the first regional plan?',
-    context: 'The strength of the Roman system lay partly in differentiated obligations. Military contribution, autonomy, commerce, and political risk did not move together as one measure.',
+    turn: 23, id: 'regional-obligations', title: 'The Caudine Forks', speaker: 'Consuls, surviving officers, senators, and allied delegates',
+    prompt: 'A Roman army is trapped in the mountain passes. Pride, lives, allied confidence, and the terms of peace now pull in different directions. How should Rome recover?',
+    context: 'Livy places the disaster in 321 BC and dramatizes the yoke and the later rejection of the consuls\' agreement. The precise treaty sequence is disputed. The game treats encirclement and political shock as credible while leaving the response open.',
     options: [
-      { id: 'fixed-quotas', label: 'Publish fixed military quotas and response duties', detail: 'Make contributions legible and rapid, increasing coercive pressure where local consent is weak.', impacts: { metrics: { readiness: 9, order: -2 }, factions: { levy: 5, allies: -5 }, regional: { militaryCoordination: 14, revoltPressure: 7 }, flags: { regionalSettlement: 'fixed-quotas' } } },
-      { id: 'autonomy-compacts', label: 'Confirm local judgment within negotiated compacts', detail: 'Reduce revolt pressure and deepen allied trust while accepting slower centralized response.', impacts: { metrics: { order: 6, readiness: 2 }, factions: { allies: 8 }, regional: { allianceDoctrine: 8, revoltPressure: -10, militaryCoordination: -3 }, flags: { regionalSettlement: 'autonomy-compacts' } } },
-      { id: 'access-for-service', label: 'Exchange market access for men and supplies', detail: 'Tie trade privileges to measured obligations, strengthening revenue and logistics at administrative cost.', impacts: { metrics: { trade: 8, readiness: 4 }, resources: { treasury: 3 }, factions: { traders: 6 }, regional: { commerceDoctrine: 8, militaryCoordination: 5, administrationBurden: 6 }, flags: { regionalSettlement: 'access-for-service' } } },
+      { id: 'fixed-quotas', label: 'Accept terms, save the army, and rebuild command', detail: 'Bear immediate humiliation to preserve trained citizens and allied contingents for a longer war.', impacts: { metrics: { readiness: 9, order: -2 }, factions: { levy: 5, allies: -5 }, regional: { militaryCoordination: 14, revoltPressure: 7 }, flags: { regionalSettlement: 'fixed-quotas', caudineResponse: 'preserve-army' } } },
+      { id: 'autonomy-compacts', label: 'Let allied councils witness and ratify the settlement', detail: 'Share responsibility for peace and recovery, preserving trust while slowing Roman freedom of action.', impacts: { metrics: { order: 6, readiness: 2 }, factions: { allies: 8 }, regional: { allianceDoctrine: 8, revoltPressure: -10, militaryCoordination: -3 }, flags: { regionalSettlement: 'autonomy-compacts', caudineResponse: 'allied-ratification' } } },
+      { id: 'access-for-service', label: 'Ransom the force and finance a new logistical system', detail: 'Use treasure and commercial obligations to save the army, then answer the defeat with roads, depots, and renewed levies.', impacts: { metrics: { trade: 8, readiness: 4 }, resources: { treasury: 3 }, factions: { traders: 6 }, regional: { commerceDoctrine: 8, militaryCoordination: 5, administrationBurden: 6 }, flags: { regionalSettlement: 'access-for-service', caudineResponse: 'ransom-and-rebuild' } } },
+    ],
+  },
+  {
+    turn: 24, id: 'appian-censorship', title: 'The Appian Censorship', speaker: 'Censors, treasury officers, contractors, and household delegates',
+    prompt: 'Rome can begin a durable road toward Capua, a new water work for the growing city, or phase both. Crews, stone, and accounts cannot finish both at once.',
+    context: 'Ancient tradition assigns the Via Appia and Aqua Appia to the censorship of Appius Claudius Caecus in 312 BC. Frontinus says the aqueduct ran mostly underground; later monumental aqueducts should not be projected backward onto it.',
+    options: [
+      { id: 'road-first', label: 'Give first crews to the Via Appia', detail: 'Prioritize military response and southern supply, accepting that the same corridor can speed hostile movement.', impacts: { resources: { treasury: -2, stone: -1 }, metrics: { readiness: 4, trade: 2 }, italian: { campaignPersistence: 5, coalitionRisk: 2 }, flags: { appianPriority: 'road' } } },
+      { id: 'water-first', label: 'Give first crews to the Aqua Appia', detail: 'Strengthen urban water and density before the road is complete, accepting long maintenance claims.', impacts: { resources: { treasury: -3, stone: -1 }, metrics: { water: 5, sanitation: 2 }, italian: { waterCapacity: 6, maintenanceDebt: 2 }, flags: { appianPriority: 'water' } } },
+      { id: 'phased-program', label: 'Authorize a phased road-and-water program', detail: 'Keep both designs alive with slower progress and clearer annual accounting.', impacts: { resources: { treasury: -4 }, metrics: { order: 3 }, italian: { allianceDepth: 2, maintenanceDebt: 1 }, flags: { appianPriority: 'phased' } } },
+    ],
+  },
+  {
+    turn: 25, id: 'samnite-settlement', title: 'The Samnite Settlement', speaker: 'Consuls, senators, allied envoys, and veteran representatives',
+    prompt: 'After years of reverses and recovery, Rome can seek a bounded peace, press obligations harder, or use settlement to restore reserves.',
+    context: 'The Second Samnite War ended in 304 BC. Livy preserves the main Roman narrative; exact treaty clauses are less secure than the fact that Rome endured repeated campaigns and emerged with a stronger network of obligations.',
+    options: [
+      { id: 'bounded-peace', label: 'Take a bounded peace and restore the levy', detail: 'Lower immediate pressure and let households rebuild reserves without claiming an impossible final settlement.', impacts: { metrics: { order: 5, readiness: -2 }, factions: { levy: 7, allies: 4 }, italian: { samnitePressure: -18, reserveDepth: 10, campaignPersistence: 3 }, flags: { samniteSettlement: 'bounded-peace' } } },
+      { id: 'hard-terms', label: 'Demand stronger military guarantees', detail: 'Increase deterrence and coordination while leaving more reason for another coalition to form.', impacts: { metrics: { readiness: 7, order: -2 }, factions: { clans: 5, allies: -5 }, italian: { samnitePressure: -10, coalitionRisk: 12, campaignPersistence: 6 }, flags: { samniteSettlement: 'hard-terms' } } },
+      { id: 'allied-renewal', label: 'Renew allied compacts before disbanding armies', detail: 'Trade speed and Roman freedom of command for deeper contingents in the next emergency.', impacts: { resources: { treasury: -3 }, factions: { allies: 8 }, italian: { samnitePressure: -14, allianceDepth: 12, reserveDepth: 4 }, flags: { samniteSettlement: 'allied-renewal' } } },
+    ],
+  },
+  {
+    turn: 26, id: 'sentinum-coalition', title: 'The Coalition at Sentinum', speaker: 'Consuls, allied commanders, reserve officers, and road wardens',
+    prompt: 'Samnites, Gauls, Etruscans, and Umbrians threaten to combine. Rome must decide whether to concentrate, divide the coalition, or defend the roads and reserves.',
+    context: 'Livy presents Sentinum in 295 BC as a great coalition battle and attaches the devotio of Decius Mus to it. The scale and narrative details are shaped, but the strategic problem of preventing several enemies from combining is sound.',
+    options: [
+      { id: 'concentrate', label: 'Concentrate for a decisive field battle', detail: 'Use roads and reserves to mass quickly, risking severe losses if alliance depth is weak.', impacts: { metrics: { readiness: 8 }, italian: { coalitionRisk: -12, reserveDepth: -8, campaignPersistence: 8 }, flags: { sentinumPlan: 'concentrate' } } },
+      { id: 'divide-coalition', label: 'Detach forces and divide the coalition', detail: 'Rely on allied commands and maneuver to keep enemy armies from joining.', impacts: { resources: { treasury: -3 }, factions: { allies: 5 }, italian: { coalitionRisk: -16, allianceDepth: 6, campaignPersistence: 4 }, flags: { sentinumPlan: 'divide' } } },
+      { id: 'defend-network', label: 'Hold roads, colonies, and reserve depots', detail: 'Refuse the most dramatic decision and make the coalition spend time against a defended system.', impacts: { metrics: { order: 3, readiness: 3 }, italian: { coalitionRisk: -8, reserveDepth: 5, campaignPersistence: 7 }, flags: { sentinumPlan: 'network' } } },
+    ],
+  },
+  {
+    turn: 27, id: 'pyrrhus-arrives', title: 'Pyrrhus Comes to Italy', speaker: 'Senators, allied envoys, quartermasters, and commanders returned from the south',
+    prompt: 'A Hellenistic king has crossed with a professional army and elephants. Rome must learn without allowing one defeat to dissolve the Italian compact.',
+    context: 'Pyrrhus entered Italy in 280 BC at Tarentum\'s invitation. Plutarch and Dionysius preserve vivid later narratives; the game emphasizes the contrast between battlefield skill and Rome\'s capacity to raise replacement armies.',
+    options: [
+      { id: 'learn-and-reform', label: 'Study the new army and rotate fresh legions', detail: 'Accept tactical reverses while preserving the system that can replace losses.', impacts: { resources: { bronze: -2, treasury: -2 }, metrics: { readiness: 3 }, italian: { pyrrhicPressure: -8, reserveDepth: -5, campaignPersistence: 12 }, flags: { pyrrhicPosture: 'adapt' } } },
+      { id: 'seek-decision', label: 'Seek an immediate decisive battle', detail: 'Risk reserves for a chance to break the expedition before it gains more allies.', impacts: { metrics: { readiness: 7, order: -3 }, italian: { pyrrhicPressure: -4, reserveDepth: -12, coalitionRisk: 5 }, flags: { pyrrhicPosture: 'decision' } } },
+      { id: 'bind-allies', label: 'Reaffirm allied obligations and deny recruits', detail: 'Use compacts and local defense to isolate the king even if the field campaign lasts longer.', impacts: { resources: { treasury: -4 }, factions: { allies: 8 }, italian: { pyrrhicPressure: -6, allianceDepth: 10, campaignPersistence: 6 }, flags: { pyrrhicPosture: 'isolate' } } },
+    ],
+  },
+  {
+    turn: 28, id: 'pyrrhic-endurance', title: 'A War of Replacements', speaker: 'Censors, levy officers, allied delegates, and envoys from the Greek cities',
+    prompt: 'The invading king still wins costly actions, but every replacement is harder for him to obtain. How should Rome force the war toward exhaustion?',
+    context: 'Plutarch gives the famous judgment that another such victory would ruin Pyrrhus. The phrase is literary, but the underlying asymmetry in replacement capacity and allied depth explains why tactical success did not secure his strategic aim.',
+    options: [
+      { id: 'refuse-terms', label: 'Refuse terms while reserves remain', detail: 'Make persistence itself the argument, provided households and allies can still carry it.', impacts: { metrics: { order: -2, readiness: 5 }, italian: { pyrrhicPressure: -14, campaignPersistence: 10, reserveDepth: -7 }, flags: { pyrrhicEndgame: 'endure' } } },
+      { id: 'limited-terms', label: 'Offer limited terms without surrendering the compact', detail: 'Test whether the expedition will leave while preserving the network that sustained the war.', impacts: { resources: { treasury: -3 }, metrics: { order: 4 }, italian: { pyrrhicPressure: -10, coalitionRisk: -3, campaignPersistence: 3 }, flags: { pyrrhicEndgame: 'limited-terms' } } },
+      { id: 'southern-pressure', label: 'Press roads, ports, and allied strongpoints', detail: 'Turn logistical superiority into a campaign against the expedition\'s bases rather than its prestige.', impacts: { metrics: { trade: 3, readiness: 4 }, italian: { pyrrhicPressure: -12, reserveDepth: -4, allianceDepth: 4 }, flags: { pyrrhicEndgame: 'southern-pressure' } } },
+    ],
+  },
+  {
+    turn: 29, id: 'mediterranean-threshold', title: 'The Mediterranean Threshold', speaker: 'Senators, censors, allied envoys, merchants, and veteran households',
+    prompt: 'By 264 BC Rome commands extraordinary depth in Italy. Which principle should govern the system before commitments cross the sea?',
+    context: 'The traditional opening of the First Punic War in 264 BC marks a useful endpoint. Rome had become the leading Italian power, but command in Italy did not automatically supply a settled policy for fleets, overseas war, or provincial rule.',
+    options: [
+      { id: 'italian-consolidation', label: 'Consolidate roads, water, reserves, and compacts', detail: 'Judge strength by whether obligations can be maintained before adding new theaters.', impacts: { metrics: { order: 6, trade: 4 }, italian: { reserveDepth: 8, allianceDepth: 5, maintenanceDebt: -5 }, flags: { mediterraneanDoctrine: 'consolidate' } } },
+      { id: 'maritime-readiness', label: 'Prepare accounts and allies for maritime commitments', detail: 'Begin the institutional preparation for a different scale of war without pretending the fleet already exists.', impacts: { resources: { treasury: -5, timber: -3 }, metrics: { trade: 6, readiness: 4 }, italian: { reserveDepth: -4, campaignPersistence: 5 }, flags: { mediterraneanDoctrine: 'prepare' } } },
+      { id: 'limited-hegemony', label: 'Keep obligations bounded to the Italian compact', detail: 'Preserve autonomy and reserves, accepting that events beyond the straits may escape Roman direction.', impacts: { metrics: { order: 4 }, factions: { allies: 6, traders: -3 }, italian: { allianceDepth: 7, coalitionRisk: -5 }, flags: { mediterraneanDoctrine: 'bounded' } } },
     ],
   },
 ]
@@ -392,8 +472,14 @@ export const OBJECTIVES = [
   { from: 19, to: 19, text: 'Settle debt, labor, and land claims before recovery hardens into faction.' },
   { from: 20, to: 20, text: 'Translate Roman recovery into a durable settlement with the Latin communities.' },
   { from: 21, to: 21, text: 'Choose whether roads and compacts serve security, commerce, or allied depth first.' },
-  { from: 22, to: 22, text: 'Commit real crews, settlers, stores, and garrisons to the regional system.' },
-  { from: 23, to: 23, text: 'Balance contribution, autonomy, access, and revolt risk without reducing them to one status.' },
+  { from: 22, to: 22, text: 'Prepare roads, settlements, and allied contingents for a war the mountains will prolong.' },
+  { from: 23, to: 23, text: 'Preserve an army and political system capable of recovering from the Caudine disaster.' },
+  { from: 24, to: 24, text: 'Choose how road and water works will compete for crews, stone, and accounts.' },
+  { from: 25, to: 25, text: 'Turn survival in the Samnite war into reserves, obligations, and a durable peace.' },
+  { from: 26, to: 26, text: 'Prevent a many-sided coalition from breaking the Italian compact.' },
+  { from: 27, to: 27, text: 'Meet a professional Hellenistic army without staking the whole system on one field day.' },
+  { from: 28, to: 28, text: 'Convert replacement depth and allied endurance into strategic victory.' },
+  { from: 29, to: 29, text: 'Judge whether Rome can maintain Italy before accepting Mediterranean commitments.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null
