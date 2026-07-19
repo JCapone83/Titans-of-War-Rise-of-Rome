@@ -26,6 +26,9 @@ The following original game assets were produced for Titans Forge with the built
 - `public/images/buildings/temple-of-jupiter-v1.png`
 - `public/images/buildings/forum-market-v1.png`
 - `public/images/buildings/workshop-quarter-v1.png`
+- `public/images/buildings/comitium-v1.png`
+- `public/images/buildings/saturn-treasury-v1.png`
+- `public/images/buildings/circuit-fortification-v1.png`
 
 Their retained chroma masters and concept sheets are stored in `docs/art_concepts/`. No third-party image was used as a visual reference for these assets; references were limited to original project concept sheets and earlier project-generated masters.
 
