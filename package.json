@@ -1,0 +1,24 @@
+{
+  "name": "titans-of-war-birth-of-rome",
+  "version": "0.1.0",
+  "private": false,
+  "description": "A local-first historical city-building strategy game about the birth of Rome.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/game.test.mjs",
+    "balance": "node scripts/run-balance.mjs",
+    "check": "python3 project_check.py && npm test && npm run build"
+  },
+  "dependencies": {
+    "lucide-react": "1.25.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.0.3",
+    "vite": "8.1.5"
+  }
+}

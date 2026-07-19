@@ -1,0 +1,20 @@
+export const BUILDING_ART = {
+  'round-huts': '/images/buildings/palatine-huts-v1.png',
+  'timber-shrine': '/images/buildings/timber-shrine-v1.png',
+  'shallow-well': '/images/buildings/shallow-well-v1.png',
+  'grain-pits': '/images/buildings/grain-pits-v1.png',
+  'timber-palisade': '/images/buildings/timber-palisade-v1.png',
+  'cattle-market': '/images/buildings/cattle-market-v1.png',
+  'drainage-ditch': '/images/buildings/drainage-ditch-v1.png',
+  'kiln-smithy': '/images/buildings/kiln-smithy-v1.png',
+  'courtyard-housing': '/images/buildings/courtyard-housing-v1.png',
+  'lined-cistern': '/images/buildings/lined-cistern-v1.png',
+  'raised-granary': '/images/buildings/raised-granary-v1.png',
+  'stone-gate': '/images/buildings/stone-gate-v1.png',
+  'cloaca-works': '/images/buildings/cloaca-works-v1.png',
+  'podium-temple': '/images/buildings/temple-of-jupiter-v1.png',
+  'forum-market': '/images/buildings/forum-market-v1.png',
+  'workshop-quarter': '/images/buildings/workshop-quarter-v1.png',
+}
+
+export const artForBuilding = (buildingId) => BUILDING_ART[buildingId] ?? null
