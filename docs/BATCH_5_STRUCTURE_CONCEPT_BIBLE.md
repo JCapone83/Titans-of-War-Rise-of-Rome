@@ -132,8 +132,8 @@ Evidence language is deliberate. **Evidence-led** means supported by surviving t
 
 **Rejection criteria:** Reject a single enclosed factory, medieval guildhall, industrial smoke-stack, modern workshop, palace courtyard, fantasy forge, or a generic market. Reject uncontrolled flames, dense smoke, or a composition where every craft is hidden inside one building; the separated hazardous zones and central firebreak are required.
 
-## Approval and runtime gate
+## Approval and runtime delivery
 
 The three existing alpha assets are integrated only as provenance-recorded game interpretations: `public/images/buildings/comitium-v1.png`, `public/images/buildings/saturn-treasury-v1.png`, and `public/images/buildings/circuit-fortification-v1.png`. Their filenames establish delivery identity, not archaeological certainty. They must continue to pass transparent-edge, camera, 96-pixel silhouette, and map-scale inspection.
 
-The four future forms—Ordered Street Courts, Public Cistern Network, Public Granary, and Contracted Craft Yards—remain unrendered and intentionally absent from runtime art mapping. A future integration may add each exact building ID only after its alpha file is provenance-recorded, inspected at full size and 96 pixels, checked against the rejection criteria, and verified on desktop and mobile. No brief authorizes a simulation, cost, unlock, council, outcome, interface, dependency, or existing art change.
+The four remaining forms—Ordered Street Courts, Public Cistern Network, Public Granary, and Contracted Craft Yards—were rendered from these locked briefs, retained as transparent alpha assets, inspected at full size and 96 pixels, and provenance-recorded in `MEDIA_RIGHTS.md`. Their runtime mappings use the exact playable IDs `street-courtyards`, `public-cisterns`, `public-granary`, and `contracted-craft-yards`. Delivery of the art does not authorize a simulation, cost, unlock, council, outcome, interface, or dependency change.

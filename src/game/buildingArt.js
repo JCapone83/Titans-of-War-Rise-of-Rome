@@ -18,6 +18,10 @@ export const BUILDING_ART = {
   'comitium': '/images/buildings/comitium-v1.png',
   'saturn-treasury': '/images/buildings/saturn-treasury-v1.png',
   'circuit-fortification': '/images/buildings/circuit-fortification-v1.png',
+  'street-courtyards': '/images/buildings/ordered-street-courts-v1.png',
+  'public-cisterns': '/images/buildings/public-cisterns-v1.png',
+  'public-granary': '/images/buildings/public-granary-v1.png',
+  'contracted-craft-yards': '/images/buildings/contracted-craft-yards-v1.png',
 }
 
 export const artForBuilding = (buildingId) => BUILDING_ART[buildingId] ?? null

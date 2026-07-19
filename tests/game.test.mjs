@@ -852,10 +852,14 @@ test('four Act V strategies finish both Appian works across every available doct
   assert.equal(new Set(results.map((result) => result.state.flags.mediterraneanDoctrine)).size, 3)
 })
 
-test('Batch 5 building art uses exact mappings for rendered Early Republic assets', () => {
+test('Batch 5 building art uses exact mappings for every rendered Early Republic asset', () => {
   assert.equal(artForBuilding('comitium'), '/images/buildings/comitium-v1.png')
   assert.equal(artForBuilding('saturn-treasury'), '/images/buildings/saturn-treasury-v1.png')
   assert.equal(artForBuilding('circuit-fortification'), '/images/buildings/circuit-fortification-v1.png')
+  assert.equal(artForBuilding('street-courtyards'), '/images/buildings/ordered-street-courts-v1.png')
+  assert.equal(artForBuilding('public-cisterns'), '/images/buildings/public-cisterns-v1.png')
+  assert.equal(artForBuilding('public-granary'), '/images/buildings/public-granary-v1.png')
+  assert.equal(artForBuilding('contracted-craft-yards'), '/images/buildings/contracted-craft-yards-v1.png')
 })
 
 test('all mapped building art paths are unique and exist under public', () => {

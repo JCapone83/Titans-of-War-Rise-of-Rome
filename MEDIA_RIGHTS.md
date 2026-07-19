@@ -29,9 +29,13 @@ The following original game assets were produced for Titans Forge with the built
 - `public/images/buildings/comitium-v1.png`
 - `public/images/buildings/saturn-treasury-v1.png`
 - `public/images/buildings/circuit-fortification-v1.png`
+- `public/images/buildings/ordered-street-courts-v1.png`
+- `public/images/buildings/public-cisterns-v1.png`
+- `public/images/buildings/public-granary-v1.png`
+- `public/images/buildings/contracted-craft-yards-v1.png`
 
 Their retained chroma masters and concept sheets are stored in `docs/art_concepts/`. No third-party image was used as a visual reference for these assets; references were limited to original project concept sheets and earlier project-generated masters.
 
-These images are historically informed game interpretations, not reproductions of excavated structures or archaeological evidence. The uncertainty and rejection criteria behind each interpretation are documented in `docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md`.
+These images are historically informed game interpretations, not reproductions of excavated structures or archaeological evidence. The uncertainty and rejection criteria behind each interpretation are documented in `docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md` and `docs/BATCH_5_STRUCTURE_CONCEPT_BIBLE.md`.
 
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

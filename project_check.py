@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import struct
 from pathlib import Path
 
 
@@ -13,6 +14,19 @@ def require(path: str, needle: str | None = None) -> None:
         raise SystemExit(f"missing required file: {path}")
     if needle and needle not in target.read_text(encoding="utf-8"):
         raise SystemExit(f"{path} is missing required marker: {needle}")
+
+
+def require_rgba_png(path: str, minimum_side: int = 512) -> None:
+    target = ROOT / path
+    require(path)
+    header = target.read_bytes()[:26]
+    if len(header) < 26 or header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
+        raise SystemExit(f"building art must be a valid PNG: {path}")
+    width, height = struct.unpack(">II", header[16:24])
+    if min(width, height) < minimum_side:
+        raise SystemExit(f"building art is below {minimum_side}px on its shortest side: {path}")
+    if header[25] not in {4, 6}:
+        raise SystemExit(f"building art must retain an alpha channel: {path}")
 
 
 def main() -> None:
@@ -76,9 +90,17 @@ def main() -> None:
     require("src/game/buildingArt.js", "'comitium': '/images/buildings/comitium-v1.png'")
     require("src/game/buildingArt.js", "'saturn-treasury': '/images/buildings/saturn-treasury-v1.png'")
     require("src/game/buildingArt.js", "'circuit-fortification': '/images/buildings/circuit-fortification-v1.png'")
+    require("src/game/buildingArt.js", "'street-courtyards': '/images/buildings/ordered-street-courts-v1.png'")
+    require("src/game/buildingArt.js", "'public-cisterns': '/images/buildings/public-cisterns-v1.png'")
+    require("src/game/buildingArt.js", "'public-granary': '/images/buildings/public-granary-v1.png'")
+    require("src/game/buildingArt.js", "'contracted-craft-yards': '/images/buildings/contracted-craft-yards-v1.png'")
     require("public/images/buildings/comitium-v1.png")
     require("public/images/buildings/saturn-treasury-v1.png")
     require("public/images/buildings/circuit-fortification-v1.png")
+    require_rgba_png("public/images/buildings/ordered-street-courts-v1.png")
+    require_rgba_png("public/images/buildings/public-cisterns-v1.png")
+    require_rgba_png("public/images/buildings/public-granary-v1.png")
+    require_rgba_png("public/images/buildings/contracted-craft-yards-v1.png")
     require("src/game/simulation.js", "buildingAvailability")
     require("src/game/simulation.js", "networkCoverage")
     require("src/game/simulation.js", "districtRiskReport")
