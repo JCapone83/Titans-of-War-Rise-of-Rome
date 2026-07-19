@@ -15,6 +15,9 @@ export const BUILDING_ART = {
   'podium-temple': '/images/buildings/temple-of-jupiter-v1.png',
   'forum-market': '/images/buildings/forum-market-v1.png',
   'workshop-quarter': '/images/buildings/workshop-quarter-v1.png',
+  'comitium': '/images/buildings/comitium-v1.png',
+  'saturn-treasury': '/images/buildings/saturn-treasury-v1.png',
+  'circuit-fortification': '/images/buildings/circuit-fortification-v1.png',
 }
 
 export const artForBuilding = (buildingId) => BUILDING_ART[buildingId] ?? null

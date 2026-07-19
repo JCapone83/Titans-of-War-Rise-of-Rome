@@ -51,6 +51,7 @@ def main() -> None:
         "docs/ACT_V_BALANCE_REPORT.md": "Appian Persistence",
         "docs/ART_DIRECTION_AND_ASSET_SPEC.md": "Approve one Palatine Huts master first",
         "docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md": "Palatine Huts",
+        "docs/BATCH_5_STRUCTURE_CONCEPT_BIBLE.md": "Comitium",
         "docs/BUILDING_ART_MANIFEST.md": "Regal Civic Core",
         "MEDIA_RIGHTS.md": "Code-native visual system",
     }
@@ -72,6 +73,12 @@ def main() -> None:
     require("public/images/buildings/temple-of-jupiter-v1.png")
     require("public/images/buildings/forum-market-v1.png")
     require("public/images/buildings/workshop-quarter-v1.png")
+    require("src/game/buildingArt.js", "'comitium': '/images/buildings/comitium-v1.png'")
+    require("src/game/buildingArt.js", "'saturn-treasury': '/images/buildings/saturn-treasury-v1.png'")
+    require("src/game/buildingArt.js", "'circuit-fortification': '/images/buildings/circuit-fortification-v1.png'")
+    require("public/images/buildings/comitium-v1.png")
+    require("public/images/buildings/saturn-treasury-v1.png")
+    require("public/images/buildings/circuit-fortification-v1.png")
     require("src/game/simulation.js", "buildingAvailability")
     require("src/game/simulation.js", "networkCoverage")
     require("src/game/simulation.js", "districtRiskReport")

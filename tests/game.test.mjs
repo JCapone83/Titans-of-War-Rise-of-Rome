@@ -6,6 +6,9 @@ import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueP
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 test('initial campaign begins at the Palatine council', () => {
   const state = createInitialState()
@@ -847,4 +850,19 @@ test('four Act V strategies finish both Appian works across every available doct
   assert.ok(results.every((result) => Object.values(result.state.italian.projects).every((project) => project.completed)))
   assert.equal(new Set(results.map((result) => result.state.flags.appianPriority)).size, 3)
   assert.equal(new Set(results.map((result) => result.state.flags.mediterraneanDoctrine)).size, 3)
+})
+
+test('Batch 5 building art uses exact mappings for rendered Early Republic assets', () => {
+  assert.equal(artForBuilding('comitium'), '/images/buildings/comitium-v1.png')
+  assert.equal(artForBuilding('saturn-treasury'), '/images/buildings/saturn-treasury-v1.png')
+  assert.equal(artForBuilding('circuit-fortification'), '/images/buildings/circuit-fortification-v1.png')
+})
+
+test('all mapped building art paths are unique and exist under public', () => {
+  const paths = Object.values(BUILDING_ART)
+  assert.equal(new Set(paths).size, paths.length)
+  for (const assetPath of paths) {
+    assert.ok(assetPath.startsWith('/images/buildings/'))
+    assert.ok(existsSync(resolve(process.cwd(), 'public', assetPath.slice(1))), assetPath)
+  }
 })
