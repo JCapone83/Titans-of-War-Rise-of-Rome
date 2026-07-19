@@ -5,7 +5,7 @@ import { BUILDING_FAMILIES, TURN_YEARS, getCouncil } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
-import { runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 test('initial campaign begins at the Palatine council', () => {
   const state = createInitialState()
@@ -836,4 +836,15 @@ test('campaign export records Appian works and the 264 BC doctrine', () => {
   assert.match(markdown, /Aqua Appia: 0\/3 seasons/)
   assert.match(markdown, /Mediterranean doctrine: consolidate/)
   assert.match(markdown, /Italian System score:/)
+})
+
+test('four Act V strategies finish both Appian works across every available doctrine', () => {
+  const results = runAllActFiveStrategies()
+  assert.equal(results.length, 4)
+  assert.ok(results.every((result) => result.state.turn === 29 && result.state.outcome === 'complete'))
+  assert.ok(results.every((result) => result.skipped.length === 0))
+  assert.ok(results.every((result) => result.italianScore.score >= 70))
+  assert.ok(results.every((result) => Object.values(result.state.italian.projects).every((project) => project.completed)))
+  assert.equal(new Set(results.map((result) => result.state.flags.appianPriority)).size, 3)
+  assert.equal(new Set(results.map((result) => result.state.flags.mediterraneanDoctrine)).size, 3)
 })

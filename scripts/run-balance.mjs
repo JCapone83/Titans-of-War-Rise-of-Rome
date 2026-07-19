@@ -1,4 +1,4 @@
-import { runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 const results = runAllReferenceStrategies()
 for (const result of results) {
@@ -48,3 +48,15 @@ for (const result of regional) {
   if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.action.join('/')} - ${item.reason}`).join('; ')}`)
 }
 if (regional.some((result) => result.outcome.overall < 70 || result.regionalScore.score < 70 || result.skipped.length)) process.exitCode = 1
+
+console.log('\nAct V reference strategies')
+const actFive = runAllActFiveStrategies()
+for (const result of actFive) {
+  const score = result.italianScore
+  const projects = result.state.italian.projects
+  console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Italian System ${score.grade} (${score.score})`)
+  console.log(`  Endurance: ${score.endurance} | Compact: ${score.compact} | Pressure: ${score.pressure} | Infrastructure: ${score.infrastructure} | Stewardship: ${score.stewardship}`)
+  console.log(`  Via Appia: ${projects.viaAppia.progress}/${projects.viaAppia.requiredSeasons} | Aqua Appia: ${projects.aquaAppia.progress}/${projects.aquaAppia.requiredSeasons} | Doctrine: ${result.state.flags.mediterraneanDoctrine}`)
+  if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId} - ${item.reason}`).join('; ')}`)
+}
+if (actFive.some((result) => result.outcome.overall < 70 || result.italianScore.score < 70 || result.skipped.length || Object.values(result.state.italian.projects).some((project) => !project.completed))) process.exitCode = 1

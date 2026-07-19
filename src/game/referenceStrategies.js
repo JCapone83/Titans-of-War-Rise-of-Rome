@@ -1,6 +1,6 @@
 import { createInitialState } from './initialState.js'
-import { calculateOutcome, calculateRegionalScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding } from './simulation.js'
+import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -168,6 +168,41 @@ export const REGIONAL_STRATEGIES = [
     allocation: { farming: 45, works: 25, levy: 30 },
     councils: { 21: 'alliance-depth', 22: 'veteran-colonial-draft', 23: 'autonomy-compacts' },
     turns: { 21: [['compact', 'tibur', 'latinAlly'], ['road', 'latin-road']], 22: [['road', 'latin-road'], ['compact', 'praeneste', 'treatyAlly']], 23: [['colony', 'tusculum']] },
+  },
+]
+
+export const ACT_FIVE_STRATEGIES = [
+  {
+    id: 'appian-persistence', name: 'Appian Persistence', baseStrategyId: 'strategic-depth',
+    thesis: 'Complete the southern road first, preserve armies after reverses, divide coalitions, and turn replacement depth into a consolidated Italian system.',
+    baseCouncilOverrides: { 21: 'commercial-corridors', 22: 'veteran-colonial-draft', 23: 'access-for-service' },
+    allocation: { farming: 40, works: 35, levy: 25 },
+    councils: { 24: 'road-first', 25: 'bounded-peace', 26: 'divide-coalition', 27: 'learn-and-reform', 28: 'refuse-terms', 29: 'italian-consolidation' },
+    turns: { 24: ['viaAppia'], 25: ['aquaAppia'], 26: ['viaAppia'], 27: ['aquaAppia'], 28: ['viaAppia'], 29: ['aquaAppia'] },
+  },
+  {
+    id: 'water-and-reserves', name: 'Water and Reserves', baseStrategyId: 'strategic-depth',
+    thesis: 'Give urban water first claim, protect household reserves, defend the network at Sentinum, and offer bounded terms only from a position of endurance.',
+    baseCouncilOverrides: { 21: 'commercial-corridors', 22: 'veteran-colonial-draft', 23: 'access-for-service' },
+    allocation: { farming: 50, works: 35, levy: 15 },
+    councils: { 24: 'water-first', 25: 'bounded-peace', 26: 'defend-network', 27: 'learn-and-reform', 28: 'limited-terms', 29: 'limited-hegemony' },
+    turns: { 24: ['aquaAppia'], 25: ['viaAppia'], 26: ['aquaAppia'], 27: ['viaAppia'], 28: ['aquaAppia'], 29: ['viaAppia'] },
+  },
+  {
+    id: 'federated-endurance', name: 'Federated Endurance', baseStrategyId: 'reciprocal-alliance',
+    thesis: 'Phase both works, renew allied compacts, keep coalition armies apart, and isolate Pyrrhus through local obligations rather than one decisive gamble.',
+    baseCouncilOverrides: { 21: 'commercial-corridors', 22: 'public-road-crews', 23: 'access-for-service' },
+    allocation: { farming: 45, works: 30, levy: 25 },
+    councils: { 24: 'phased-program', 25: 'allied-renewal', 26: 'divide-coalition', 27: 'bind-allies', 28: 'southern-pressure', 29: 'limited-hegemony' },
+    turns: { 24: ['viaAppia'], 25: ['aquaAppia'], 26: ['aquaAppia'], 27: ['viaAppia'], 28: ['aquaAppia'], 29: ['viaAppia'] },
+  },
+  {
+    id: 'command-and-decision', name: 'Command and Decision', baseStrategyId: 'strategic-depth',
+    thesis: 'Use direct guarantees, concentration at Sentinum, and an early battle against Pyrrhus while relying on completed infrastructure to contain the resulting strain.',
+    baseCouncilOverrides: { 21: 'commercial-corridors', 22: 'public-road-crews', 23: 'access-for-service' },
+    allocation: { farming: 35, works: 30, levy: 35 },
+    councils: { 24: 'road-first', 25: 'hard-terms', 26: 'concentrate', 27: 'seek-decision', 28: 'southern-pressure', 29: 'maritime-readiness' },
+    turns: { 24: ['viaAppia'], 25: ['aquaAppia'], 26: ['viaAppia'], 27: ['aquaAppia'], 28: ['aquaAppia'], 29: ['viaAppia'] },
   },
 ]
 
@@ -340,4 +375,34 @@ export function runRegionalStrategy(strategy) {
 
 export function runAllRegionalStrategies() {
   return REGIONAL_STRATEGIES.map(runRegionalStrategy)
+}
+
+export function runActFiveStrategy(strategy) {
+  const base = REGIONAL_STRATEGIES.find((item) => item.id === strategy.baseStrategyId)
+  if (!base) throw new Error(`Unknown Act V base strategy: ${strategy.baseStrategyId}`)
+  const inherited = runRegionalStrategy({
+    ...base,
+    councils: { ...base.councils, ...(strategy.baseCouncilOverrides ?? {}) },
+  })
+  let state = setAllocation(enterItalianStrategy(inherited.state), strategy.allocation)
+  const skipped = []
+  const snapshots = []
+  while (!state.outcome) {
+    if (state.council && !state.councilResolved) state = resolveCouncil(state, strategy.councils[state.turn] ?? state.council.options[0].id)
+    for (const projectId of strategy.turns[state.turn] ?? []) {
+      if (!actionRemaining(state)) break
+      const result = workItalianProject(state, projectId)
+      if (result.error) skipped.push({ turn: state.turn, projectId, reason: result.error })
+      else state = result.state
+    }
+    snapshots.push({ turn: state.turn, italian: { ...state.italian, projects: structuredClone(state.italian.projects) }, resources: { ...state.resources } })
+    const result = advanceTurn(state)
+    if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+    state = result.state
+  }
+  return { strategy, state, outcome: calculateOutcome(state), italianScore: calculateItalianScore(state), skipped, snapshots }
+}
+
+export function runAllActFiveStrategies() {
+  return ACT_FIVE_STRATEGIES.map(runActFiveStrategy)
 }
