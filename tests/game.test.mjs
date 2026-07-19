@@ -5,7 +5,8 @@ import { BUILDING_FAMILIES, TURN_YEARS, getCouncil } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { continueToMediterranean, enterMediterranean } from '../src/game/continuation.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -344,7 +345,7 @@ test('version three saves remove legacy labor and gain workforce and projects', 
   delete old.workforceAllocation
   delete old.projects
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 8)
+  assert.equal(migrated.version, 9)
   assert.equal('labor' in migrated.resources, false)
   assert.equal(Object.values(migrated.workforceAllocation).reduce((sum, value) => sum + value, 0), 100)
   assert.deepEqual(migrated.projects, [])
@@ -356,7 +357,7 @@ test('version one saves migrate to the current population state', () => {
   delete old.actionsMax
   delete old.actionLog
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 8)
+  assert.equal(migrated.version, 9)
   assert.equal(migrated.actionsMax, 2)
   assert.deepEqual(migrated.actionLog, [])
   assert.equal(migrated.population.total, 1030)
@@ -366,7 +367,7 @@ test('version two saves retain mechanics while gaining population', () => {
   const old = { ...createInitialState(), version: 2, actionsUsed: 1, actionLog: [{ type: 'build' }] }
   delete old.population
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 8)
+  assert.equal(migrated.version, 9)
   assert.equal(migrated.actionsUsed, 1)
   assert.equal(migrated.actionLog.length, 1)
   assert.equal(migrated.population.districts.palatine, 450)
@@ -557,7 +558,7 @@ test('three Act III reference strategies complete cleanly at C or better', () =>
 
 test('a completed version four campaign migrates to a resumable republic transition', () => {
   const migrated = migrateState({ ...createInitialState(), version: 4, turn: 10, era: 1, outcome: 'complete' })
-  assert.equal(migrated.version, 8)
+  assert.equal(migrated.version, 9)
   assert.equal(migrated.outcome, 'acts-complete')
   assert.equal(migrated.republicTransition, true)
   assert.equal(enterEarlyRepublic(migrated).turn, 11)
@@ -606,7 +607,7 @@ test('Tier IV works remain locked until reconstruction', () => {
 test('a version five save completed at turn sixteen opens reconstruction', () => {
   const saved = { ...createInitialState(), version: 5, era: 2, turn: 16, republic: createRepublicState(), war: createWarState(), outcome: 'complete' }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 8)
+  assert.equal(migrated.version, 9)
   assert.equal(migrated.outcome, 'act-three-complete')
   assert.equal(migrated.reconstructionTransition, true)
 })
@@ -696,7 +697,7 @@ test('three regional doctrines finish with viable but distinct compacts', () => 
 })
 
 test('Act V chronology runs from the Samnite opening through the 264 BC threshold', () => {
-  assert.deepEqual(TURN_YEARS.slice(20), [338, 326, 321, 312, 304, 295, 280, 275, 264])
+  assert.deepEqual(TURN_YEARS.slice(20, 29), [338, 326, 321, 312, 304, 295, 280, 275, 264])
   assert.equal(getCouncil(23).id, 'regional-obligations')
   assert.match(getCouncil(23).title, /Caudine/i)
   assert.equal(getCouncil(29).id, 'mediterranean-threshold')
@@ -713,7 +714,7 @@ test('version seven regional completion migrates to the Italian transition', () 
     italianTransition: undefined,
   }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 8)
+  assert.equal(migrated.version, 9)
   assert.equal(migrated.outcome, 'regional-complete')
   assert.equal(migrated.italianTransition, true)
   assert.equal(migrated.turn, 23)
@@ -869,4 +870,42 @@ test('all mapped building art paths are unique and exist under public', () => {
     assert.ok(assetPath.startsWith('/images/buildings/'))
     assert.ok(existsSync(resolve(process.cwd(), 'public', assetPath.slice(1))), assetPath)
   }
+})
+
+test('version-eight endpoint migration remains opt-in', () => {
+  const endpoint = runAllActFiveStrategies()[0].state
+  const migrated = migrateState({ ...endpoint, version: 8 })
+  assert.equal(migrated.turn, 29)
+  assert.equal(migrated.outcome, 'complete')
+  assert.equal(migrated.mediterraneanTransition, false)
+})
+
+test('core ending is complete until explicit opt-in', () => {
+  const endpoint = runAllActFiveStrategies()[0].state
+  assert.equal(continueToMediterranean(endpoint).mediterraneanTransition, true)
+})
+
+test('frozen core judgment is immutable', () => {
+  const endpoint = runAllActFiveStrategies()[0].state
+  const continued = enterMediterranean(continueToMediterranean(endpoint))
+  assert.equal(continued.coreJudgment.turn, 29)
+  assert.equal(continued.coreJudgment.year, 264)
+  assert.equal(continued.coreJudgment.choiceLogLength, endpoint.choiceLog.length)
+})
+
+test('three-turn Mediterranean completion and chronicle separation', () => {
+  const result = runAllMediterraneanStrategies()[0]
+  assert.equal(result.state.turn, 32)
+  assert.match(result.outcome.title, /Mediterranean/i)
+  assert.ok(result.outcome.grades['Mediterranean Opening'])
+  const chronicle = campaignMarkdown(result.state)
+  assert.match(chronicle, /Frozen 264 BC Core Judgment/)
+  assert.match(chronicle, /Mediterranean Opening/)
+})
+
+test('three continuation strategies finish without skips and expose distinct ledgers', () => {
+  const results = runAllMediterraneanStrategies()
+  assert.equal(results.length, 3)
+  assert.ok(results.every((result) => result.state.turn === 32 && result.skipped.length === 0))
+  assert.equal(new Set(results.map((result) => JSON.stringify(result.ledger))).size, 3)
 })

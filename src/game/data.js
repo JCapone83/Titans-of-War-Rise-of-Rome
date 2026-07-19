@@ -41,9 +41,16 @@ export const ERAS = [
     turns: [24, 29],
     summary: 'Bind roads, water, allies, reserves, and repeated armies into an Italian system capable of outlasting coalitions and kings.',
   },
+  {
+    id: 'mediterranean-republic',
+    name: 'Mediterranean Republic',
+    span: '264-241 BC',
+    turns: [30, 32],
+    summary: 'Learn to finance, crew, and command a maritime war without confusing a new theater with an inherited naval state.',
+  },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241]
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -455,6 +462,39 @@ export const COUNCILS = [
   },
 ]
 
+COUNCILS.push(
+  {
+    turn: 30, id: 'fleet-acquisition', title: 'A Fleet Without a Naval State', speaker: 'Senators, shipwrights, allied captains, and treasury officers',
+    prompt: 'Rome has Italian depth but no settled naval institution. How should a republic acquire maritime capacity?',
+    context: 'The opening of the First Punic War required improvisation, allied expertise, and public finance rather than a long-established Roman navy.',
+    options: [
+      { id: 'allied-hulls', label: 'Contract allied hulls and crews', detail: 'Gain capacity quickly through communities with maritime experience, while exposing Rome to contractor dependence.', impacts: { mediterranean: { fleetCapacity: 24, maritimeLosses: 2, contractorExposure: 12, alliedExhaustion: 6, overseasCommandDuration: 1 }, resources: { treasury: -4, timber: -2 }, flags: { fleetDoctrine: 'allied-hulls' } } },
+      { id: 'roman-keels', label: 'Build a Roman squadron in Italian yards', detail: 'Create a more legible public asset, accepting slower readiness and heavy first costs.', impacts: { mediterranean: { fleetCapacity: 16, maritimeLosses: 1, warCredit: -4, contractorExposure: -5, overseasCommandDuration: 2 }, resources: { treasury: -6, timber: -5 }, flags: { fleetDoctrine: 'roman-keels' } } },
+      { id: 'limited-convoy', label: 'Fund only a limited convoy force', detail: 'Keep losses and exposure bounded, but accept that Rome cannot yet dictate events beyond the straits.', impacts: { mediterranean: { fleetCapacity: 9, maritimeLosses: -2, warCredit: 2, alliedExhaustion: -3, overseasCommandDuration: 1 }, resources: { treasury: -2 }, flags: { fleetDoctrine: 'limited-convoy' } } },
+    ],
+  },
+  {
+    turn: 31, id: 'maritime-learning', title: 'Maritime Learning', speaker: 'Captains, interpreters, allied pilots, and citizen crews',
+    prompt: 'A land power must learn seamanship, signals, and the limits of command before seeking decisive action.',
+    context: 'Roman maritime practice developed through contact with Greek and Italian communities; learning was an institutional cost, not a free technology.',
+    options: [
+      { id: 'pilotage-exchange', label: 'Exchange pilots and methods', detail: 'Improve command by sharing authority with experienced sailors and paying the political price of dependence.', impacts: { mediterranean: { fleetCapacity: 8, maritimeLosses: -5, contractorExposure: 7, provincialTrust: 3, overseasCommandDuration: 2 }, resources: { treasury: -3 }, flags: { maritimeLearning: 'pilotage' } } },
+      { id: 'drill-boarding', label: 'Drill crews for controlled boarding', detail: 'Translate Roman infantry habits into a naval method, increasing losses when commanders overreach.', impacts: { mediterranean: { fleetCapacity: 5, maritimeLosses: 4, warCredit: 6, alliedExhaustion: 3, overseasCommandDuration: 3 }, resources: { bronze: -2, treasury: -2 }, flags: { maritimeLearning: 'boarding' } } },
+      { id: 'safe-harbors', label: 'Secure harbors and grain before battle', detail: 'Trade tempo for a durable supply chain and greater trust among communities that must provision the fleet.', impacts: { mediterranean: { fleetCapacity: 3, maritimeLosses: -3, provincialTrust: 8, importedGrainShare: 7, overseasCommandDuration: 2 }, resources: { grain: -3, treasury: -3 }, flags: { maritimeLearning: 'harbors' } } },
+    ],
+  },
+  {
+    turn: 32, id: 'sicilian-settlement', title: 'First Punic War Finance and Sicilian Settlement', speaker: 'Senators, tax farmers, Sicilian envoys, grain merchants, and returning crews',
+    prompt: 'A war credit can sustain an overseas command only if settlement, grain, and local trust remain visible in the accounts.',
+    context: 'The opening war belongs to the third century BC. This endpoint concerns finance and settlement, not later Punic wars or imperial administration.',
+    options: [
+      { id: 'war-credit', label: 'Issue a bounded war credit', detail: 'Keep the fleet at sea with transparent public borrowing, accepting contractor exposure and future repayment pressure.', impacts: { mediterranean: { warCredit: 18, contractorExposure: 8, fleetCapacity: 7, importedGrainShare: 4, alliedExhaustion: 5, overseasCommandDuration: 3 }, resources: { treasury: -5 }, flags: { sicilianSettlement: 'war-credit' } } },
+      { id: 'local-compact', label: 'Settle Sicilian communities through negotiated dues', detail: 'Build trust and provisioning rights through differentiated terms, but accept slower extraction and less immediate credit.', impacts: { mediterranean: { provincialTrust: 18, importedGrainShare: 10, contractorExposure: -3, warCredit: 6, alliedExhaustion: -4, overseasCommandDuration: 2 }, resources: { treasury: -3, grain: -2 }, flags: { sicilianSettlement: 'local-compact' } } },
+      { id: 'short-command', label: 'Limit the overseas command', detail: 'Return command to a short, bounded mandate before costs compound, preserving trust at the expense of momentum.', impacts: { mediterranean: { overseasCommandDuration: -2, contractorExposure: -5, alliedExhaustion: -6, warCredit: 3, provincialTrust: 5, importedGrainShare: 3 }, resources: { treasury: 2 }, flags: { sicilianSettlement: 'short-command' } } },
+    ],
+  },
+)
+
 export const OBJECTIVES = [
   { from: 1, to: 2, text: 'Shelter the first households and secure water.' },
   { from: 3, to: 4, text: 'Open exchange without leaving the river undefended.' },
@@ -480,6 +520,9 @@ export const OBJECTIVES = [
   { from: 27, to: 27, text: 'Meet a professional Hellenistic army without staking the whole system on one field day.' },
   { from: 28, to: 28, text: 'Convert replacement depth and allied endurance into strategic victory.' },
   { from: 29, to: 29, text: 'Judge whether Rome can maintain Italy before accepting Mediterranean commitments.' },
+  { from: 30, to: 30, text: 'Acquire maritime capacity without pretending Rome already possesses a naval state.' },
+  { from: 31, to: 31, text: 'Learn the practices that make a fleet more than a collection of hulls.' },
+  { from: 32, to: 32, text: 'Finance the First Punic War opening and settle the first Sicilian obligations.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

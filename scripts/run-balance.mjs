@@ -1,4 +1,4 @@
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 const results = runAllReferenceStrategies()
 for (const result of results) {
@@ -60,3 +60,8 @@ for (const result of actFive) {
   if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId} - ${item.reason}`).join('; ')}`)
 }
 if (actFive.some((result) => result.outcome.overall < 70 || result.italianScore.score < 70 || result.skipped.length || Object.values(result.state.italian.projects).some((project) => !project.completed))) process.exitCode = 1
+
+console.log('\nMediterranean opening strategies')
+const mediterranean = runAllMediterraneanStrategies()
+for (const result of mediterranean) console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Mediterranean Opening ${result.outcome.grades['Mediterranean Opening'].grade} (${result.outcome.grades['Mediterranean Opening'].score}) | 241 BC`)
+if (mediterranean.some((result) => result.state.turn !== 32 || result.skipped.length)) process.exitCode = 1

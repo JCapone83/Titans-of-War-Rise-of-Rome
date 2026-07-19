@@ -1,5 +1,5 @@
 import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
-import { createItalianState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
+import { createItalianState, createMediterraneanState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
@@ -808,8 +808,11 @@ export function resolveCouncil(state, optionId) {
   const nextReconstruction = updateReconstruction(state.reconstruction, impacts.reconstruction)
   const nextRegional = updateRegional(state.regional, impacts.regional)
   const nextItalian = updateItalian(state.italian, impacts.italian)
+  const nextMediterranean = state.mediterranean
+    ? Object.fromEntries(Object.entries({ ...createMediterraneanState(), ...state.mediterranean }).map(([key, value]) => [key, clamp(value + (impacts.mediterranean?.[key] ?? 0))]))
+    : state.mediterranean
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
-  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, flags: nextFlags }
+  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, flags: nextFlags }
   return {
     ...state,
     resources: addResources(state.resources, impacts.resources),
@@ -821,6 +824,7 @@ export function resolveCouncil(state, optionId) {
     reconstruction: nextReconstruction,
     regional: nextRegional,
     italian: nextItalian,
+    mediterranean: nextMediterranean,
     nextWorksBonus,
     actionsMax: Math.max(state.actionsUsed ?? 0, workforceSummary(capacityState).constructionCapacity),
     councilResolved: true,
@@ -1047,6 +1051,37 @@ export function civicPressures(state) {
   return { effects, notes }
 }
 
+export function mediterraneanForecast(state) {
+  if (!state.mediterranean) return null
+  const m = { ...createMediterraneanState(), ...state.mediterranean }
+  const changes = {
+    fleetCapacity: m.fleetCapacity > 0 ? -1 : 0,
+    maritimeLosses: state.turn === 30 ? 3 : state.turn === 31 ? 4 : 2,
+    warCredit: m.fleetCapacity >= 20 ? -3 : -1,
+    contractorExposure: m.fleetCapacity >= 20 ? 2 : 0,
+    provincialTrust: m.contractorExposure >= 40 ? -2 : 0,
+    importedGrainShare: 0,
+    alliedExhaustion: m.fleetCapacity >= 20 ? 3 : 1,
+    overseasCommandDuration: 1,
+  }
+  const projected = Object.fromEntries(Object.entries(m).map(([key, value]) => [key, clamp(value + changes[key])]))
+  return {
+    ...projected,
+    changes,
+    projected,
+    resourceDelta: { treasury: m.fleetCapacity >= 20 ? -2 : -1, grain: m.importedGrainShare >= 10 ? 1 : 0 },
+    metricDelta: {
+      readiness: m.fleetCapacity >= 18 ? 1 : m.fleetCapacity < 8 ? -1 : 0,
+      trade: m.importedGrainShare >= 10 ? 1 : 0,
+      order: m.contractorExposure >= 45 || m.alliedExhaustion >= 55 ? -2 : 0,
+    },
+    notes: [
+      m.fleetCapacity < 10 ? 'Maritime capacity remains dependent on borrowed hulls and crews.' : 'The opening fleet is usable but institutionally young.',
+      m.contractorExposure >= 40 ? 'Contracting now limits senatorial control over replacement and accounts.' : 'Maritime contracts remain bounded enough for public inspection.',
+    ],
+  }
+}
+
 export function forecastSeason(state) {
   const production = sumBuildingMaps(state, 'production')
   const upkeep = reverseChanges(sumBuildingMaps(state, 'upkeep'))
@@ -1056,8 +1091,9 @@ export function forecastSeason(state) {
   const reconstruction = reconstructionForecast(state)
   const regional = regionalForecast(state)
   const italian = italianForecast(state)
+  const mediterranean = mediterraneanForecast(state)
   return {
-    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta),
+    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta),
     pressures: civicPressures(state),
     actionsRemaining: actionRemaining(state),
     population: projectPopulation(state),
@@ -1068,6 +1104,7 @@ export function forecastSeason(state) {
     reconstruction,
     regional,
     italian,
+    mediterranean,
   }
 }
 
@@ -1308,7 +1345,7 @@ export function advanceTurn(state) {
   const pressures = forecast.pressures
   const event = timedEvent(state)
   const resourceDelta = mergeChanges(forecast.resourceDelta, event?.resources)
-  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta)
+  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta)
   const nextResources = addResources(state.resources, resourceDelta)
   let nextMetrics = addMap(state.metrics, metricDelta)
   const shortages = Object.entries(nextResources).filter(([key, value]) => value === 0 && ['grain', 'timber', 'treasury'].includes(key))
@@ -1343,6 +1380,7 @@ export function advanceTurn(state) {
   const nextReconstruction = forecast.reconstruction ? forecast.reconstruction.projected : state.reconstruction
   const nextRegional = forecast.regional ? forecast.regional.projected : state.regional
   const nextItalian = forecast.italian ? forecast.italian.projected : state.italian
+  const nextMediterranean = forecast.mediterranean ? forecast.mediterranean.projected : state.mediterranean
   report.republicChanges = mergeChanges(forecast.republic?.changes, warRepublicChanges)
   report.warChanges = forecast.war?.changes ?? null
   report.reconstructionChanges = forecast.reconstruction?.changes ?? null
@@ -1356,8 +1394,9 @@ export function advanceTurn(state) {
   report.italianChanges = forecast.italian?.changes ?? null
   if (forecast.italian) report.notes.push(...forecast.italian.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, reports: [...state.reports, report] }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, reports: [...state.reports, report] }
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
+  if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }
   if (state.turn === 16) return {

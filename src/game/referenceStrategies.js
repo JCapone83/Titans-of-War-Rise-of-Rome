@@ -1,4 +1,5 @@
 import { createInitialState } from './initialState.js'
+import { continueToMediterranean, enterMediterranean } from './continuation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
 import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject } from './simulation.js'
 
@@ -405,4 +406,27 @@ export function runActFiveStrategy(strategy) {
 
 export function runAllActFiveStrategies() {
   return ACT_FIVE_STRATEGIES.map(runActFiveStrategy)
+}
+
+export const MEDITERRANEAN_STRATEGIES = [
+  { id: 'borrowed-hulls', name: 'Borrowed Hulls', councils: { 30: 'allied-hulls', 31: 'pilotage-exchange', 32: 'war-credit' } },
+  { id: 'roman-squadron', name: 'Roman Squadron', councils: { 30: 'roman-keels', 31: 'drill-boarding', 32: 'local-compact' } },
+  { id: 'bounded-convoy', name: 'Bounded Convoy', councils: { 30: 'limited-convoy', 31: 'safe-harbors', 32: 'short-command' } },
+]
+
+export function runAllMediterraneanStrategies() {
+  const bases = runAllActFiveStrategies().slice(0, 3)
+  return MEDITERRANEAN_STRATEGIES.map((strategy, index) => {
+    let state = enterMediterranean(continueToMediterranean(bases[index].state))
+    const skipped = []
+    const ledger = []
+    while (!state.outcome) {
+      if (state.council && !state.councilResolved) state = resolveCouncil(state, strategy.councils[state.turn])
+      ledger.push({ turn: state.turn, mediterranean: { ...state.mediterranean } })
+      const result = advanceTurn(state)
+      if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+      state = result.state
+    }
+    return { strategy, state, outcome: calculateOutcome(state), skipped, ledger }
+  })
 }

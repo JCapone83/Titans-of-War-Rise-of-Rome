@@ -63,9 +63,14 @@ export function calculateOutcome(state) {
   if (regionalScore) scores['Regional Compact'] = regionalScore.score
   const italianScore = calculateItalianScore(state)
   if (italianScore) scores['Italian System'] = italianScore.score
+  if (state.mediterranean && state.turn >= 30) {
+    const m = state.mediterranean
+    scores['Mediterranean Opening'] = Math.max(0, Math.min(100, Math.round(40 + m.fleetCapacity * 0.25 + m.warCredit * 0.2 + m.provincialTrust * 0.2 + m.importedGrainShare * 0.15 - m.maritimeLosses * 0.2 - m.contractorExposure * 0.15 - m.alliedExhaustion * 0.12)))
+  }
   const overall = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.keys(scores).length)
   let title = 'A City Still Becoming'
-  if (state.turn >= 29 && overall >= 72) title = 'Rome Reaches the Mediterranean Threshold'
+  if (state.turn >= 32) title = 'The Mediterranean Opening'
+  else if (state.turn >= 29 && overall >= 72) title = 'Rome Reaches the Mediterranean Threshold'
   else if (state.turn >= 23 && overall >= 72) title = 'The City Becomes a Regional Power'
   else if (overall >= 85) title = 'The Seven Hills Become Rome'
   else if (overall >= 72) title = 'A Durable City of Kings'
@@ -74,7 +79,7 @@ export function calculateOutcome(state) {
     title,
     overall,
     summary: overall >= 72
-      ? state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
+      ? state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
       : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
     grades: Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, { score: value, grade: grade(value) }])),
   }

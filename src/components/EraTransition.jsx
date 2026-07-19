@@ -29,6 +29,13 @@ const CONTENT = {
     unlocks: ['Regional map', 'Road and colony commitments', 'Independent political statuses'],
     action: 'Plan the region',
   },
+  mediterranean: {
+    eyebrow: '264 BC - a republic crosses the sea',
+    title: 'The Mediterranean Republic',
+    text: 'Italy has supplied depth; the sea now demands a different ledger. Fleet capacity, maritime losses, credit, local trust, grain, allies, and command duration become visible obligations.',
+    unlocks: ['Fleet acquisition', 'Maritime learning', 'Sicilian settlement'],
+    action: 'Enter the Mediterranean',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',
