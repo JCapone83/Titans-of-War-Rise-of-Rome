@@ -3,7 +3,8 @@ import assert from 'node:assert/strict'
 import { createInitialState, createItalianState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
 import { BUILDING_FAMILIES, TURN_YEARS, getCouncil } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
-import { calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
+import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
+import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFourStrategies, runAllActThreeStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 test('initial campaign begins at the Palatine council', () => {
@@ -792,4 +793,47 @@ test('the deterministic Act V engine reaches a complete 264 BC endpoint', () => 
   assert.equal(state.outcome, 'complete')
   assert.equal(state.italian.projects.viaAppia.completed, true)
   assert.equal(state.italian.projects.aquaAppia.completed, true)
+})
+
+test('Italian System grading appears only after the Act V state exists', () => {
+  assert.equal(calculateOutcome(createInitialState()).grades['Italian System'], undefined)
+  const regional = createRegionalState('differentiated-compacts')
+  const italian = {
+    ...createItalianState(regional, 'preserve-army'),
+    samnitePressure: 18,
+    allianceDepth: 78,
+    campaignPersistence: 82,
+    reserveDepth: 76,
+    coalitionRisk: 20,
+    pyrrhicPressure: 12,
+    maintenanceDebt: 14,
+    waterCapacity: 24,
+    projects: {
+      viaAppia: { id: 'viaAppia', progress: 3, requiredSeasons: 3, completed: true, lastWorkedTurn: 28 },
+      aquaAppia: { id: 'aquaAppia', progress: 3, requiredSeasons: 3, completed: true, lastWorkedTurn: 29 },
+    },
+  }
+  const state = { ...createInitialState(), era: 5, turn: 29, regional, italian, outcome: 'complete' }
+  assert.ok(calculateItalianScore(state).score >= 70)
+  assert.equal(calculateOutcome(state).grades['Italian System'].score, calculateItalianScore(state).score)
+})
+
+test('campaign export records Appian works and the 264 BC doctrine', () => {
+  const regional = createRegionalState('differentiated-compacts')
+  const italian = createItalianState(regional, 'preserve-army')
+  italian.projects.viaAppia = { ...italian.projects.viaAppia, progress: 3, completed: true }
+  const state = {
+    ...createInitialState(),
+    era: 5,
+    turn: 29,
+    regional,
+    italian,
+    flags: { caudineResponse: 'preserve-army', appianPriority: 'road', mediterraneanDoctrine: 'consolidate' },
+  }
+  const markdown = campaignMarkdown(state)
+  assert.match(markdown, /## Roads to Italy/)
+  assert.match(markdown, /Via Appia: complete/)
+  assert.match(markdown, /Aqua Appia: 0\/3 seasons/)
+  assert.match(markdown, /Mediterranean doctrine: consolidate/)
+  assert.match(markdown, /Italian System score:/)
 })

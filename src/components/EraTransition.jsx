@@ -29,6 +29,13 @@ const CONTENT = {
     unlocks: ['Regional map', 'Road and colony commitments', 'Independent political statuses'],
     action: 'Plan the region',
   },
+  italian: {
+    eyebrow: '312 BC - recovery becomes a system',
+    title: 'Roads to Italy',
+    text: 'Rome survived the Caudine disaster because defeat did not exhaust its armies, allies, or institutions. The next test is harder: roads, water, reserves, and negotiated obligations must sustain repeated wars without consuming the city behind them.',
+    unlocks: ['Via Appia and Aqua Appia', 'Samnite and coalition pressure', 'Pyrrhic war of replacements'],
+    action: 'Build the Italian system',
+  },
 }
 
 export function EraTransition({ open, kind = 'kings', onContinue }) {

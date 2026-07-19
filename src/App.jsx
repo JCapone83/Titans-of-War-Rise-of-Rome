@@ -12,6 +12,7 @@ import { RepublicPanel } from './components/RepublicPanel.jsx'
 import { ReconstructionPanel } from './components/ReconstructionPanel.jsx'
 import { RegionalInspector } from './components/RegionalInspector.jsx'
 import { RegionalMap } from './components/RegionalMap.jsx'
+import { RoadsToItalyPanel } from './components/RoadsToItalyPanel.jsx'
 import { OutcomeOverlay } from './components/OutcomeOverlay.jsx'
 import { TopBar } from './components/TopBar.jsx'
 import { TurnReport } from './components/TurnReport.jsx'
@@ -20,7 +21,7 @@ import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState, migrateState } from './game/initialState.js'
 import { calculateOutcome } from './game/outcomes.js'
-import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding } from './game/simulation.js'
+import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject } from './game/simulation.js'
 
 const STORAGE_KEY = 'titans-of-war-birth-of-rome-v1'
 
@@ -45,7 +46,7 @@ export default function App() {
   const [surface, setSurface] = useState('city')
   const era = ERAS[state.era]
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
-  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition ? calculateOutcome(state) : null, [state])
+  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition ? calculateOutcome(state) : null, [state])
 
   useEffect(() => {
     const handleKey = (event) => {
@@ -165,6 +166,7 @@ export default function App() {
         <aside className="decision-rail">
           <RepublicPanel state={state} />
           <ReconstructionPanel state={state} />
+          <RoadsToItalyPanel state={state} onWork={(id) => applyRegionalAction(workItalianProject, id)} />
           <DecisionCouncil
             council={state.council}
             resolved={state.councilResolved}
@@ -174,7 +176,7 @@ export default function App() {
           <section className="advance-section">
             <div>
               <p className="eyebrow">Next</p>
-              <strong>{state.turn === 23 ? 'Judge city and regional compact' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
+              <strong>{state.turn === 29 ? 'Judge the Italian system' : state.turn === 23 ? 'Recover from the Caudine Forks' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
             </div>
             <button className="advance-button" onClick={endSeason} disabled={Boolean(state.council && !state.councilResolved)}>
               End season <ArrowRight />
@@ -188,9 +190,9 @@ export default function App() {
       <WalkthroughOverlay open={walkthroughOpen} onClose={closeWalkthrough} />
       <TurnReport report={report} onClose={() => setReport(null)} />
       <EraTransition
-        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition) && !report}
-        kind={state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
-        onContinue={() => { setSurface('city'); setState(state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
+        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition) && !report}
+        kind={state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
+        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
       />
       <OutcomeOverlay outcome={report ? null : outcome} onExport={exportCampaign} onRestart={restart} />
     </div>
