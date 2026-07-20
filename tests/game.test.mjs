@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
 import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runAllTrajanicCapitalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToTrajanicCapital, enterTrajanicCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
@@ -1651,4 +1651,32 @@ test('Act XII project prerequisites follow the enacted council programs', () => 
   const noInheritance = structuredClone(circus)
   noInheritance.mediterranean.projects.republicanCircus.completed = false
   assert.equal(trajanicProjectAvailability(noInheritance, 'trajanicCircus').available, false)
+})
+
+test('Trajanic Capital scoring rewards durable systems over brittle expansion', () => {
+  const imperialCapital = createImperialCapitalState()
+  const base = { ...createInitialState(), version: 16, era: 12, turn: 76, outcome: 'trajanic-capital-complete', imperialCapital, trajanicCapital: createTrajanicCapitalState(imperialCapital) }
+  const strong = { ...base, trajanicCapital: { ...base.trajanicCapital, successionSettlement: 82, constitutionalContinuity: 84, frontierCommand: 74, provincialTrust: 80, treasuryResilience: 78, conquestDependence: 12, capitalSupply: 82, publicProvision: 80, maintenanceCapacity: 78, maintenanceDebt: 8, administrativeCapacity: 80 } }
+  const brittle = { ...base, trajanicCapital: { ...base.trajanicCapital, successionSettlement: 40, constitutionalContinuity: 35, frontierCommand: 72, provincialTrust: 28, treasuryResilience: 24, conquestDependence: 88, capitalSupply: 35, publicProvision: 32, maintenanceCapacity: 25, maintenanceDebt: 86, administrativeCapacity: 42 } }
+  assert.ok(calculateTrajanicCapitalScore(strong).score > calculateTrajanicCapitalScore(brittle).score)
+  assert.ok(calculateTrajanicCapitalScore(brittle).risks.length >= 3)
+})
+
+test('four Act XII strategies reach AD 117 with distinct viable settlements', () => {
+  const results = runAllTrajanicCapitalStrategies()
+  assert.equal(TRAJANIC_CAPITAL_STRATEGIES.length, 4)
+  assert.equal(results.length, 4)
+  assert.ok(results.every((result) => result.state.turn === 76 && result.state.outcome === 'trajanic-capital-complete'))
+  assert.ok(results.every((result) => result.trajanicScore.score >= 55 && result.skipped.length === 0))
+  assert.ok(results.every((result) => Object.values(result.state.trajanicCapital.projects).some((project) => project.completed || project.progress > 0)))
+  assert.equal(new Set(results.map((result) => result.trajanicScore.operatingForm)).size, 4)
+})
+
+test('AD 117 outcome exposes the Trajanic operating legacy', () => {
+  const result = runAllTrajanicCapitalStrategies()[0]
+  const outcome = calculateOutcome(result.state)
+  assert.equal(outcome.grades['Trajanic Capital'].score, result.trajanicScore.score)
+  assert.equal(outcome.trajanicCapitalLegacy.systems.length, 5)
+  assert.equal(outcome.trajanicCapitalLegacy.operatingForm, result.trajanicScore.operatingForm)
+  assert.match(outcome.summary, /AD 117/)
 })

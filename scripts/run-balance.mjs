@@ -1,4 +1,4 @@
-import { IMPERIAL_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { IMPERIAL_CAPITAL_STRATEGIES, TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runAllTrajanicCapitalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 const results = runAllReferenceStrategies()
 for (const result of results) {
@@ -131,3 +131,17 @@ for (const result of imperialCapital) {
   if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
 }
 if (IMPERIAL_CAPITAL_STRATEGIES.length !== 3 || imperialCapital.some((result) => result.state.turn !== 70 || result.state.outcome !== 'imperial-capital-complete' || result.outcome.overall < 60 || result.imperialScore.score < 60 || result.skipped.length)) process.exitCode = 1
+
+console.log('\nAct XII Trajanic Capital strategies')
+const trajanicCapital = runAllTrajanicCapitalStrategies()
+for (const result of trajanicCapital) {
+  const score = result.trajanicScore
+  const projects = Object.values(result.state.trajanicCapital.projects)
+  console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Trajanic Capital ${score.grade} (${score.score}) | ${score.operatingForm} | AD 117`)
+  console.log(`  Succession ${score.succession} | Frontier ${score.frontier} | Treasury ${score.treasury} | Provision ${score.provision} | Maintenance ${score.maintenance} | Administration ${score.administration}`)
+  console.log(`  Trajanic works: ${projects.filter((project) => project.completed).map((project) => project.id).join(', ') || 'none'} operating; ${projects.filter((project) => !project.completed && project.progress > 0).map((project) => `${project.id} ${project.progress}/${project.requiredSeasons}`).join(', ') || 'none active'}`)
+  if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
+}
+const trajanicOperatingForms = new Set(trajanicCapital.map((result) => result.trajanicScore.operatingForm))
+const emptyTrajanicPortfolios = trajanicCapital.some((result) => !Object.values(result.state.trajanicCapital.projects).some((project) => project.completed || project.progress > 0))
+if (TRAJANIC_CAPITAL_STRATEGIES.length !== 4 || trajanicCapital.length !== 4 || trajanicOperatingForms.size !== 4 || emptyTrajanicPortfolios || trajanicCapital.some((result) => result.state.turn !== 76 || result.state.outcome !== 'trajanic-capital-complete' || result.trajanicScore.score < 55 || result.skipped.length)) process.exitCode = 1

@@ -1,4 +1,4 @@
-import { augustanCapitalSystems, countFamily, hasBuilding, imperialCapitalSystems, regionalForecast } from './simulation.js'
+import { augustanCapitalSystems, countFamily, hasBuilding, imperialCapitalSystems, regionalForecast, trajanicCapitalSystems } from './simulation.js'
 
 const grade = (score) => score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F'
 
@@ -164,6 +164,44 @@ export function calculateImperialCapitalScore(state) {
   return { score, grade: grade(score), operatingForm, transfer: Math.round(transfer), provision: Math.round(provision), safety: Math.round(safety), publicCity: Math.round(publicCity), provincial: Math.round(provincial), physical: Math.round(physical), completed, active, stages, strengths, risks }
 }
 
+export function calculateTrajanicCapitalScore(state) {
+  if (!state.trajanicCapital) return null
+  const t = state.trajanicCapital
+  const projects = Object.values(t.projects ?? {})
+  const completed = projects.filter((project) => project.completed).length
+  const active = projects.filter((project) => !project.completed && project.progress > 0).length
+  const stages = projects.reduce((sum, project) => sum + (project.progress ?? 0), 0)
+  const bounded = (value) => Math.max(0, Math.min(100, value))
+  const succession = bounded(t.successionSettlement * 0.45 + t.constitutionalContinuity * 0.55)
+  const frontier = bounded(t.frontierCommand * 0.45 + t.provincialTrust * 0.55)
+  const treasury = bounded(t.treasuryResilience * 0.5 + (100 - t.conquestDependence) * 0.3 + (100 - t.maintenanceDebt) * 0.2)
+  const provision = bounded(t.capitalSupply * 0.45 + t.publicProvision * 0.35 + t.maintenanceCapacity * 0.2)
+  const maintenance = bounded(t.maintenanceCapacity * 0.6 + (100 - t.maintenanceDebt) * 0.4)
+  const physical = bounded(44 + stages * 2.5 + completed * 7 + active * 2)
+  const administration = bounded(t.administrativeCapacity * 0.75 + physical * 0.25)
+  const score = Math.round(succession * 0.2 + frontier * 0.16 + treasury * 0.18 + provision * 0.18 + maintenance * 0.16 + administration * 0.12)
+  let operatingForm = 'Constitutional Trajanic Settlement'
+  if (state.flags?.ad117Settlement === 'frontier-treasury') operatingForm = 'Frontier-Treasury Principate'
+  else if (state.flags?.ad117Settlement === 'provincial-maintenance') operatingForm = 'Provincial Maintenance Compact'
+  else if (state.flags?.quirinalProgram === 'integrated-precinct' && state.flags?.waterPortusProgram === 'joined-supply') operatingForm = 'Integrated Administrative Capital'
+  else if (state.flags?.waterPortusProgram === 'water-first') operatingForm = 'Water-Resilient Capital'
+  const strengths = [
+    succession >= 60 ? 'Recorded succession and constitutional continuity' : null,
+    frontier >= 60 ? 'Frontier command retains provincial trust' : null,
+    treasury >= 60 ? 'Treasury can operate without continuous conquest' : null,
+    provision >= 60 ? 'Capital supply and public provision remain connected' : null,
+    maintenance >= 60 ? 'Maintenance capacity contains inherited debt' : null,
+  ].filter(Boolean)
+  const risks = [
+    t.conquestDependence >= 55 ? 'Ordinary government depends too heavily on new conquest' : null,
+    t.maintenanceDebt >= 45 ? 'Maintenance debt is overtaking new construction' : null,
+    t.provincialTrust < 45 ? 'Provincial trust is carrying frontier extraction' : null,
+    t.publicProvision < 45 || t.capitalSupply < 45 ? 'The monumental capital outruns supply and provision' : null,
+    succession < 50 ? 'The AD 117 transfer remains personally rather than constitutionally secured' : null,
+  ].filter(Boolean)
+  return { score, grade: grade(score), operatingForm, succession: Math.round(succession), frontier: Math.round(frontier), treasury: Math.round(treasury), provision: Math.round(provision), maintenance: Math.round(maintenance), administration: Math.round(administration), physical: Math.round(physical), completed, active, stages, strengths, risks }
+}
+
 export function calculateOutcome(state) {
   const average = (keys) => keys.reduce((sum, key) => sum + state.metrics[key], 0) / keys.length
   const drainage = hasBuilding(state, 'cloaca-works') ? 12 : hasBuilding(state, 'drainage-ditch') ? 5 : -10
@@ -217,11 +255,14 @@ export function calculateOutcome(state) {
   if (augustanCityScore && state.turn >= 55) scores['The Augustan City'] = augustanCityScore.score
   const imperialCapitalScore = calculateImperialCapitalScore(state)
   if (imperialCapitalScore && state.turn >= 62) scores['Imperial Capital'] = imperialCapitalScore.score
+  const trajanicCapitalScore = calculateTrajanicCapitalScore(state)
+  if (trajanicCapitalScore && state.turn >= 71) scores['Trajanic Capital'] = trajanicCapitalScore.score
   const overall = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.keys(scores).length)
   const operatingFormName = civilSettlementScore?.operatingForm.toLowerCase()
   const operatingFormArticle = operatingFormName?.startsWith('augustan') ? 'an' : 'a'
   let title = 'A City Still Becoming'
-  if (state.turn >= 70) title = imperialCapitalScore.operatingForm
+  if (state.turn >= 76) title = trajanicCapitalScore.operatingForm
+  else if (state.turn >= 70) title = imperialCapitalScore.operatingForm
   else if (state.turn >= 61) title = augustanCityScore.operatingForm
   else if (state.turn >= 54) title = civilSettlementScore.operatingForm
   else if (state.turn >= 48) title = scores['Republic Under Strain'] >= 70 ? 'A Republic Still Capable of Settlement' : 'Command Outruns the Republic'
@@ -245,14 +286,21 @@ export function calculateOutcome(state) {
     completed: imperialCapitalScore.completed,
     active: imperialCapitalScore.active,
   } : null
+  const trajanicCapitalLegacy = state.turn >= 76 && trajanicCapitalScore ? {
+    operatingForm: trajanicCapitalScore.operatingForm,
+    systems: trajanicCapitalSystems(state),
+    completed: trajanicCapitalScore.completed,
+    active: trajanicCapitalScore.active,
+  } : null
   return {
     title,
     overall,
     summary: overall >= 72
-      ? state.turn >= 70 ? `Rome reaches AD 96 as a ${imperialCapitalScore.operatingForm.toLowerCase()}. The Colosseum and palace stand within separate judgments of succession, military recognition, public provision, fire resilience, maintenance, provincial trust, and access to the city.` : state.turn >= 61 ? `Rome reaches AD 14 as a ${augustanCityScore.operatingForm.toLowerCase()}. Authority, Senate and magistrates, public access, provincial command, maintenance, fire response, memory, and succession are judged as separate operating systems.` : state.turn >= 54 ? `Rome reaches 27 BC as ${operatingFormArticle} ${operatingFormName}, with constitutional language judged separately from command, demobilization, courts, finance, Italian titles, public provision, and succession.` : state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
-      : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
+      ? state.turn >= 76 ? `Rome reaches AD 117 as a ${trajanicCapitalScore.operatingForm.toLowerCase()}. Frontier reach, provincial trust, treasury resilience, conquest dependence, capital provision, maintenance, administration, succession, and constitutional continuity are judged as separate operating obligations.` : state.turn >= 70 ? `Rome reaches AD 96 as a ${imperialCapitalScore.operatingForm.toLowerCase()}. The Colosseum and palace stand within separate judgments of succession, military recognition, public provision, fire resilience, maintenance, provincial trust, and access to the city.` : state.turn >= 61 ? `Rome reaches AD 14 as a ${augustanCityScore.operatingForm.toLowerCase()}. Authority, Senate and magistrates, public access, provincial command, maintenance, fire response, memory, and succession are judged as separate operating systems.` : state.turn >= 54 ? `Rome reaches 27 BC as ${operatingFormArticle} ${operatingFormName}, with constitutional language judged separately from command, demobilization, courts, finance, Italian titles, public provision, and succession.` : state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
+      : state.turn >= 76 ? `Rome reaches AD 117, but the ${trajanicCapitalScore.operatingForm.toLowerCase()} leaves unresolved burdens in conquest finance, provincial trust, supply, maintenance, succession, or constitutional continuity.` : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
     grades: Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, { score: value, grade: grade(value) }])),
     capitalLegacy,
     imperialCapitalLegacy,
+    trajanicCapitalLegacy,
   }
 }

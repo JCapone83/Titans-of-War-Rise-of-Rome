@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
-import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
+import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, continueToTrajanicCapital, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain, enterTrajanicCapital } from './continuation.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -690,4 +690,60 @@ export function simulateImperialCapitalStrategy(strategy, baseState) {
 export function runAllImperialCapitalStrategies() {
   const bases = runAllAugustanCityStrategies()
   return IMPERIAL_CAPITAL_STRATEGIES.map((strategy, index) => simulateImperialCapitalStrategy(strategy, bases[index].state))
+}
+
+export const TRAJANIC_CAPITAL_STRATEGIES = [
+  {
+    id: 'integrated-administrative-capital', name: 'Integrated Administrative Capital', thesis: 'Bind recorded succession, provincial disposition, the Quirinal precinct, and joined supply to an operating administrative center.',
+    councils: { 71: 'recorded-adoption', 72: 'provincial-disposition', 73: 'integrated-forum-program', 74: 'service-before-splendor', 75: 'distributed-supply-and-basin', 76: 'constitutional-settlement' },
+    projectPriorities: { 73: 'trajanAdministrativeComplex', 74: 'trajanAdministrativeComplex', 75: 'trajanAdministrativeComplex', 76: 'trajanAdministrativeComplex' },
+    baseIndex: 1,
+  },
+  {
+    id: 'frontier-forum-capital', name: 'Frontier and Forum Capital', thesis: 'Use veteran rolls and the integrated Forum while leaving AD 117 under an explicit frontier and treasury settlement.',
+    councils: { 71: 'recorded-adoption', 72: 'frontier-and-veteran-rolls', 73: 'integrated-forum-program', 74: 'restricted-operation', 75: 'water-first-resilience', 76: 'frontier-and-treasury' },
+    projectPriorities: { 73: 'forumTrajan', 74: 'forumTrajan', 75: 'forumTrajan', 76: 'forumTrajan' },
+    baseIndex: 1,
+  },
+  {
+    id: 'public-baths-compact', name: 'Public Baths and Provincial Compact', thesis: 'Convert palace ground to public service and make provincial trust and maintenance the final settlement rather than an afterthought.',
+    councils: { 71: 'senate-guarded-transfer', 72: 'provincial-disposition', 73: 'administrative-first', 74: 'public-conversion', 75: 'distributed-supply-and-basin', 76: 'provincial-trust-and-maintenance' },
+    projectPriorities: { 74: 'bathsTrajan', 75: 'bathsTrajan', 76: 'bathsTrajan' },
+    baseIndex: 1,
+  },
+  {
+    id: 'water-resilient-capital', name: 'Water-Resilient Capital', thesis: 'Limit conquest dependence, secure sources and flood defenses, and carry a constitutional settlement through distributed water capacity.',
+    councils: { 71: 'recorded-adoption', 72: 'provincial-disposition', 73: 'administrative-first', 74: 'service-before-splendor', 75: 'water-first-resilience', 76: 'constitutional-settlement' },
+    projectPriorities: { 75: 'aquaTraiana', 76: 'aquaTraiana' },
+    baseIndex: 1,
+  },
+]
+
+export function simulateTrajanicCapitalStrategy(strategy, baseState) {
+  let state = enterTrajanicCapital(continueToTrajanicCapital(baseState))
+  const skipped = []
+  const ledger = []
+  while (state.outcome !== 'trajanic-capital-complete') {
+    const optionId = strategy.councils[state.turn]
+    if (state.council && !state.councilResolved) {
+      if (!optionId) skipped.push({ turn: state.turn, reason: 'No Trajanic Capital council choice declared.' })
+      else state = resolveCouncil(state, optionId)
+    }
+    const projectId = strategy.projectPriorities[state.turn]
+    if (projectId && actionRemaining(state)) {
+      const work = workTrajanicProject(state, projectId)
+      if (work.error) skipped.push({ turn: state.turn, projectId, reason: work.error })
+      else state = work.state
+    }
+    ledger.push({ turn: state.turn, trajanicCapital: { ...state.trajanicCapital, projects: structuredClone(state.trajanicCapital.projects ?? {}) }, resources: { ...state.resources } })
+    const result = advanceTurn(state)
+    if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+    state = result.state
+  }
+  return { strategy, state, outcome: calculateOutcome(state), trajanicScore: calculateTrajanicCapitalScore(state), skipped, ledger }
+}
+
+export function runAllTrajanicCapitalStrategies() {
+  const bases = runAllImperialCapitalStrategies()
+  return TRAJANIC_CAPITAL_STRATEGIES.map((strategy) => simulateTrajanicCapitalStrategy(strategy, bases[strategy.baseIndex].state))
 }
