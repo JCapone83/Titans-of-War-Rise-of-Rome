@@ -1964,34 +1964,39 @@ function trajanicProgramSelected(state, keys, values) {
 function trajanicPrerequisiteReason(state, projectId) {
   if (['forumTrajan', 'trajanAdministrativeComplex'].includes(projectId) && !trajanicProgramSelected(
     state,
-    ['trajanicForumProgram', 'integratedForumProgram', 'quirinalForumProgram'],
-    ['integrated-forum-program', 'integrated-quirinal-forum', 'quirinal-forum-program'],
+    ['quirinalProgram'],
+    ['integrated-precinct', 'integrated-forum-program'],
   )) return 'The integrated Quirinal/forum program must be authorized before this project can begin.'
   if (projectId === 'bathsTrajan' && !trajanicProgramSelected(
     state,
-    ['domusAureaConversion', 'domusAureaGround', 'flavianSettlement'],
-    ['domus-aurea-conversion', 'public-conversion'],
+    ['domusAureaConversion'],
+    ['public-baths', 'public-conversion'],
   )) return 'The former Domus Aurea ground must be converted to public use before the Baths of Trajan can begin.'
   if (projectId === 'aquaTraiana' && !trajanicProgramSelected(
     state,
-    ['trajanicWaterProgram', 'waterProgram', 'aquaTraianaProgram'],
-    ['water-program', 'trajanic-water-program', 'aqua-traiana-program'],
+    ['waterPortusProgram'],
+    ['joined-supply', 'water-first', 'distributed-supply-and-basin', 'water-first-resilience'],
   )) return 'The turn-75 water program must be authorized before Aqua Traiana can begin.'
   if (projectId === 'trajanicPortus') {
     const retainedPortus = state.imperialCapital?.projects?.claudianPortus?.completed === true
     const harborProgram = trajanicProgramSelected(
       state,
-      ['trajanicHarborProgram', 'harborProgram', 'portusProgram'],
-      ['harbor-program', 'trajanic-harbor-program', 'portus-program'],
+      ['waterPortusProgram'],
+      ['joined-supply', 'grain-first', 'distributed-supply-and-basin', 'grain-first-portus'],
     )
     if (!retainedPortus) return 'The Claudian Portus must be retained before the Trajanic inner harbor can begin.'
     if (!harborProgram) return 'The turn-75 harbor program must be authorized before the Trajanic inner harbor can begin.'
   }
-  if (projectId === 'trajanicCircus' && !trajanicProgramSelected(
-    state,
-    ['circusValleyContinuity', 'valleyContinuity', 'trajanicCircusProgram'],
-    ['circus-program', 'trajanic-circus-program', 'valley-continuity'],
-  )) return 'Inherited Circus valley continuity and the turn-76 reconstruction program are required before the Trajanic Circus can begin.'
+  if (projectId === 'trajanicCircus') {
+    const inheritedValley = state.mediterranean?.projects?.republicanCircus?.completed === true
+    const maintenanceSettlement = trajanicProgramSelected(
+      state,
+      ['ad117Settlement'],
+      ['provincial-maintenance', 'provincial-trust-and-maintenance'],
+    )
+    if (!inheritedValley) return 'The inherited Republican Circus grounds must be operating before their Trajanic completion can begin.'
+    if (!maintenanceSettlement) return 'The turn-76 provincial and maintenance settlement must authorize the final Circus program.'
+  }
   return null
 }
 

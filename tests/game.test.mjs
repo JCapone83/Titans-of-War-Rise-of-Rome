@@ -1611,3 +1611,44 @@ test('Act XII operating pressure penalizes debt and conquest dependence', () => 
   assert.ok(trajanicCapitalForecast(strong).resourceDelta.treasury > trajanicCapitalForecast(brittle).resourceDelta.treasury)
   assert.ok(trajanicCapitalSystems(strong).reduce((sum, system) => sum + system.score, 0) > trajanicCapitalSystems(brittle).reduce((sum, system) => sum + system.score, 0))
 })
+
+test('Act XII project prerequisites follow the enacted council programs', () => {
+  const actState = (turn) => {
+    const imperialCapital = createImperialCapitalState()
+    imperialCapital.projects.claudianPortus.completed = true
+    const state = {
+      ...createInitialState(), version: 16, era: 12, turn,
+      resources: { grain: 100, timber: 100, stone: 100, bronze: 100, treasury: 100 },
+      imperialCapital, trajanicCapital: createTrajanicCapitalState(imperialCapital),
+      mediterranean: createMediterraneanState(),
+      council: getCouncil(turn), councilResolved: false, actionsUsed: 0, actionsMax: 3,
+    }
+    state.mediterranean.projects.republicanCircus.completed = true
+    return state
+  }
+
+  const forum = resolveCouncil(actState(73), 'integrated-forum-program')
+  assert.equal(trajanicProjectAvailability(forum, 'forumTrajan').available, true)
+  assert.equal(trajanicProjectAvailability(forum, 'trajanAdministrativeComplex').available, true)
+
+  const baths = resolveCouncil(actState(74), 'public-conversion')
+  assert.equal(trajanicProjectAvailability(baths, 'bathsTrajan').available, true)
+
+  const joined = resolveCouncil(actState(75), 'distributed-supply-and-basin')
+  assert.equal(trajanicProjectAvailability(joined, 'aquaTraiana').available, true)
+  assert.equal(trajanicProjectAvailability(joined, 'trajanicPortus').available, true)
+
+  const grain = resolveCouncil(actState(75), 'grain-first-portus')
+  assert.equal(trajanicProjectAvailability(grain, 'trajanicPortus').available, true)
+  assert.equal(trajanicProjectAvailability(grain, 'aquaTraiana').available, false)
+
+  const water = resolveCouncil(actState(75), 'water-first-resilience')
+  assert.equal(trajanicProjectAvailability(water, 'aquaTraiana').available, true)
+  assert.equal(trajanicProjectAvailability(water, 'trajanicPortus').available, false)
+
+  const circus = resolveCouncil(actState(76), 'provincial-trust-and-maintenance')
+  assert.equal(trajanicProjectAvailability(circus, 'trajanicCircus').available, true)
+  const noInheritance = structuredClone(circus)
+  noInheritance.mediterranean.projects.republicanCircus.completed = false
+  assert.equal(trajanicProjectAvailability(noInheritance, 'trajanicCircus').available, false)
+})
