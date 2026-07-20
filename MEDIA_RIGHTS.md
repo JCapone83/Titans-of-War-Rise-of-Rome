@@ -65,4 +65,15 @@ The following five transparent PNG assets were produced with the built-in OpenAI
 
 The Agrippan Pantheon asset deliberately excludes the standing Hadrianic rotunda, dome, and oculus. The Mausoleum cutaway is a game presentation device for its concentric burial structure and is not a claim that the monument stood open. The House of Augustus is a phased reconstruction rather than the later Domitianic palace. The Baths of Agrippa and vigiles station combine incomplete early evidence with functional game presentation. These assets remain preproduction landmarks until their corresponding playable projects or historical-context surfaces pass separate implementation and historical-review gates.
 
+## Act XI project art
+
+The following four transparent PNG assets were produced with the built-in OpenAI image-generation tool under project-authored historical art direction on July 20, 2026. They are historically informed game reconstructions rather than archaeological evidence:
+
+- `public/images/projects/aqua-claudia-v1.png` — Evidence-led infrastructure synthesis
+- `public/images/projects/claudian-portus-v1.png` — Evidence-led harbor system with bounded warehouse abstraction
+- `public/images/projects/flavian-amphitheatre-v1.png` — Evidence-led intact Flavian reconstruction
+- `public/images/projects/domitianic-palace-v1.png` — Evidence-led plan with reconstructed upper architecture
+
+The assets use transparent RGBA PNG presentation and remain byte-identical to the approved production batch. Their evidence-status labels describe the reconstruction treatment used in the game and do not claim archaeological certainty. Final illustrated reconstructions for the remaining Act XI projects remain behind a separate visual-production gate.
+
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

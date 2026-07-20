@@ -21,6 +21,29 @@ export const CIVIL_SETTLEMENT_PROJECT_ART = {
   },
 }
 
+export const IMPERIAL_PROJECT_ART = {
+  aquaClaudia: {
+    src: '/images/projects/aqua-claudia-v1.png',
+    alt: 'Isometric reconstruction of Aqua Claudia and Anio Novus with two enclosed conduits and monumental arcades.',
+    evidence: 'Evidence-led infrastructure synthesis',
+  },
+  claudianPortus: {
+    src: '/images/projects/claudian-portus-v1.png',
+    alt: 'Isometric reconstruction of Claudian Portus and Imperial Horrea with harbor works, canals, and guarded stores.',
+    evidence: 'Evidence-led harbor system with bounded warehouse abstraction',
+  },
+  flavianAmphitheatre: {
+    src: '/images/projects/flavian-amphitheatre-v1.png',
+    alt: 'Isometric reconstruction of the intact Flavian Amphitheatre with arcades, arena, seating, and crowd routes.',
+    evidence: 'Evidence-led intact Flavian reconstruction',
+  },
+  domitianicPalace: {
+    src: '/images/projects/domitianic-palace-v1.png',
+    alt: 'Isometric reconstruction of Domitianic Palace Administration with public halls, offices, courts, and service routes.',
+    evidence: 'Evidence-led plan with reconstructed upper architecture',
+  },
+}
+
 export const AUGUSTAN_PROJECT_ART = {
   palatineOfficialPrecinct: {
     src: '/images/projects/house-of-augustus-v1.png',
@@ -84,6 +107,7 @@ const STAGES = {
 
 export const artForCivilSettlementProject = (projectId) => CIVIL_SETTLEMENT_PROJECT_ART[projectId] ?? null
 export const artForAugustanProject = (projectId) => AUGUSTAN_PROJECT_ART[projectId] ?? null
+export const artForImperialProject = (projectId) => IMPERIAL_PROJECT_ART[projectId] ?? null
 
 export function augustanCapitalLandmarks(state) {
   if (!state?.augustanCity || state.era < 10) return []

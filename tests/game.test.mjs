@@ -9,7 +9,7 @@ import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrateg
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
-import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
+import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -1442,6 +1442,24 @@ test('Act XI projects carry dates, evidence, stages, and recurring burdens', () 
   }
   assert.equal(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.openingTurn, 69)
   assert.equal(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.operatingTurn, 70)
+})
+
+test('first Imperial Capital visual batch maps only its approved project art', () => {
+  assert.deepEqual(Object.keys(IMPERIAL_PROJECT_ART).sort(), ['aquaClaudia', 'claudianPortus', 'domitianicPalace', 'flavianAmphitheatre'])
+  const expected = {
+    aquaClaudia: '/images/projects/aqua-claudia-v1.png',
+    claudianPortus: '/images/projects/claudian-portus-v1.png',
+    flavianAmphitheatre: '/images/projects/flavian-amphitheatre-v1.png',
+    domitianicPalace: '/images/projects/domitianic-palace-v1.png',
+  }
+  for (const [id, src] of Object.entries(expected)) {
+    const art = IMPERIAL_PROJECT_ART[id]
+    assert.equal(art.src, src)
+    assert.ok(art.alt.length >= 40)
+    assert.ok(art.evidence.length >= 25)
+    assert.equal(artForImperialProject(id), art)
+  }
+  for (const id of ['castraPraetoria', 'domusAurea', 'templePeace', 'archTitus', 'unknown']) assert.equal(artForImperialProject(id), null)
 })
 
 test('Flavian Amphitheatre requires public conversion, opens in AD 80, and gains the Domitianic layer by AD 96', () => {
