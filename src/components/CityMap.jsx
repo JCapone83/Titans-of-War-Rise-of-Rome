@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Droplets, Landmark, Map, Route, Shield, Waves } from 'lucide-react'
+import { Droplets, Landmark, Map as MapIcon, Mountain, Route, Shield, Waves } from 'lucide-react'
 import { artForBuilding } from '../game/buildingArt.js'
 import { augustanCapitalLandmarks } from '../game/projectArt.js'
 import { DISTRICTS, DISTRICT_LINKS } from '../game/data.js'
 import { networkCoverage } from '../game/simulation.js'
+import { assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../game/romeScenes.js'
 
 const MODES = [
-  { id: 'terrain', label: 'Terrain', icon: Map },
+  { id: 'terrain', label: 'Terrain', icon: MapIcon },
   { id: 'roads', label: 'Roads', icon: Route },
   { id: 'water', label: 'Water', icon: Droplets },
   { id: 'drainage', label: 'Drainage', icon: Waves },
@@ -49,9 +50,72 @@ function BuildingModel({ building, index }) {
   )
 }
 
+function SceneRoad({ link, emphasized }) {
+  const dx = link.to.x - link.from.x
+  const dy = link.to.y - link.from.y
+  return (
+    <i
+      className={`scene-road${link.improved ? ' improved' : ''}${emphasized ? ' emphasized' : ''}`}
+      style={{ left: `${link.from.x}%`, top: `${link.from.y}%`, width: `${Math.hypot(dx, dy)}%`, transform: `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)` }}
+    />
+  )
+}
+
+function TerrainScene({ state, mode, onSelectDistrict }) {
+  const scene = sceneForId('palatine-capitoline')
+  const assignments = assignBuildingsToScene(state, scene.id)
+  const assignmentByPlot = new Map(assignments.map((assignment) => [assignment.plot.id, assignment]))
+  const roads = roadLinksForScene(state, scene.id)
+
+  return (
+    <div className={`terrain-scene map-mode-${mode}`} role="group" aria-label={`${scene.label}, ${mode} overlay`}>
+      <img className="terrain-scene-background" src={scene.background} alt="Natural hill terraces above the Tiber prepared for settlement" draggable="false" />
+      <div className="scene-road-layer" aria-hidden="true">
+        {roads.map((link) => <SceneRoad key={link.id} link={link} emphasized={mode === 'roads'} />)}
+      </div>
+      {scene.gates.map((gate) => (
+        <span
+          key={gate.id}
+          className={`scene-gate${mode === 'roads' ? ' visible' : ''}`}
+          style={{ left: `${gate.x}%`, top: `${gate.y}%` }}
+          aria-hidden="true"
+        >{gate.label}</span>
+      ))}
+      {scene.plots.map((plot) => {
+        const assignment = assignmentByPlot.get(plot.id)
+        const district = DISTRICTS.find((item) => item.id === plot.districtId)
+        const art = assignment ? artForBuilding(assignment.building.buildingId) : null
+        const selected = state.selectedDistrict === plot.districtId
+        const gate = districtGate(scene, plot.districtId)
+        const buildingLabel = assignment ? `${assignment.building.name}, ${assignment.building.condition ?? 100}% condition` : 'empty construction plot'
+        return (
+          <button
+            type="button"
+            key={plot.id}
+            className={`scene-plot${assignment ? ' occupied' : ' empty'}${selected ? ' selected' : ''}`}
+            style={{ left: `${plot.x}%`, top: `${plot.y}%`, zIndex: 10 + plot.depth, '--scene-scale': plot.scale }}
+            onClick={() => onSelectDistrict(plot.districtId)}
+            aria-label={`Select ${district.name} plot, ${buildingLabel}. Road approach: ${gate?.label ?? 'district path'}.`}
+            aria-pressed={selected}
+          >
+            {art ? <img className="scene-building" src={art} alt="" draggable="false" /> : <span className="scene-plot-marker" aria-hidden="true" />}
+            <span className="scene-plot-label"><strong>{district.name}</strong><small>{assignment ? assignment.building.name : 'Open plot'}</small></span>
+          </button>
+        )
+      })}
+      <div className="terrain-scene-legend" aria-hidden="true">
+        {mode === 'roads'
+          ? <><span><i className="scene-road-key" /> Paths follow occupied plots</span><span><i className="scene-road-key improved" /> Improved by district works</span></>
+          : <><span>Select a clearing to work in that district</span><span>Buildings occupy stable plots as Rome grows</span></>}
+      </div>
+    </div>
+  )
+}
+
 export function CityMap({ state, onSelectDistrict }) {
   const [mode, setMode] = useState('terrain')
-  const modes = state.era >= 10 ? [...MODES, CAPITAL_MODE] : MODES
+  const [view, setView] = useState('overview')
+  const modes = view === 'overview' && state.era >= 10 ? [...MODES, CAPITAL_MODE] : MODES
   const landmarks = augustanCapitalLandmarks(state)
   const coverage = networkCoverage(state)
   const covered = new Set(coverage[mode] ?? [])
@@ -60,21 +124,32 @@ export function CityMap({ state, onSelectDistrict }) {
     : ['water', 'drainage', 'defense'].includes(mode)
       ? DISTRICT_LINKS.filter(([from, to]) => covered.has(from) && covered.has(to)).map(([from, to]) => ({ from, to }))
       : []
+  const selectView = (nextView) => {
+    setView(nextView)
+    if (nextView === 'hills' && mode === 'capital') setMode('terrain')
+  }
+
   return (
     <section className="city-map-section" aria-labelledby="city-map-title">
       <div className="map-heading">
         <div>
-          <p className="eyebrow">{state.era >= 10 ? 'From the seven hills to an Imperial capital' : 'The seven hills and the river road'}</p>
-          <h2 id="city-map-title">{mode === 'capital' ? 'The Augustan Capital' : state.era >= 7 ? 'Rome' : 'The Settlement'}</h2>
+          <p className="eyebrow">{view === 'hills' ? 'Build the hill communities plot by plot' : state.era >= 10 ? 'From the seven hills to an Imperial capital' : 'The seven hills and the river road'}</p>
+          <h2 id="city-map-title">{view === 'hills' ? 'Palatine and Capitoline' : mode === 'capital' ? 'The Augustan Capital' : state.era >= 7 ? 'Rome' : 'The Settlement'}</h2>
         </div>
-        <div className="map-tools" role="group" aria-label="Map overlay">
-          {modes.map((item) => {
-            const Icon = item.icon
-            return <button type="button" key={item.id} className={mode === item.id ? 'active' : ''} onClick={() => setMode(item.id)} aria-pressed={mode === item.id} title={`${item.label} overlay`}><Icon /><span>{item.label}</span></button>
-          })}
+        <div className="map-control-stack">
+          <div className="map-view-tools" role="group" aria-label="City map view">
+            <button type="button" className={view === 'overview' ? 'active' : ''} onClick={() => selectView('overview')} aria-pressed={view === 'overview'} title="Strategic overview"><MapIcon /><span>Strategic overview</span></button>
+            <button type="button" className={view === 'hills' ? 'active' : ''} onClick={() => selectView('hills')} aria-pressed={view === 'hills'} title="Hill terrain"><Mountain /><span>Hill terrain</span></button>
+          </div>
+          <div className="map-tools" role="group" aria-label="Map overlay">
+            {modes.map((item) => {
+              const Icon = item.icon
+              return <button type="button" key={item.id} className={mode === item.id ? 'active' : ''} onClick={() => setMode(item.id)} aria-pressed={mode === item.id} title={`${item.label} overlay`}><Icon /><span>{item.label}</span></button>
+            })}
+          </div>
         </div>
       </div>
-      <div className={`city-map map-mode-${mode}`} role="group" aria-label={`District map showing ${mode}`}>
+      {view === 'hills' ? <TerrainScene state={state} mode={mode} onSelectDistrict={onSelectDistrict} /> : <div className={`city-map map-mode-${mode}`} role="group" aria-label={`District map showing ${mode}`}>
         <div className="tiber-river" aria-hidden="true"><span>Tiber</span></div>
         <div className="forum-basin" aria-hidden="true" />
         <div className="salt-road road-a" aria-hidden="true" />
@@ -130,7 +205,7 @@ export function CityMap({ state, onSelectDistrict }) {
         <div className="map-legend" aria-hidden="true">
           {mode === 'terrain' ? <><span><i className="legend-hill" /> Hill</span><span><i className="legend-valley" /> Low ground</span><span><i className="legend-river" /> River</span></> : mode === 'capital' ? <><span>Dim: reserved site</span><span>Bright: operating work</span></> : <><span><i className={`legend-network legend-${mode}`} /> {MODES.find((item) => item.id === mode).label} link</span><span>Bright districts are served</span></>}
         </div>
-      </div>
+      </div>}
     </section>
   )
 }

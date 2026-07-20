@@ -159,6 +159,11 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .city-map-section { background: #25271f; border-bottom: 1px solid var(--line); }
 .map-heading { min-height: 64px; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .map-heading > p { color: var(--muted); font-size: 12px; }
+.map-control-stack { display: grid; justify-items: end; gap: 5px; }
+.map-view-tools { display: flex; gap: 3px; }
+.map-view-tools button { min-height: 34px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); background: #20211d; color: var(--muted); cursor: pointer; }
+.map-view-tools button:hover, .map-view-tools button.active { border-color: var(--gold); color: var(--gold); background: #171815; }
+.map-view-tools svg { width: 15px; height: 15px; }.map-view-tools span { font-size: 9px; text-transform: uppercase; }
 .map-tools { display: flex; gap: 3px; }.map-tools button { min-width: 38px; height: 36px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--line); background: #1a1b18; color: var(--muted); cursor: pointer; }.map-tools button:hover, .map-tools button.active { border-color: var(--gold); color: var(--gold); }.map-tools svg { width: 15px; }.map-tools span { font-size: 9px; text-transform: uppercase; }
 .city-map { position: relative; height: clamp(390px, 48vw, 590px); min-height: 390px; overflow: hidden; isolation: isolate; background-color: #4f5b3d; }
 .city-map::before { content: ""; position: absolute; inset: 8% 12%; border: 1px solid #899063; transform: skewY(-8deg) rotate(-2deg); opacity: .45; }
@@ -194,6 +199,28 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .map-legend { position: absolute; right: 14px; bottom: 12px; display: flex; gap: 12px; padding: 7px 9px; background: #171815db; border: 1px solid var(--line); color: var(--muted); font-size: 9px; z-index: 9; }
 .map-legend span { display: flex; align-items: center; gap: 5px; }.map-legend i { width: 13px; height: 8px; display: inline-block; }.legend-hill { background: #68774a; }.legend-valley { background: #65715a; }.legend-river { background: var(--river); }
 .legend-roads { background: #d4c38e; }.legend-water { background: #73afbd; }.legend-drainage { background: #7ead88; }.legend-defense { background: #c98263; }
+
+.terrain-scene { position: relative; isolation: isolate; width: 100%; height: clamp(420px, 50vw, 640px); overflow: hidden; background: #283021; }
+.terrain-scene-background { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; user-select: none; transition: filter .2s ease; }
+.terrain-scene.map-mode-water .terrain-scene-background, .terrain-scene.map-mode-drainage .terrain-scene-background, .terrain-scene.map-mode-defense .terrain-scene-background { filter: brightness(.62) saturate(.72); }
+.scene-road-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.scene-road { position: absolute; display: block; height: 5px; transform-origin: left center; border: 1px solid #635234; background: #ad9362; opacity: .68; box-shadow: 0 2px 2px #17130d88; }
+.scene-road.improved { height: 7px; border-color: #6f6753; background: #b7ac91; box-shadow: inset 0 1px #ded3b8, 0 2px 2px #17130d99; }
+.scene-road.emphasized { opacity: 1; box-shadow: 0 0 0 2px #15130ea8, 0 0 8px #d4b65b88; }
+.scene-gate { position: absolute; z-index: 8; max-width: 120px; transform: translate(-50%, -50%); padding: 4px 6px; border: 1px solid #8f7a49; background: #171815e6; color: #d7c17a; font-size: 8px; text-transform: uppercase; opacity: 0; pointer-events: none; }
+.scene-gate.visible { opacity: 1; }
+.scene-plot { position: absolute; width: 150px; height: 138px; transform: translate(-50%, -70%) scale(var(--scene-scale)); transform-origin: center bottom; border: 0; background: transparent; color: var(--paper); cursor: pointer; }
+.scene-plot::after { content: ""; position: absolute; left: 50%; bottom: 10px; width: 76px; height: 22px; transform: translateX(-50%); border-radius: 50%; background: #15130d66; filter: blur(4px); opacity: 0; transition: opacity .2s ease; }
+.scene-plot.occupied::after { opacity: .78; }
+.scene-building { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(4px 7px 3px #17130daa); pointer-events: none; user-select: none; }
+.scene-plot-marker { position: absolute; left: 50%; bottom: 18px; z-index: 3; width: 74px; height: 34px; transform: translateX(-50%) skewX(-20deg); border: 2px dashed #d9bf6ba8; background: #17181542; box-shadow: 0 0 0 1px #17181599; }
+.scene-plot:hover .scene-plot-marker, .scene-plot:focus-visible .scene-plot-marker, .scene-plot.selected .scene-plot-marker { border-style: solid; border-color: var(--gold); background: #d7ae4d33; }
+.scene-plot:hover .scene-building, .scene-plot:focus-visible .scene-building, .scene-plot.selected .scene-building { filter: drop-shadow(0 0 3px var(--gold)) drop-shadow(4px 7px 3px #17130dcc); }
+.scene-plot-label { position: absolute; left: 50%; bottom: -23px; z-index: 5; min-width: 128px; transform: translateX(-50%); padding: 5px 7px; border: 1px solid #6e6247; background: #171815ed; text-align: center; opacity: 0; transition: opacity .15s ease; }
+.scene-plot:hover .scene-plot-label, .scene-plot:focus-visible .scene-plot-label, .scene-plot.occupied .scene-plot-label { opacity: 1; }
+.scene-plot-label strong, .scene-plot-label small { display: block; }.scene-plot-label strong { font: 600 12px Georgia, serif; }.scene-plot-label small { margin-top: 2px; color: var(--muted); font-size: 8px; }
+.terrain-scene-legend { position: absolute; right: 12px; bottom: 10px; z-index: 110; display: flex; gap: 10px; padding: 7px 9px; border: 1px solid #625b47; background: #171815e8; color: #c7c0ae; font-size: 9px; pointer-events: none; }
+.terrain-scene-legend span { display: flex; align-items: center; gap: 5px; }.scene-road-key { display: inline-block; width: 18px; height: 4px; border: 1px solid #635234; background: #ad9362; }.scene-road-key.improved { height: 6px; border-color: #6f6753; background: #b7ac91; }
 
 .project-ledger { padding: 16px 20px; background: #191a17; border-bottom: 1px solid var(--line); }.project-ledger-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }.project-ledger-heading h2 { margin: 0; font-size: 20px; }.project-ledger-heading > span { display: flex; align-items: center; gap: 6px; color: var(--gold); font-size: 10px; text-transform: uppercase; }.project-ledger-heading svg { width: 15px; }
 .project-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 12px; }.project-list article { padding: 12px; border: 1px solid var(--line); background: #23241f; }.project-title { display: flex; justify-content: space-between; gap: 8px; }.project-title strong { font-family: Georgia, serif; font-size: 13px; }.project-title span { color: var(--muted); font-size: 9px; }.project-progress { height: 7px; margin: 10px 0 6px; background: #35362f; }.project-progress i { display: block; height: 100%; background: var(--gold); }.project-status { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 9px; color: var(--muted); font-size: 9px; }.project-status span { display: inline-flex; align-items: center; gap: 4px; }.project-status svg { width: 11px; }.project-list .secondary-button { width: 100%; min-height: 34px; font-size: 10px; }.project-list .secondary-button svg { width: 13px; }
@@ -386,7 +413,12 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
   .topbar { position: static; min-height: 76px; padding: 12px; gap: 8px; }.brand-mark { width: 42px; height: 42px; font-size: 10px; }.brand-block h1 { font-size: 20px; }.series-name { font-size: 9px; }.top-actions { gap: 4px; }.icon-button { width: 35px; height: 35px; }
   .game-layout { display: flex; flex-direction: column; }.game-center { order: 1; }.decision-rail { order: 2; display: block; }.civic-rail { order: 3; display: block; }
   .campaign-strip { grid-template-columns: 1fr auto; gap: 10px; }.campaign-strip .progress-track { grid-column: 1 / -1; grid-row: 2; }.context-button { grid-column: 2; grid-row: 1; }
-  .city-map { height: 500px; min-height: 500px; }.map-heading { align-items: flex-start; flex-direction: column; }.map-tools { width: 100%; overflow-x: auto; }.map-tools button { flex: 1 0 38px; }.map-tools span { display: none; }.district { width: 135px; height: 100px; transform: translate(-50%, -50%) scale(.78); }.district-label { min-width: 110px; }.map-legend { display: none; }
+  .city-map { height: 500px; min-height: 500px; }.map-heading { align-items: flex-start; flex-direction: column; }.map-control-stack { width: 100%; justify-items: stretch; }.map-view-tools, .map-tools { width: 100%; overflow-x: auto; }.map-view-tools button { flex: 1 0 128px; min-height: 42px; }.map-tools button { flex: 1 0 42px; min-height: 42px; }.map-tools span { display: none; }.district { width: 135px; height: 100px; transform: translate(-50%, -50%) scale(.78); }.district-label { min-width: 110px; }.map-legend { display: none; }
+  .terrain-scene { height: min(76vw, 520px); min-height: 360px; }
+  .scene-plot { width: 128px; height: 118px; }
+  .scene-plot-marker { width: 64px; height: 30px; }
+  .scene-plot-label { min-width: 116px; bottom: -18px; }
+  .terrain-scene-legend { left: 8px; right: 8px; bottom: 7px; justify-content: center; }
   .build-dock { display: block; }.selected-work { border-right: 0; border-bottom: 1px solid var(--line); }.building-catalog { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }.building-choice { flex: 0 0 125px; scroll-snap-align: start; }.build-action { display: block; border-left: 0; }.build-action .primary-button { width: 100%; margin: 12px 0; }
   .building-inspector { display: block; }.inspector-list, .inspector-detail { padding: 16px; }.work-list button { flex-basis: 175px; }.inspector-actions { display: grid; grid-template-columns: repeat(3, 1fr); }.inspector-actions button { padding: 0 5px; font-size: 11px; }
   .council-options button { min-height: 88px; }.civic-rail section { border-right: 0; }
@@ -433,6 +465,12 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
   .home-chronology strong { font-size: 8px; }
   .brand-mark { display: none; }.top-actions .desktop-action, .top-actions .mobile-optional { display: none; }
   .campaign-strip strong { font-size: 14px; }.city-map { height: 470px; min-height: 470px; }.district { width: 118px; transform: translate(-50%, -50%) scale(.7); }.district-label { bottom: -11px; }
+  .map-view-tools button { flex-basis: 116px; padding-inline: 7px; }.map-view-tools span { font-size: 8px; }
+  .terrain-scene { height: 390px; min-height: 390px; }
+  .terrain-scene-background { object-position: 51% center; }
+  .scene-plot { width: 112px; height: 103px; }
+  .scene-plot-label { min-width: 108px; }.scene-plot-label strong { font-size: 10px; }
+  .terrain-scene-legend { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

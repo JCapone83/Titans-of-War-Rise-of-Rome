@@ -160,3 +160,15 @@ Future maps, music, generated art, or public-domain historical material must be 
 - SHA-256: `70c80ee1ff51865fdd64dc2a9a43f527ffc1215dba4e06b65083cd109a30397e`
 
 The image is interface background art rather than archaeological evidence. It must not be presented as a reconstruction of one documented view or named event.
+
+## Playable terrain artwork
+
+### Palatine and Capitoline hill terrain
+
+- File: `public/images/scenes/palatine-capitoline-terrain-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Rights basis: Original game artwork produced for this project; no source photograph is embedded or redistributed.
+- Historical scope: An interpretive natural-terrain view of hill clearings near the Tiber before dense urban construction. The clearings and paths are composed for strategy play rather than claimed as a surveyed eighth-century BC plan.
+- SHA-256: `ae620a3716a3dbb8dce026317e0155a865e94ad1de085004d1e2217eb32c3515`
+
+This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. Buildings remain separate project-authored assets layered by the game.

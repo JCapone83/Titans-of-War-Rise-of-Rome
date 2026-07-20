@@ -98,6 +98,12 @@ The game opens on a full campaign home rather than dropping the player into an a
 
 Use the Home control in the campaign toolbar to return to the home screen without changing or silently saving the current simulation. Historical Method, Credits and Rights, and the opt-in Music control are available before entering play.
 
+## Playable Terrain
+
+The city map now includes a **Hill terrain** view for the Palatine and Capitoline alongside the complete **Strategic overview**. Buildings constructed in either hill district occupy stable clearings in the realistic terrain scene; selecting an open or occupied plot selects that district for the existing construction workflow. The overview remains the default and retains access to all six districts and every infrastructure overlay.
+
+Paths in the hill scene connect occupied plots to their district approach. They appear as compacted earth until existing district road service is improved through the same market and defensive works already used by the simulation. This terrain layer does not create a second currency, construction action, or save format.
+
 ## Soundtrack
 
 Birth of Rome includes an opt-in, self-hosted six-track classical soundtrack. Open the music control in the campaign header to see the recording recommended for the current era, select another recording, adjust volume, or mute playback. No music plays until the player presses Play, and every recording includes a direct source-and-rights link. All audio is served from the installed game; playback requires no account, model, API, or internet connection.

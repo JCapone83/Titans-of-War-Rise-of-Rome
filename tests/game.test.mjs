@@ -12,6 +12,7 @@ import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCa
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, TRAJANIC_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, artForTrajanicProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
+import { assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../src/game/romeScenes.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
@@ -40,6 +41,49 @@ test('home screen recognizes in-memory campaign progress', () => {
   assert.equal(hasCampaignProgress({ ...initial, turn: 2 }), true)
   assert.equal(hasCampaignProgress({ ...initial, buildings: [{ instanceId: 'hut' }] }), true)
   assert.equal(hasCampaignProgress({ ...initial, choiceLog: [{ turn: 1, optionId: 'a' }] }), true)
+})
+
+test('terrain scene assigns Palatine and Capitoline buildings deterministically', () => {
+  const state = createInitialState()
+  state.buildings = [
+    { instanceId: 'p-1', districtId: 'palatine', buildingId: 'palatine-huts', name: 'Palatine Huts', familyId: 'housing', tier: 1, condition: 100 },
+    { instanceId: 'f-1', districtId: 'forum', buildingId: 'forum-market', name: 'Forum Market', familyId: 'market', tier: 1, condition: 100 },
+    { instanceId: 'p-2', districtId: 'palatine', buildingId: 'shallow-well', name: 'Shallow Well', familyId: 'water', tier: 1, condition: 100 },
+    { instanceId: 'c-1', districtId: 'capitoline', buildingId: 'timber-shrine', name: 'Timber Shrine', familyId: 'shrine', tier: 1, condition: 100 },
+  ]
+  const scene = sceneForId('palatine-capitoline')
+  const first = assignBuildingsToScene(state, scene.id)
+  const second = assignBuildingsToScene(state, scene.id)
+
+  assert.equal(scene.plots.length, 8)
+  assert.deepEqual(first.map((item) => item.building.instanceId), ['p-1', 'p-2', 'c-1'])
+  assert.equal(new Set(first.map((item) => item.plot.id)).size, first.length)
+  assert.deepEqual(second, first)
+  assert.equal(state.buildings.length, 4)
+  assert.equal(districtGate(scene, 'palatine').id, 'palatine-gate')
+  assert.equal(districtGate(scene, 'forum'), null)
+})
+
+test('terrain scene road links connect occupied plots to district gates', () => {
+  const state = createInitialState()
+  state.buildings = [
+    { instanceId: 'p-1', districtId: 'palatine', buildingId: 'palatine-huts', name: 'Palatine Huts', familyId: 'housing', tier: 1, condition: 100 },
+    { instanceId: 'c-1', districtId: 'capitoline', buildingId: 'timber-shrine', name: 'Timber Shrine', familyId: 'shrine', tier: 1, condition: 100 },
+  ]
+  const plain = roadLinksForScene(state, 'palatine-capitoline')
+  assert.ok(plain.some((link) => link.to.id === 'palatine-gate'))
+  assert.ok(plain.some((link) => link.to.id === 'capitoline-gate'))
+  assert.equal(new Set(plain.map((link) => link.id)).size, plain.length)
+  assert.ok(plain.every((link) => link.improved === false))
+
+  const improved = roadLinksForScene({
+    ...state,
+    buildings: [
+      ...state.buildings,
+      { instanceId: 'p-2', districtId: 'palatine', buildingId: 'forum-market', name: 'Improved Market', familyId: 'market', tier: 2, condition: 100 },
+    ],
+  }, 'palatine-capitoline')
+  assert.ok(improved.filter((link) => link.districtId === 'palatine').every((link) => link.improved))
 })
 
 test('soundtrack catalog contains six self-hosted verified recordings', () => {
