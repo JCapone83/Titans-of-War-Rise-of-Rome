@@ -163,6 +163,23 @@ def main() -> None:
     require("scripts/run-balance.mjs", "Act VIII Republic Under Strain strategies")
     require("src/game/historicalContext.js", "rubicon-threshold")
     require("src/game/data.js", "CIVIL_SETTLEMENT_PROJECTS")
+    require("src/game/projectArt.js", "CIVIL_SETTLEMENT_PROJECT_ART")
+    require("src/game/projectArt.js", "civilSettlementProjectStage")
+    require("src/game/projectArt.js", "Reserved site")
+    require("src/game/projectArt.js", "Foundations and service")
+    require("src/game/projectArt.js", "Structural shell")
+    require("src/game/projectArt.js", "Operating form")
+    require("src/game/projectArt.js", "forum-of-caesar-v1.png")
+    require("src/game/projectArt.js", "curia-julia-v1.png")
+    require("src/game/projectArt.js", "basilica-julia-v1.png")
+    require("src/game/projectArt.js", "veteran-land-road-registry-v1.png")
+    for project_id, asset in {
+        "caesarianForum": "public/images/projects/forum-of-caesar-v1.png",
+        "curiaJulia": "public/images/projects/curia-julia-v1.png",
+        "basilicaJulia": "public/images/projects/basilica-julia-v1.png",
+        "veteranLandRoadRegistry": "public/images/projects/veteran-land-road-registry-v1.png",
+    }.items():
+        require_rgba_png(asset)
     require("src/game/data.js", "Settlement of 27 BC")
     require("src/game/initialState.js", "createCivilSettlementState")
     require("src/game/continuation.js", "continueToCivilSettlement")

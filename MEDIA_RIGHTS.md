@@ -38,4 +38,15 @@ Their retained chroma masters and concept sheets are stored in `docs/art_concept
 
 These images are historically informed game interpretations, not reproductions of excavated structures or archaeological evidence. The uncertainty and rejection criteria behind each interpretation are documented in `docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md` and `docs/BATCH_5_STRUCTURE_CONCEPT_BIBLE.md`.
 
+## Act IX project art
+
+The following four transparent PNG assets were produced with the built-in OpenAI image-generation tool under project-authored direction on July 19, 2026. They are visual production assets, not archaeological evidence:
+
+- `public/images/projects/forum-of-caesar-v1.png` — Evidence-led reconstruction
+- `public/images/projects/curia-julia-v1.png` — Evidence-led reconstruction
+- `public/images/projects/basilica-julia-v1.png` — Evidence-led reconstruction
+- `public/images/projects/veteran-land-road-registry-v1.png` — Game abstraction
+
+The evidence-status labels describe the design treatment used for the game presentation and do not establish provenance or certainty for the generated imagery. The files are retained under the project repository and use the same project license and provenance conditions as the building art above.
+
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

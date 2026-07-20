@@ -9,6 +9,7 @@ import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrateg
 import { continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
+import { CIVIL_SETTLEMENT_PROJECT_ART, artForCivilSettlementProject, civilSettlementProjectStage } from '../src/game/projectArt.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -1245,4 +1246,24 @@ test('three Act IX strategies reach 27 BC with distinct viable operating settlem
 
 test('historical context covers the complete Civil War and Settlement act', () => {
   for (const turn of [49, 50, 51, 52, 53, 54]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)), `missing historical context for turn ${turn}`)
+})
+
+test('every Civil Settlement work has project art', () => {
+  assert.deepEqual(Object.keys(CIVIL_SETTLEMENT_PROJECT_ART).sort(), Object.keys(CIVIL_SETTLEMENT_PROJECTS).sort())
+  for (const [id, definition] of Object.entries(CIVIL_SETTLEMENT_PROJECTS)) {
+    const art = artForCivilSettlementProject(id)
+    assert.match(art.src, /^\/images\/projects\/.+-v1\.png$/)
+    assert.ok(art.alt.length >= 30)
+    assert.ok(['Evidence-led reconstruction', 'Game abstraction'].includes(art.evidence))
+    assert.equal(civilSettlementProjectStage({ progress: 0, completed: false }, definition).key, 'reserved')
+    assert.equal(civilSettlementProjectStage({ progress: definition.seasons, completed: true }, definition).key, 'operating')
+  }
+})
+
+test('Civil Settlement construction stages use explicit three- and four-stage boundaries', () => {
+  assert.equal(civilSettlementProjectStage({ progress: 1 }, CIVIL_SETTLEMENT_PROJECTS.caesarianForum).key, 'foundations')
+  assert.equal(civilSettlementProjectStage({ progress: 2 }, CIVIL_SETTLEMENT_PROJECTS.caesarianForum).key, 'structure')
+  assert.equal(civilSettlementProjectStage({ progress: 2 }, CIVIL_SETTLEMENT_PROJECTS.basilicaJulia).key, 'foundations')
+  assert.equal(civilSettlementProjectStage({ progress: 3 }, CIVIL_SETTLEMENT_PROJECTS.basilicaJulia).key, 'structure')
+  assert.equal(civilSettlementProjectStage({ progress: 4, completed: true }, CIVIL_SETTLEMENT_PROJECTS.basilicaJulia).key, 'operating')
 })
