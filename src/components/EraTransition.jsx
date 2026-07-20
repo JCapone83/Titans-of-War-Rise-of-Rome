@@ -57,6 +57,13 @@ const CONTENT = {
     unlocks: ['Constitutional ledger', 'Dated civic works', 'Command and demobilization risk'],
     action: 'Enter the late Republic',
   },
+  settlement: {
+    eyebrow: '49 BC - the threshold becomes civil war',
+    title: 'Civil War and Settlement',
+    text: 'Competing commands now carry armies, provinces, debts, veterans, and political guarantees into war. Victory can unify force; it cannot by itself restore courts, titles, public provision, or a lawful succession.',
+    unlocks: ['Operating settlement ledger', 'Caesarian civic works', 'Multiple constitutional outcomes'],
+    action: 'Enter the civil war',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

@@ -1,6 +1,6 @@
 # Titans of War: Birth of Rome - Grand Build Roadmap
 
-**Purpose:** This is the canonical execution plan for taking *Birth of Rome* from its current two-act vertical slice to a complete historical city-building strategy game covering 753-264 BC.
+**Purpose:** This is the canonical execution record for *Birth of Rome*, now covering 753-27 BC through a complete mechanics-first campaign. The 264 BC core remains a frozen judgment; Mediterranean, metropolitan, late-Republic, and civil-settlement acts remain explicit opt-in continuations.
 
 **Rule:** Work from the top of the Immediate Queue. Do not begin a later milestone because it is visually attractive while an earlier completion gate is still open.
 
@@ -15,7 +15,16 @@
 
 ## Immediate Queue
 
-These are the next five executable steps, in order.
+These are the current executable steps, in order.
+
+- [x] Complete Act VIII, Republic Under Strain, through the 49 BC civil-war threshold.
+- [x] Complete Act IX, Civil War and Settlement, through three viable operating forms at 27 BC.
+- [x] Add save-schema version 13, six historical context notes, chronicle export, and deterministic Act IX strategies.
+- [x] Verify all three Act IX routes without skipped decisions or project actions.
+- [x] Complete production build, desktop/mobile browser QA, and independent governed acceptance.
+- [ ] Promote the verified Act IX candidate only after human approval.
+
+Earlier milestone checklists below are retained as an implementation record. Some unchecked planning lines are superseded by later verified work and should not be read as current release status.
 
 - [x] Add a household and population model tied to food, water, shelter, health, and district capacity.
 - [x] Separate available labor from seasonal public-works capacity so military service, farming, and construction compete for people.
@@ -57,7 +66,7 @@ The player should feel three scales operating at once:
 ## Locked Design Decisions
 
 - [x] Campaign scope begins with the foundation tradition in 753 BC.
-- [x] Campaign scope ends in 264 BC, before the First Punic War becomes the game's central subject.
+- [x] The core campaign judgment remains at 264 BC; four explicit opt-in continuations extend the represented campaign to the settlement of 27 BC.
 - [x] The first two acts are **Hill Settlements** and **City of Kings**.
 - [x] Later acts are **The Early Republic**, **Sack and Reconstruction**, and **Roads to Italy**.
 - [x] The game remains fully playable without AI, an account, or a remote service.

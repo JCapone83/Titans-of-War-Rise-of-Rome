@@ -1,5 +1,5 @@
 import { getCouncil } from './data.js'
-import { createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
+import { createCivilSettlementState, createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
 import { calculateOutcome } from './outcomes.js'
 
 export function freezeCoreJudgment(state) {
@@ -194,6 +194,41 @@ export function enterRepublicUnderStrain(state) {
     nextWorksBonus: 0,
     selectedBuildingId: null,
     council: getCouncil(42),
+    councilResolved: false,
+  }
+}
+
+export function continueToCivilSettlement(state) {
+  if (state.turn !== 48 || state.outcome !== 'republic-strain-complete' || state.settlementTransition) return state
+  return { ...state, settlementTransition: true }
+}
+
+export function enterCivilSettlement(state) {
+  if (!state.settlementTransition || state.turn !== 48 || state.outcome !== 'republic-strain-complete') return state
+  const bridgeExists = (state.chronologyBridges ?? []).some((bridge) => bridge.id === 'rubicon-to-civil-war')
+  const bridge = {
+    id: 'rubicon-to-civil-war',
+    fromYear: 49,
+    toYear: 49,
+    mediterraneanChanges: {},
+    notes: [
+      'The constitutional threshold and the opening civil-war decision occur in the same year; the bridge records an explicit player choice to continue rather than an elapsed interval.',
+      'Every inherited city, compact, account, public work, burden, judgment, and decision remains part of the settlement problem.',
+    ],
+  }
+  return {
+    ...state,
+    version: 13,
+    turn: 49,
+    era: 9,
+    outcome: null,
+    settlementTransition: false,
+    civilSettlement: state.civilSettlement ?? createCivilSettlementState(),
+    chronologyBridges: bridgeExists ? state.chronologyBridges : [...(state.chronologyBridges ?? []), bridge],
+    actionsUsed: 0,
+    nextWorksBonus: 0,
+    selectedBuildingId: null,
+    council: getCouncil(49),
     councilResolved: false,
   }
 }

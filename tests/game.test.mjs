@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
-import { BUILDING_FAMILIES, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
-import { calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
+import { createCivilSettlementState, createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
+import { BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, getCouncil } from '../src/game/data.js'
+import { __test, advanceTurn, allocateWorkforce, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
+import { calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
-import { continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { existsSync } from 'node:fs'
@@ -346,7 +346,7 @@ test('version three saves remove legacy labor and gain workforce and projects', 
   delete old.workforceAllocation
   delete old.projects
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal('labor' in migrated.resources, false)
   assert.equal(Object.values(migrated.workforceAllocation).reduce((sum, value) => sum + value, 0), 100)
   assert.deepEqual(migrated.projects, [])
@@ -358,7 +358,7 @@ test('version one saves migrate to the current population state', () => {
   delete old.actionsMax
   delete old.actionLog
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.actionsMax, 2)
   assert.deepEqual(migrated.actionLog, [])
   assert.equal(migrated.population.total, 1030)
@@ -368,7 +368,7 @@ test('version two saves retain mechanics while gaining population', () => {
   const old = { ...createInitialState(), version: 2, actionsUsed: 1, actionLog: [{ type: 'build' }] }
   delete old.population
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.actionsUsed, 1)
   assert.equal(migrated.actionLog.length, 1)
   assert.equal(migrated.population.districts.palatine, 450)
@@ -559,7 +559,7 @@ test('three Act III reference strategies complete cleanly at C or better', () =>
 
 test('a completed version four campaign migrates to a resumable republic transition', () => {
   const migrated = migrateState({ ...createInitialState(), version: 4, turn: 10, era: 1, outcome: 'complete' })
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.outcome, 'acts-complete')
   assert.equal(migrated.republicTransition, true)
   assert.equal(enterEarlyRepublic(migrated).turn, 11)
@@ -608,7 +608,7 @@ test('Tier IV works remain locked until reconstruction', () => {
 test('a version five save completed at turn sixteen opens reconstruction', () => {
   const saved = { ...createInitialState(), version: 5, era: 2, turn: 16, republic: createRepublicState(), war: createWarState(), outcome: 'complete' }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.outcome, 'act-three-complete')
   assert.equal(migrated.reconstructionTransition, true)
 })
@@ -715,7 +715,7 @@ test('version seven regional completion migrates to the Italian transition', () 
     italianTransition: undefined,
   }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.outcome, 'regional-complete')
   assert.equal(migrated.italianTransition, true)
   assert.equal(migrated.turn, 23)
@@ -915,7 +915,7 @@ test('turn thirty-two opens a visible bridge without exposing the final outcome'
 test('version nine Mediterranean endpoint migrates to the Hannibalic bridge', () => {
   const old = { ...mediterraneanOpeningEndpoint(), version: 9, outcome: 'mediterranean-complete', hannibalicTransition: undefined }
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.turn, 32)
   assert.equal(migrated.outcome, 'mediterranean-opening-complete')
   assert.equal(migrated.hannibalicTransition, true)
@@ -1128,7 +1128,7 @@ test('completed late-Republic works add visible recurring burdens', () => {
 test('version 11 late-Republic saves migrate missing ledgers and projects', () => {
   const saved = { ...createInitialState(), version: 11, era: 8, turn: 45, republicStrain: { archiveIntegrity: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 12)
+  assert.equal(migrated.version, 13)
   assert.equal(migrated.republicStrain.archiveIntegrity, 63)
   assert.deepEqual(Object.keys(migrated.republicStrain.projects), Object.keys(REPUBLIC_STRAIN_PROJECTS))
 })
@@ -1152,4 +1152,97 @@ test('three Act VIII strategies reach 49 BC with distinct viable settlements', (
 
 test('historical context covers the complete Republic Under Strain act', () => {
   for (const turn of [42, 43, 44, 45, 46, 47, 48]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)), `missing historical context for turn ${turn}`)
+})
+
+test('Act IX starts only through the explicit same-year 49 BC bridge', () => {
+  const completed = runAllRepublicStrainStrategies()[0].state
+  assert.equal(completed.turn, 48)
+  assert.equal(completed.outcome, 'republic-strain-complete')
+  assert.equal(enterCivilSettlement(completed), completed)
+  const pending = continueToCivilSettlement(completed)
+  assert.equal(pending.settlementTransition, true)
+  assert.equal(pending.outcome, 'republic-strain-complete')
+  const entered = enterCivilSettlement(pending)
+  assert.equal(entered.version, 13)
+  assert.equal(entered.turn, 49)
+  assert.equal(entered.era, 9)
+  assert.equal(entered.outcome, null)
+  assert.equal(entered.council.id, 'caesars-emergency')
+  assert.equal(entered.choiceLog.length, completed.choiceLog.length)
+  assert.ok(entered.chronologyBridges.some((bridge) => bridge.id === 'rubicon-to-civil-war' && bridge.fromYear === 49 && bridge.toYear === 49))
+})
+
+test('civil-settlement works enforce prerequisites and shared seasonal crews', () => {
+  const completed = runAllRepublicStrainStrategies()[0].state
+  let state = enterCivilSettlement(continueToCivilSettlement(completed))
+  state = { ...state, resources: { grain: 100, timber: 100, stone: 100, bronze: 100, treasury: 100 }, actionsMax: 4 }
+  assert.equal(civilSettlementProjectAvailability(state, 'curiaJulia').available, false)
+  assert.match(civilSettlementProjectAvailability({ ...state, turn: 51 }, 'curiaJulia').reason, /Forum of Caesar precinct/)
+  const worked = workCivilSettlementProject(state, 'caesarianForum')
+  assert.equal(worked.state.civilSettlement.projects.caesarianForum.progress, 1)
+  assert.equal(worked.state.actionsUsed, 1)
+  assert.equal(civilSettlementProjectAvailability(worked.state, 'caesarianForum').available, false)
+  assert.match(civilSettlementProjectAvailability(worked.state, 'caesarianForum').reason, /shared crews/)
+  const completedForum = {
+    ...worked.state,
+    turn: 51,
+    actionsUsed: 0,
+    civilSettlement: {
+      ...worked.state.civilSettlement,
+      projects: {
+        ...worked.state.civilSettlement.projects,
+        caesarianForum: { ...worked.state.civilSettlement.projects.caesarianForum, progress: 3, completed: true, lastWorkedTurn: 50 },
+      },
+    },
+  }
+  assert.equal(civilSettlementProjectAvailability(completedForum, 'curiaJulia').available, true)
+})
+
+test('completed civil-settlement works expose visible recurring burdens', () => {
+  const projects = Object.fromEntries(Object.keys(CIVIL_SETTLEMENT_PROJECTS).map((id) => [id, { id, progress: 0, requiredSeasons: CIVIL_SETTLEMENT_PROJECTS[id].seasons, completed: id === 'caesarianForum', lastWorkedTurn: null }]))
+  const state = { ...createInitialState(), era: 9, turn: 53, civilSettlement: { ...createCivilSettlementState(), projects } }
+  const forecast = civilSettlementForecast(state)
+  assert.deepEqual(forecast.publicWorks.completed, ['caesarianForum'])
+  assert.equal(forecast.resourceDelta.treasury, -3)
+  assert.equal(forecast.changes.personalMonumentalCredit, 1)
+})
+
+test('version 12 civil-settlement saves migrate missing ledgers and projects', () => {
+  const saved = { ...createInitialState(), version: 12, era: 9, turn: 51, civilSettlement: { archiveContinuity: 63 } }
+  const migrated = migrateState(saved)
+  assert.equal(migrated.version, 13)
+  assert.equal(migrated.civilSettlement.archiveContinuity, 63)
+  assert.deepEqual(Object.keys(migrated.civilSettlement.projects), Object.keys(CIVIL_SETTLEMENT_PROJECTS))
+})
+
+test('every Act IX turn offers three materially distinct council choices', () => {
+  for (const turn of [49, 50, 51, 52, 53, 54]) {
+    const council = getCouncil(turn)
+    assert.ok(council, `missing council for turn ${turn}`)
+    assert.equal(council.options.length, 3, `turn ${turn} must offer three choices`)
+    assert.equal(new Set(council.options.map((option) => option.id)).size, 3)
+  }
+})
+
+test('three Act IX strategies reach 27 BC with distinct viable operating settlements', () => {
+  const results = runAllCivilSettlementStrategies()
+  const expectedForms = new Set(['Augustan-Style Principate', 'Negotiated Republican Restoration', 'Collegial Military Oligarchy'])
+  assert.equal(results.length, 3)
+  assert.deepEqual(new Set(results.map((result) => result.civilScore.operatingForm)), expectedForms)
+  assert.equal(new Set(results.map((result) => Object.entries(result.state.civilSettlement.projects).filter(([, project]) => project.progress > 0).map(([id]) => id).sort().join(','))).size, 3)
+  for (const result of results) {
+    assert.equal(result.state.turn, 54)
+    assert.equal(result.state.outcome, 'civil-settlement-complete')
+    assert.equal(result.state.choiceLog.length, 49)
+    assert.equal(result.skipped.length, 0, JSON.stringify(result.skipped))
+    assert.ok(result.civilScore.score >= 60, `${result.strategy.name}: ${result.civilScore.score}`)
+    assert.ok(result.outcome.overall >= 60, `${result.strategy.name}: ${result.outcome.overall}`)
+    assert.doesNotMatch(result.outcome.summary, /as a augustan/i)
+    assert.match(campaignMarkdown(result.state), /Civil War and Settlement/)
+    assert.match(campaignMarkdown(result.state), /Operating form/)
+  }
+})
+
+test('historical context covers the complete Civil War and Settlement act', () => {
+  for (const turn of [49, 50, 51, 52, 53, 54]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)), `missing historical context for turn ${turn}`)
 })

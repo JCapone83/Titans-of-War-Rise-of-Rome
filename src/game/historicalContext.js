@@ -204,6 +204,36 @@ export const HISTORICAL_NOTES = [
     text: 'The final crisis joined command duration, prosecution risk, candidacy, Senate procedure, Pompey\'s position, Caesar\'s army, and fear of renewed disorder. No single slogan explains the crossing. The game stops at the boundary so a civil-war outcome is not smuggled into the choice itself.',
     evidence: 'Caesar, Civil War 1.1-32; Cicero, Letters to Atticus 7 and Letters to Friends 16; Appian, Civil Wars 2.25-40; Plutarch, Caesar and Pompey; Cassius Dio 41. Caesar is a participant defending his conduct, Cicero writes amid uncertainty, and the connected narratives are later.',
   },
+  {
+    id: 'civil-war-opening', title: 'Civil War Was a Command and Guarantee Crisis', category: 'Participant advocacy + contemporary correspondence', turns: [49],
+    text: 'The crossing into Italy did not erase the preceding dispute over commands, candidacy, prosecution, provincial authority, and Pompey\'s position. Municipal choices, army loyalty, treasury access, grain, and credible guarantees determined whether either side could convert a constitutional claim into operating authority.',
+    evidence: 'Caesar, Civil War 1; Cicero, Letters to Atticus 7-9 and Letters to Friends 16; Caesar\'s account defends his own case, while Cicero records changing information, fear, and divided judgment. Appian, Plutarch, and Cassius Dio provide later connected narratives that should not overwrite the contemporary uncertainty.',
+  },
+  {
+    id: 'caesarian-civic-core', title: 'Caesar\'s Forum and the Price of Civic Capacity', category: 'Archaeology + literary and inscriptional context', turns: [50],
+    text: 'The Forum of Caesar and Basilica Julia expanded courts, business, circulation, and public display. They also tied land acquisition, dedication, and urban reorganization to Caesar\'s command, wealth, and lineage. New capacity and personal power were not opposing descriptions of the same project.',
+    evidence: 'Cicero, Letters to Atticus 4.16 for expensive forum acquisition; Caesar-era and Augustan building evidence in the Forum Romanum and Forum of Caesar; Vitruvius 5 for basilica form used cautiously. Surviving fabric includes later repair, and acquisition details remain incomplete.',
+  },
+  {
+    id: 'ides-succession', title: 'The Ides Removed a Dictator, Not His Obligations', category: 'Contemporary intervention + later narrative', turns: [51],
+    text: 'Caesar\'s death left laws, offices, provincial assignments, debts, veterans, promised lands, and armed followers in place. Amnesty and ratification could preserve continuity, but no accepted succession rule determined who controlled the Caesarian coalition or enforced the settlement.',
+    evidence: 'Cicero, Philippics and Letters to Atticus 14-16; Nicolaus of Damascus, Life of Augustus; Appian, Civil Wars 2-3; Plutarch, Caesar, Brutus, and Antony; Suetonius, Julius Caesar. Cicero is an active partisan, and the fuller narratives are later and shaped by known outcomes.',
+  },
+  {
+    id: 'triumviral-extraction', title: 'War Finance, Proscription, and Italian Land', category: 'Ancient narrative + local and material evidence', turns: [52],
+    text: 'The triumvirs needed money, soldiers, and land faster than ordinary processes could supply them. Proscriptions and confiscations financed command and settled veterans while damaging title security, municipal order, and the independence of courts and records. The burden varied by community and claimant.',
+    evidence: 'Appian, Civil Wars 4-5; Cassius Dio 47-48; Plutarch, Antony, Brutus, and Cicero; inscriptions, colonial evidence, and Augustan land-survey traditions. Lists, totals, and individual stories vary, but the fiscal and territorial structure is secure.',
+  },
+  {
+    id: 'actium-demobilization', title: 'Actium Ended Rival Command, Not the Settlement Work', category: 'Augustan representation + later histories', turns: [53],
+    text: 'Actium decided the final struggle between command coalitions, fleets, provinces, and client rulers. The victor still had to discharge or retain armies, settle veterans, assign provinces, restore credit, and present a Roman civil victory as a durable peace.',
+    evidence: 'Augustus, Res Gestae 1-3 and 25; Virgil and Horace as contemporary public representation rather than operational records; Plutarch, Antony; Cassius Dio 50-51; archaeological and naval evidence. Augustan memory sharpened the foreign character of a conflict rooted in Roman civil war.',
+  },
+  {
+    id: 'settlement-27', title: 'Restored Forms and Operating Power in 27 BC', category: 'Inscriptional self-account + institutional reconstruction', turns: [54],
+    text: 'The settlement called a restoration preserved consuls, magistrates, Senate business, courts, and assemblies while concentrating provinces, armies, honors, fiscal means, and public obligations around Augustus. The arrangement developed further after 27 BC; one date did not produce the finished principate.',
+    evidence: 'Augustus, Res Gestae 34; the Fasti, coin legends, honors, provincial assignments, and later legal evidence; Cassius Dio 53 supplies a much later constitutional narrative. Modern labels such as principate summarize an operating pattern and should not be mistaken for an ancient founding statute.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

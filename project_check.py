@@ -66,6 +66,7 @@ def main() -> None:
         "docs/ACT_V_BALANCE_REPORT.md": "Appian Persistence",
         "docs/ACT_VII_OPENING_BALANCE_REPORT.md": "200-133 BC",
         "docs/ACT_VIII_BALANCE_REPORT.md": "133-49 BC",
+        "docs/ACT_IX_BALANCE_REPORT.md": "49-27 BC",
         "docs/ART_DIRECTION_AND_ASSET_SPEC.md": "Approve one Palatine Huts master first",
         "docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md": "Palatine Huts",
         "docs/BATCH_5_STRUCTURE_CONCEPT_BIBLE.md": "Comitium",
@@ -161,6 +162,19 @@ def main() -> None:
     require("src/game/referenceStrategies.js", "runAllRepublicStrainStrategies")
     require("scripts/run-balance.mjs", "Act VIII Republic Under Strain strategies")
     require("src/game/historicalContext.js", "rubicon-threshold")
+    require("src/game/data.js", "CIVIL_SETTLEMENT_PROJECTS")
+    require("src/game/data.js", "Settlement of 27 BC")
+    require("src/game/initialState.js", "createCivilSettlementState")
+    require("src/game/continuation.js", "continueToCivilSettlement")
+    require("src/game/continuation.js", "enterCivilSettlement")
+    require("src/game/simulation.js", "civilSettlementForecast")
+    require("src/game/simulation.js", "workCivilSettlementProject")
+    require("src/game/outcomes.js", "calculateCivilSettlementScore")
+    require("src/components/CivilSettlementPanel.jsx", "Operating settlement")
+    require("src/components/CivilSettlementWorksPanel.jsx", "Settlement works")
+    require("src/game/referenceStrategies.js", "runAllCivilSettlementStrategies")
+    require("scripts/run-balance.mjs", "Act IX Civil War and Settlement strategies")
+    require("src/game/historicalContext.js", "settlement-27")
     require("src/game/data.js", "first-secession")
     require("src/game/data.js", "veii-settlement")
     require("src/game/data.js", "gallic-approach")

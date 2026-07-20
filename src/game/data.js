@@ -62,9 +62,16 @@ export const ERAS = [
     turns: [42, 48],
     summary: 'Test whether land, citizenship, courts, assemblies, and military command can be revised without making emergency power permanent.',
   },
+  {
+    id: 'civil-war-settlement',
+    name: 'Civil War and Settlement',
+    span: '49-27 BC',
+    turns: [49, 54],
+    summary: 'End competing commands, settle armies and debts, and determine which institutions can operate after victory without disguising personal rule as ordinary office.',
+  },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27]
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -223,6 +230,49 @@ export const REPUBLIC_STRAIN_PROJECTS = {
     upkeepResources: { treasury: -1 },
     upkeepStrain: { urbanFireResponse: 1 },
     burdenLabel: 'Night patrols, equipment, water access, and accountable local command require recurring service.',
+  },
+}
+
+export const CIVIL_SETTLEMENT_PROJECTS = {
+  caesarianForum: {
+    id: 'caesarianForum', name: 'Forum of Caesar and Temple of Venus Genetrix', seasons: 3, unlockTurn: 49,
+    cost: { stone: 1 },
+    summary: 'Property, drainage, porticoes, service rooms, and an axial temple create new court capacity while making one commander\'s lineage and patronage permanent in the civic core.',
+    completionMetrics: { order: 4, trade: 5 },
+    completionSettlement: { civicOperatingCapacity: 11, urbanDisplacement: 7, personalMonumentalCredit: 13, senateOperatingCapacity: 3 },
+    upkeepResources: { treasury: -1 },
+    upkeepSettlement: { personalMonumentalCredit: 1 },
+    burdenLabel: 'Courts, shops, drainage, security, ceremonies, and displaced circulation remain continuing charges.',
+  },
+  curiaJulia: {
+    id: 'curiaJulia', name: 'Curia Julia', seasons: 3, unlockTurn: 51, prerequisite: 'caesarianForum',
+    cost: { stone: 1, timber: 1 },
+    summary: 'A severe enclosed Senate hall begun after the old curial site was displaced. Three playable stages represent work continuing through the triumviral years toward Augustan completion near 29 BC.',
+    completionMetrics: { order: 5 },
+    completionSettlement: { senateOperatingCapacity: 17, archiveContinuity: 8, civicOperatingCapacity: 6, personalMonumentalCredit: 5 },
+    upkeepResources: { treasury: -1 },
+    upkeepSettlement: { senateOperatingCapacity: 1 },
+    burdenLabel: 'Clerks, security, records transfer, roof repair, and access to deliberation require permanent provision.',
+  },
+  basilicaJulia: {
+    id: 'basilicaJulia', name: 'Basilica Julia', seasons: 4, unlockTurn: 50,
+    cost: { stone: 1, timber: 1 },
+    summary: 'A long flexible legal and business hall whose construction, dedication, fire, and later completion test whether civic capacity survives changes of regime.',
+    completionMetrics: { order: 5, trade: 6 },
+    completionSettlement: { civicOperatingCapacity: 15, courtContinuity: 17, warFinanceBurden: -4, urbanDisplacement: 5 },
+    upkeepResources: { treasury: -1 },
+    upkeepSettlement: { courtContinuity: 1 },
+    burdenLabel: 'Tribunals, shops, roofing, fire repair, records, and crowd circulation remain expensive operating commitments.',
+  },
+  veteranLandRoadRegistry: {
+    id: 'veteranLandRoadRegistry', name: 'Veteran Land and Road Registry', seasons: 3, unlockTurn: 50,
+    cost: { timber: 1, grain: 1 },
+    summary: 'Surveyed allotments, municipal copies, road access, appeals, and demobilization rolls turn promises to soldiers into reviewable obligations without erasing prior title claims.',
+    completionMetrics: { order: 4, readiness: 2 },
+    completionSettlement: { armyDemobilization: 17, veteranSettlementPressure: -16, italianLandSecurity: 12, confiscationPressure: -8, archiveContinuity: 5 },
+    upkeepResources: { treasury: -1 },
+    upkeepSettlement: { italianLandSecurity: 1 },
+    burdenLabel: 'Surveyors, appeals, municipal duplicates, road maintenance, and unresolved title cases continue after allotment.',
   },
 }
 
@@ -822,6 +872,69 @@ COUNCILS.push(
   },
 )
 
+COUNCILS.push(
+  {
+    turn: 49, id: 'caesars-emergency', title: 'Caesar\'s Emergency', speaker: 'Consuls, senators, tribunes, Caesarian and Pompeian officers, municipal delegates, creditors, and grain officers',
+    prompt: 'The disputed command has crossed into Italy. Which authority can end competing mobilizations without making victory itself the only law?',
+    context: 'Caesar\'s own account is an argument by a participant; Cicero\'s correspondence exposes uncertainty and divided loyalties; later narratives impose clearer designs than contemporaries possessed. The game treats civil war as a failure of demobilization, command, credit, and enforceable guarantees rather than one dramatic gesture alone.',
+    options: [
+      { id: 'mediated-mutual-standdown', label: 'Offer a mediated mutual stand-down', detail: 'Guarantee candidacy and trial, appoint mixed witnesses, and demobilize both Italian concentrations under dated terms, accepting delay and the risk that neither commander trusts the process.', impacts: { resources: { treasury: -5, grain: -2 }, metrics: { order: 4, readiness: -3 }, settlement: { unifiedCommand: 4, senateOperatingCapacity: 8, magistrateContinuity: 9, armyDemobilization: 12, emergencyAuthority: -7, successionClarity: 4 }, flags: { caesarianEmergency: 'mediated-standdown' } } },
+      { id: 'senatorial-war-command', label: 'Mobilize Italy under senatorial command', detail: 'Defend the ultimatum through consular and Pompeian forces, preserving the formal claim of the Senate while accepting divided command, rapid expenditure, and uncertain municipal obedience.', impacts: { resources: { treasury: -7, grain: -4 }, metrics: { readiness: 8, order: -6 }, settlement: { unifiedCommand: -5, senateOperatingCapacity: 5, magistrateContinuity: 2, armyDemobilization: -7, warFinanceBurden: 9, veteranSettlementPressure: 6, emergencyAuthority: 7 }, flags: { caesarianEmergency: 'senatorial-war' } } },
+      { id: 'caesarian-concentration', label: 'Recognize Caesar\'s restoring command', detail: 'Concentrate military, fiscal, and appointment power long enough to break rival armies, gaining decision at the cost of making institutional recovery depend on one victorious commander.', impacts: { resources: { treasury: -4, grain: -3 }, metrics: { readiness: 10, order: 1 }, settlement: { unifiedCommand: 18, senateOperatingCapacity: -9, magistrateContinuity: -7, armyDemobilization: 2, emergencyAuthority: 16, personalMonumentalCredit: 5, successionClarity: -4 }, flags: { caesarianEmergency: 'caesarian-command' } } },
+    ],
+  },
+  {
+    turn: 50, id: 'clearing-civic-core', title: 'Clearing the Civic Core', speaker: 'Praetors, senators, property holders, jurists, contractors, architects, merchants, and displaced households',
+    prompt: 'Victory and new courts press against an overloaded Forum. How should the Caesarian civic program acquire land, credit, and operating authority?',
+    context: 'The Forum of Caesar and Basilica Julia increased legal and commercial capacity while tying urban change to Caesar\'s wealth, office, lineage, and victory. Archaeology establishes major footprints and phases more securely than it recovers every acquisition or displaced household.',
+    options: [
+      { id: 'public-board-and-compensation', label: 'Use a public board, recorded purchase, and compensation', detail: 'Acquire a bounded precinct through published accounts and appeals, preserving more title security while slowing clearance and limiting the sponsor\'s control over the finished space.', impacts: { resources: { treasury: -7, stone: -2 }, metrics: { order: 5, trade: 3 }, settlement: { civicOperatingCapacity: 10, courtContinuity: 7, urbanDisplacement: 2, personalMonumentalCredit: 3, italianLandSecurity: 6, warFinanceBurden: 3 }, flags: { civicCoreSettlement: 'public-board' } } },
+      { id: 'victor-funded-precinct', label: 'Let the victor fund and direct the precinct', detail: 'Clear quickly with private and war-derived funds, expanding courts and business while placing circulation, dedication, and patronage under one household\'s name.', impacts: { resources: { stone: 4, treasury: 3 }, metrics: { trade: 7, order: 2 }, settlement: { civicOperatingCapacity: 13, courtContinuity: 5, urbanDisplacement: 13, personalMonumentalCredit: 17, warFinanceBurden: -3, senateOperatingCapacity: -3 }, flags: { civicCoreSettlement: 'victor-precinct' } } },
+      { id: 'repair-existing-forum', label: 'Repair and disperse existing public business', detail: 'Avoid a grand clearance by strengthening older basilicas, records rooms, and district hearing spaces, preserving continuity but leaving congestion and fragmented administration.', impacts: { resources: { treasury: -4, timber: -2 }, metrics: { order: 4, trade: 2 }, settlement: { civicOperatingCapacity: 5, courtContinuity: 9, urbanDisplacement: -3, personalMonumentalCredit: -5, archiveContinuity: 5 }, flags: { civicCoreSettlement: 'distributed-repair' } } },
+    ],
+  },
+  {
+    turn: 51, id: 'after-the-ides', title: 'After the Ides', speaker: 'Consuls, senators, Caesarian officers, veterans, municipal delegates, jurists, creditors, and the urban plebs',
+    prompt: 'The dictator is dead, but his appointments, laws, soldiers, debts, and promised settlements remain. What carries lawful continuity through the succession crisis?',
+    context: 'Cicero\'s speeches and letters are partisan interventions within the crisis; Nicolaus, Appian, Plutarch, Suetonius, and Dio wrote with different distances and purposes. The assassination removed Caesar without supplying an agreed authority able to settle his army and enactments.',
+    options: [
+      { id: 'amnesty-and-ratified-acts', label: 'Pair amnesty with review and ratification of acts', detail: 'Recognize existing offices and veteran obligations under a dated senatorial review, seeking continuity without declaring either assassination or dictatorship the permanent rule.', impacts: { resources: { treasury: -4 }, metrics: { order: 6, readiness: -2 }, settlement: { senateOperatingCapacity: 10, magistrateContinuity: 11, successionClarity: 8, courtContinuity: 7, veteranSettlementPressure: -4, emergencyAuthority: -3 }, flags: { idesSettlement: 'amnesty-ratification' } } },
+      { id: 'prosecute-assassins', label: 'Prosecute the assassins under a single avenging command', detail: 'Use Caesar\'s appointments, heir, and veteran network to recover unity, gaining military direction while making succession and justice depend upon personal inheritance.', impacts: { resources: { treasury: -5, grain: -2 }, metrics: { readiness: 8, order: -3 }, settlement: { unifiedCommand: 12, senateOperatingCapacity: -6, magistrateContinuity: -5, successionClarity: 3, emergencyAuthority: 10, personalMonumentalCredit: 8, veteranSettlementPressure: 3 }, flags: { idesSettlement: 'avenging-command' } } },
+      { id: 'restore-before-caesar', label: 'Void the dictatorship and restore the pre-Caesarian offices', detail: 'Reject the dictator\'s appointments and grants in defense of republican forms, accepting immediate conflict over veterans, provinces, debts, and who lawfully holds office.', impacts: { resources: { treasury: -3 }, metrics: { order: -8, readiness: -4 }, settlement: { senateOperatingCapacity: 8, magistrateContinuity: 4, successionClarity: -10, veteranSettlementPressure: 15, italianLandSecurity: -8, courtContinuity: -4, unifiedCommand: -7 }, flags: { idesSettlement: 'pre-caesarian-restoration' } } },
+    ],
+  },
+  {
+    turn: 52, id: 'triumviral-extraction', title: 'Triumviral Extraction', speaker: 'Triumvirs, senators, equestrian creditors, municipal magistrates, veterans, tax assessors, and dispossessed households',
+    prompt: 'Three commanders claim emergency authority while armies require pay and land. How should the wars against their enemies be financed and settled?',
+    context: 'The triumviral settlement, proscriptions, extraordinary taxes, confiscations, and veteran colonies are broadly attested, while totals and local sequences remain uneven. Immediate military finance and long-term title security moved in opposite directions.',
+    options: [
+      { id: 'assessed-tax-and-bonds', label: 'Use assessed taxation, bonds, and recorded veteran claims', detail: 'Spread the emergency charge through published assessments and defer part of the settlement under enforceable rolls, accepting slower mobilization and heavy public debt.', impacts: { resources: { treasury: 4, grain: -2 }, metrics: { order: 2, trade: -2 }, settlement: { warFinanceBurden: 8, confiscationPressure: -6, italianLandSecurity: 7, archiveContinuity: 8, veteranSettlementPressure: 4, courtContinuity: 4 }, flags: { triumviralFinance: 'assessed-finance' } } },
+      { id: 'proscription-and-confiscation', label: 'Finance war through proscription and confiscation', detail: 'Seize wealth and Italian land to pay armies quickly, gaining command capacity while multiplying title disputes, fear, private denunciation, and dependence on the triumvirs.', impacts: { resources: { treasury: 13, grain: 4 }, metrics: { readiness: 8, order: -10 }, settlement: { unifiedCommand: 7, warFinanceBurden: -7, confiscationPressure: 21, italianLandSecurity: -17, courtContinuity: -12, archiveContinuity: -7, veteranSettlementPressure: -7, emergencyAuthority: 13 }, flags: { triumviralFinance: 'proscription-confiscation' } } },
+      { id: 'separate-command-zones', label: 'Divide provinces and finance among separate commands', detail: 'Let each commander raise revenue and settle his own forces, reducing one central proscription machinery while institutionalizing rival armies and incompatible accounts.', impacts: { resources: { treasury: 7 }, metrics: { readiness: 5, order: -6 }, settlement: { unifiedCommand: -13, warFinanceBurden: 5, confiscationPressure: 8, archiveContinuity: -5, successionClarity: -8, provincialCommandSettlement: -9, veteranSettlementPressure: 7 }, flags: { triumviralFinance: 'separate-zones' } } },
+    ],
+  },
+  {
+    turn: 53, id: 'actium-and-demobilization', title: 'Actium and Demobilization', speaker: 'Octavian and Antonian envoys, senators, naval officers, veterans, provincial delegates, treasury officers, and Italian municipal magistrates',
+    prompt: 'The last rival commands meet with fleets, provinces, client rulers, debts, and promised land behind them. What settlement should follow military decision?',
+    context: 'Actium in 31 BC was both a naval campaign and the terminal struggle between command systems assembled over years. Augustan representation later made the victory appear more inevitable and foreign than the preceding Roman civil conflict had been.',
+    options: [
+      { id: 'victory-with-recorded-demobilization', label: 'Win, then demobilize through recorded grants and cash', detail: 'Concentrate the final campaign but bind discharge, land, cash, and provincial transfers to published rolls and staged settlement.', impacts: { resources: { treasury: -8, grain: -3 }, metrics: { readiness: 6, order: 6 }, settlement: { unifiedCommand: 10, armyDemobilization: 18, veteranSettlementPressure: -15, italianLandSecurity: 12, warFinanceBurden: 7, provincialCommandSettlement: 10, archiveContinuity: 6 }, flags: { actiumSettlement: 'recorded-demobilization' } } },
+      { id: 'negotiated-dual-withdrawal', label: 'Negotiate dual withdrawal and provincial arbitration', detail: 'Trade recognition and retirement for synchronized demobilization, preserving more shared authority while risking that unresolved fleets and client networks revive the war.', impacts: { resources: { treasury: -5 }, metrics: { order: 5, readiness: -5 }, settlement: { unifiedCommand: -2, senateOperatingCapacity: 8, magistrateContinuity: 7, armyDemobilization: 11, veteranSettlementPressure: -7, successionClarity: 3, provincialCommandSettlement: 7, emergencyAuthority: -5 }, flags: { actiumSettlement: 'dual-withdrawal' } } },
+      { id: 'victor-keeps-armies', label: 'Keep the victorious armies under one permanent command', detail: 'Use disciplined force to secure provinces and Italy after Actium, suppressing renewed war while leaving civil order and succession dependent on the commander\'s military household.', impacts: { resources: { treasury: -3, grain: -4 }, metrics: { readiness: 10, order: 3 }, settlement: { unifiedCommand: 18, armyDemobilization: -9, veteranSettlementPressure: 8, senateOperatingCapacity: -7, magistrateContinuity: -5, emergencyAuthority: 15, successionClarity: -5, provincialCommandSettlement: 12 }, flags: { actiumSettlement: 'permanent-command' } } },
+    ],
+  },
+  {
+    turn: 54, id: 'settlement-of-27', title: 'The Settlement of 27 BC', speaker: 'The victorious commander, consuls, senators, magistrates, provincial delegates, veterans, jurists, treasury officers, and grain administrators',
+    prompt: 'Civil war has ended. Which arrangement can assign provinces, armies, offices, provision, courts, and succession without relying upon constitutional names alone?',
+    context: 'The arrangements of 27 and 23 BC developed over time. Augustus\'s later account emphasizes restoration; Cassius Dio supplies a much later constitutional narrative; inscriptions, coins, offices, commands, and administrative practice reveal how authority actually operated.',
+    options: [
+      { id: 'augustan-principate', label: 'Create a princeps settlement with divided provinces', detail: 'Restore annual offices and senatorial business while granting the victor a large provincial command, military loyalty, fiscal capacity, and public obligations under republican forms.', impacts: { resources: { treasury: -5, grain: 3 }, metrics: { order: 8, readiness: 6, food: 3 }, settlement: { unifiedCommand: 11, senateOperatingCapacity: 8, magistrateContinuity: 9, armyDemobilization: 8, emergencyAuthority: 2, provincialCommandSettlement: 14, publicProvision: 10, successionClarity: 12, personalMonumentalCredit: 8 }, flags: { constitutionalSettlement: 'augustan-principate' } } },
+      { id: 'negotiated-republican-restoration', label: 'Restore commands to elected offices under enforceable limits', detail: 'Return armies and provinces to dated magistracies, preserve the victor\'s honors and security, and strengthen Senate, courts, and public accounts, accepting weaker immediate unity and difficult succession bargains.', impacts: { resources: { treasury: -7 }, metrics: { order: 6, readiness: -2 }, settlement: { unifiedCommand: -5, senateOperatingCapacity: 16, magistrateContinuity: 16, armyDemobilization: 13, emergencyAuthority: -13, provincialCommandSettlement: 7, courtContinuity: 9, successionClarity: 7, personalMonumentalCredit: -5 }, flags: { constitutionalSettlement: 'republican-restoration' } } },
+      { id: 'collegial-military-settlement', label: 'Formalize a collegial military settlement', detail: 'Distribute provinces and army groups among several senior commanders under a common council, avoiding one princeps while accepting continuing military bargaining and uncertain civilian control.', impacts: { resources: { treasury: -3, stone: 2 }, metrics: { readiness: 8, order: -2 }, settlement: { unifiedCommand: 4, senateOperatingCapacity: 2, magistrateContinuity: 1, armyDemobilization: 4, emergencyAuthority: 4, provincialCommandSettlement: 8, successionClarity: 6, veteranSettlementPressure: -2 }, flags: { constitutionalSettlement: 'military-oligarchy' } } },
+    ],
+  },
+)
+
 export const OBJECTIVES = [
   { from: 1, to: 2, text: 'Shelter the first households and secure water.' },
   { from: 3, to: 4, text: 'Open exchange without leaving the river undefended.' },
@@ -866,6 +979,12 @@ export const OBJECTIVES = [
   { from: 46, to: 46, text: 'Give laws, accounts, and titles physical continuity in the post-Sullan city.' },
   { from: 47, to: 47, text: 'Preserve assemblies and trials amid crowding, patronage, and armed political competition.' },
   { from: 48, to: 48, text: 'Judge whether armies can return to civic authority before civil war becomes the settlement.' },
+  { from: 49, to: 49, text: 'End competing mobilizations without making military victory the only source of law.' },
+  { from: 50, to: 50, text: 'Expand civic capacity without hiding displacement, patronage, or the source of construction credit.' },
+  { from: 51, to: 51, text: 'Carry offices, laws, veterans, and debts through the succession crisis after Caesar.' },
+  { from: 52, to: 52, text: 'Finance the triumviral wars without allowing confiscation to consume Italian title security.' },
+  { from: 53, to: 53, text: 'Turn final military victory into demobilization, provincial settlement, and enforceable accounts.' },
+  { from: 54, to: 54, text: 'Judge operating authority in 27 BC separately from the constitutional language used to describe it.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

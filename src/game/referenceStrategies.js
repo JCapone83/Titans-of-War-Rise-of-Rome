@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
-import { continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
-import { calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
+import { continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
+import { calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -552,5 +552,50 @@ export function runAllRepublicStrainStrategies() {
       state = result.state
     }
     return { strategy, state, outcome: calculateOutcome(state), strainScore: calculateRepublicStrainScore(state), skipped, ledger }
+  })
+}
+
+export const CIVIL_SETTLEMENT_STRATEGIES = [
+  {
+    id: 'augustan-operating-settlement', name: 'Augustan Operating Settlement',
+    councils: { 49: 'caesarian-concentration', 50: 'public-board-and-compensation', 51: 'amnesty-and-ratified-acts', 52: 'assessed-tax-and-bonds', 53: 'victory-with-recorded-demobilization', 54: 'augustan-principate' },
+    projectPriorities: { 50: 'caesarianForum', 51: 'caesarianForum', 52: 'caesarianForum', 53: 'curiaJulia', 54: 'curiaJulia' },
+  },
+  {
+    id: 'negotiated-republican-restoration', name: 'Negotiated Republican Restoration',
+    councils: { 49: 'mediated-mutual-standdown', 50: 'repair-existing-forum', 51: 'amnesty-and-ratified-acts', 52: 'assessed-tax-and-bonds', 53: 'negotiated-dual-withdrawal', 54: 'negotiated-republican-restoration' },
+    projectPriorities: { 50: 'veteranLandRoadRegistry', 51: 'veteranLandRoadRegistry', 52: 'veteranLandRoadRegistry', 53: 'basilicaJulia', 54: 'basilicaJulia' },
+  },
+  {
+    id: 'collegial-military-compact', name: 'Collegial Military Compact',
+    councils: { 49: 'mediated-mutual-standdown', 50: 'victor-funded-precinct', 51: 'amnesty-and-ratified-acts', 52: 'assessed-tax-and-bonds', 53: 'victory-with-recorded-demobilization', 54: 'collegial-military-settlement' },
+    projectPriorities: { 50: 'caesarianForum', 51: 'caesarianForum', 52: 'caesarianForum', 53: 'basilicaJulia', 54: 'basilicaJulia' },
+  },
+]
+
+export function runAllCivilSettlementStrategies() {
+  const bases = runAllRepublicStrainStrategies()
+  return CIVIL_SETTLEMENT_STRATEGIES.map((strategy, index) => {
+    let state = enterCivilSettlement(continueToCivilSettlement(bases[index].state))
+    const skipped = []
+    const ledger = []
+    while (state.outcome !== 'civil-settlement-complete') {
+      const optionId = strategy.councils[state.turn]
+      if (state.council && !state.councilResolved) {
+        if (!optionId) skipped.push({ turn: state.turn, reason: 'No civil-settlement council choice declared.' })
+        else state = resolveCouncil(state, optionId)
+      }
+      const projectId = strategy.projectPriorities[state.turn]
+      if (projectId && actionRemaining(state)) {
+        const work = workCivilSettlementProject(state, projectId)
+        if (work.error) skipped.push({ turn: state.turn, projectId, reason: work.error })
+        else state = work.state
+      }
+      ledger.push({ turn: state.turn, civilSettlement: { ...state.civilSettlement, projects: structuredClone(state.civilSettlement.projects ?? {}) }, resources: { ...state.resources }, bridges: structuredClone(state.chronologyBridges ?? []) })
+      const result = advanceTurn(state)
+      if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+      state = result.state
+    }
+    return { strategy, state, outcome: calculateOutcome(state), civilScore: calculateCivilSettlementScore(state), skipped, ledger }
   })
 }

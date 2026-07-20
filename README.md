@@ -2,20 +2,24 @@
 
 Build Rome before Rome is inevitable.
 
-**Birth of Rome** is a local-first historical city-building strategy game. The playable campaign follows the transformation from separate hill settlements through the organized **City of Kings**, the **Early Republic**, the **Sack and Reconstruction**, and a first **Regional Compact** through 304 BC. The player must place works according to terrain, divide households among farming, construction, and levy service, sustain Veii, survive proportional Gallic destruction, rebuild damaged districts, and turn Rome's differentiated Latin settlement into roads, obligations, and colonies without exhausting the city.
+**Birth of Rome** is a local-first historical city-building strategy game. Its deterministic campaign follows Rome from separate hill settlements in 753 BC through kingship, republic, Italian and Mediterranean expansion, metropolitan strain, civil war, and the operating settlement of 27 BC. The player must place works according to terrain, divide households among farming, construction, and levy service, preserve public records and political channels, and convert victory into institutions without exhausting the city or its allies.
 
 No AI model, account, remote service, or internet connection is required after installation.
 
 ## Current Campaign
 
-This `0.1.0` vertical slice contains:
+This `0.1.0` campaign contains 54 deterministic turns and 49 political councils. The 264 BC core judgment and every later act are explicit opt-in continuations, so a completed earlier campaign is never silently rewritten.
 
 - **Hill Settlements, 753-650 BC**
 - **City of Kings, 650-509 BC**
 - **Early Republic, 509-390 BC**
 - **Sack and Reconstruction, 390-338 BC**
 - **Regional Planning, 338-304 BC**
-- 23 deterministic turns and eighteen political councils
+- **Italian Strategy, 304-264 BC**
+- **Mediterranean Republic, 261-201 BC**
+- **Conquest and Metropolis, 197-133 BC**
+- **Republic Under Strain, 121-49 BC**
+- **Civil War and Settlement, 49-27 BC**
 - Six districts with terrain rules and limited plots
 - A household population model with district occupancy, births, arrivals, departures, illness, and crisis losses
 - Visible population composition: households, workers, levy-eligible people, craftsmen, and dependents
@@ -43,9 +47,12 @@ This `0.1.0` vertical slice contains:
 - Multi-season roads that improve supply, trade, and response while also opening hostile access
 - Colonies that consume real settlers, stores, treasury, garrisons, and shared public capacity
 - Visible regional overextension and three balanced doctrines: security, commerce, and reciprocal alliance
-- Local save/restore, a guided walkthrough, historical context, chronicle export, five city grades, and a Regional Compact grade
-
-The Samnite struggle, Caudine Forks, Pyrrhus, and the full conquest-of-Italy campaign remain planned rather than represented as finished content.
+- Multi-stage Appian works, Mediterranean war finance, allied burdens, and veteran settlement
+- Metropolitan and late-Republic ledgers separating public provision, legal capacity, command limits, citizenship, records, violence, and fire response
+- Civil-war settlement mechanics separating command, demobilization, property, finance, succession, civic operation, and monumental credit
+- Four staged settlement works: the Forum of Caesar, Curia Julia, Basilica Julia, and a veteran land-and-road registry
+- Three viable 27 BC operating forms: an Augustan-style principate, a negotiated republican restoration, and a collegial military oligarchy
+- Local save/restore through schema version 13, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
 
 ## Play Locally
 
@@ -71,9 +78,9 @@ After 509 BC, office structure matters directly. Paired annual magistrates cap t
 
 The **Season Forecast** exposes known production, upkeep, structural penalties, and population change before the player ends a turn. It explains expected births, arrivals, departures, and illness without revealing floods or enemy action in advance. The district inspector records condition and permits damaged works to be repaired, upgraded in place, or cleared for limited salvage.
 
-Run `npm run balance` to execute the published Acts I-II strategies, the opening recovery campaign, three strategies each for Acts III and IV, and three regional doctrines. Their design claims are recorded in [docs/ACTS_I_II_BALANCE_REPORT.md](docs/ACTS_I_II_BALANCE_REPORT.md), [docs/ACT_III_BALANCE_REPORT.md](docs/ACT_III_BALANCE_REPORT.md), [docs/ACT_IV_BALANCE_REPORT.md](docs/ACT_IV_BALANCE_REPORT.md), and [docs/REGIONAL_SPINE_BALANCE_REPORT.md](docs/REGIONAL_SPINE_BALANCE_REPORT.md).
+Run `npm run balance` to execute the published reference strategies from the hill settlements through 27 BC. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act VIII](docs/ACT_VIII_BALANCE_REPORT.md) and [Act IX](docs/ACT_IX_BALANCE_REPORT.md).
 
-The campaign ends with five city grades and a separate Regional Compact grade:
+The campaign retains five city grades and adds separate grades for each later operating system:
 
 - Urban Design
 - Civic Balance
@@ -81,6 +88,11 @@ The campaign ends with five city grades and a separate Regional Compact grade:
 - Military Readiness
 - Historical Continuity
 - Regional Compact
+- Italian System
+- Mediterranean Republic
+- Conquest and Metropolis
+- Republic Under Strain
+- Civil War and Settlement
 
 Historical continuity measures how closely the city reproduces major developments associated with early Rome. It is not a moral grade, and alternate development remains valid play.
 

@@ -175,8 +175,36 @@ export const createRepublicStrainState = () => ({
   projects: createRepublicStrainProjects(),
 })
 
+export const createCivilSettlementProjects = () => ({
+  caesarianForum: { id: 'caesarianForum', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+  curiaJulia: { id: 'curiaJulia', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+  basilicaJulia: { id: 'basilicaJulia', progress: 0, requiredSeasons: 4, completed: false, lastWorkedTurn: null },
+  veteranLandRoadRegistry: { id: 'veteranLandRoadRegistry', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+})
+
+export const createCivilSettlementState = () => ({
+  unifiedCommand: 28,
+  senateOperatingCapacity: 44,
+  magistrateContinuity: 42,
+  armyDemobilization: 30,
+  veteranSettlementPressure: 48,
+  warFinanceBurden: 24,
+  confiscationPressure: 12,
+  italianLandSecurity: 46,
+  provincialCommandSettlement: 30,
+  courtContinuity: 42,
+  archiveContinuity: 48,
+  publicProvision: 44,
+  successionClarity: 18,
+  emergencyAuthority: 28,
+  civicOperatingCapacity: 40,
+  urbanDisplacement: 12,
+  personalMonumentalCredit: 10,
+  projects: createCivilSettlementProjects(),
+})
+
 export const createInitialState = () => ({
-  version: 12,
+  version: 13,
   turn: 1,
   era: 0,
   resources: { grain: 12, timber: 12, stone: 4, bronze: 2, treasury: 7 },
@@ -207,6 +235,7 @@ export const createInitialState = () => ({
   hannibalicTransition: false,
   metropolitanTransition: false,
   strainTransition: false,
+  settlementTransition: false,
   republic: null,
   war: null,
   reconstruction: null,
@@ -215,6 +244,7 @@ export const createInitialState = () => ({
   mediterranean: null,
   metropolitan: null,
   republicStrain: null,
+  civilSettlement: null,
   coreJudgment: null,
   chronologyBridges: [],
   outcome: null,
@@ -223,11 +253,11 @@ export const createInitialState = () => ({
 })
 
 export function migrateState(saved) {
-  if (!saved || saved.turn < 1 || saved.turn > 48) return null
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(saved.version)) return null
+  if (!saved || saved.turn < 1 || saved.turn > 54) return null
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(saved.version)) return null
   const population = saved.population ?? createInitialPopulation()
   const workforceAllocation = saved.workforceAllocation ?? createInitialWorkforceAllocation()
-  if ([5, 6, 7, 8, 9, 10, 11, 12].includes(saved.version)) {
+  if ([5, 6, 7, 8, 9, 10, 11, 12, 13].includes(saved.version)) {
     const completedOldRepublic = saved.era >= 2 && saved.turn === 13 && saved.outcome === 'complete'
     const completedOldActThree = saved.era === 2 && saved.turn === 16 && saved.outcome === 'complete'
     const completedOldActFour = saved.era === 3 && saved.turn === 20 && saved.outcome === 'complete'
@@ -235,7 +265,7 @@ export function migrateState(saved) {
     const completedMediterraneanOpening = saved.version === 9 && saved.turn === 32 && saved.outcome === 'mediterranean-complete'
     return {
       ...saved,
-      version: 12,
+      version: 13,
       outcome: completedOldRepublic ? null : completedOldActThree ? 'act-three-complete' : completedOldActFour ? 'act-four-complete' : completedOldRegional ? 'regional-complete' : completedMediterraneanOpening ? 'mediterranean-opening-complete' : saved.outcome,
       resources: withoutLegacyLabor(saved.resources),
       population,
@@ -256,17 +286,19 @@ export function migrateState(saved) {
       hannibalicTransition: completedMediterraneanOpening ? true : saved.hannibalicTransition ?? false,
       metropolitanTransition: saved.metropolitanTransition ?? false,
       strainTransition: saved.strainTransition ?? false,
+      settlementTransition: saved.settlementTransition ?? false,
       coreJudgment: saved.coreJudgment ?? null,
       chronologyBridges: saved.chronologyBridges ?? [],
       metropolitan: saved.era >= 7 ? { ...createMetropolitanState(), ...(saved.metropolitan ?? {}), projects: { ...createMetropolitanProjects(), ...(saved.metropolitan?.projects ?? {}) } } : null,
       republicStrain: saved.era >= 8 ? { ...createRepublicStrainState(), ...(saved.republicStrain ?? {}), projects: { ...createRepublicStrainProjects(), ...(saved.republicStrain?.projects ?? {}) } } : null,
+      civilSettlement: saved.era >= 9 ? { ...createCivilSettlementState(), ...(saved.civilSettlement ?? {}), projects: { ...createCivilSettlementProjects(), ...(saved.civilSettlement?.projects ?? {}) } } : null,
       actionsMax: Math.max(saved.actionsUsed ?? 0, migratedWorksCapacity(population, workforceAllocation, saved.nextWorksBonus ?? 0, saved.republic, saved.flags?.magistrateMode)),
     }
   }
   const completedRoyalCampaign = saved.version === 4 && saved.turn === 10 && saved.outcome
   return {
     ...saved,
-    version: 12,
+    version: 13,
     resources: withoutLegacyLabor(saved.resources),
     selectedBuildingId: saved.selectedBuildingId ?? null,
     actionsUsed: saved.actionsUsed ?? 0,
@@ -284,10 +316,12 @@ export function migrateState(saved) {
     hannibalicTransition: false,
     metropolitanTransition: false,
     strainTransition: false,
+    settlementTransition: false,
     republic: null,
     war: null,
     reconstruction: null,
     republicStrain: null,
+    civilSettlement: null,
     regional: null,
     italian: null,
     mediterranean: null,
