@@ -1,10 +1,10 @@
 # Titans of War: Birth of Rome - Grand Build Roadmap
 
-**Purpose:** This is the canonical execution record for *Birth of Rome*, now covering 753-27 BC through a complete mechanics-first campaign. The 264 BC core remains a frozen judgment; Mediterranean, metropolitan, late-Republic, and civil-settlement acts remain explicit opt-in continuations.
+**Purpose:** This is the canonical execution record for *Birth of Rome*, now covering 753 BC-AD 117 through a complete mechanics-first campaign. The 264 BC core remains a frozen judgment; the seven later acts remain explicit opt-in continuations.
 
 **Rule:** Work from the top of the Immediate Queue. Do not begin a later milestone because it is visually attractive while an earlier completion gate is still open.
 
-**Last updated:** 2026-07-19
+**Last updated:** 2026-07-20
 
 ## Status Key
 
@@ -17,12 +17,12 @@
 
 These are the current executable steps, in order.
 
-- [x] Complete Act VIII, Republic Under Strain, through the 49 BC civil-war threshold.
-- [x] Complete Act IX, Civil War and Settlement, through three viable operating forms at 27 BC.
-- [x] Add save-schema version 13, six historical context notes, chronicle export, and deterministic Act IX strategies.
-- [x] Verify all three Act IX routes without skipped decisions or project actions.
-- [x] Complete production build, desktop/mobile browser QA, and independent governed acceptance.
-- [ ] Promote the verified Act IX candidate only after human approval.
+- [x] Complete the 76-turn campaign from 753 BC through the AD 117 Trajanic judgment.
+- [x] Complete the building and capital-project art sets with evidence labels and media-rights records.
+- [x] Add the opt-in self-hosted soundtrack and the Tiber Dawn campaign home.
+- [x] Verify deterministic tests, reference strategies, production build, and responsive browser behavior.
+- [x] Synchronize public documentation with the completed AD 117 campaign and add a reproducible browser-release packager.
+- [ ] Merge the promoted release branch, create the public repository, and deploy the frozen browser zip only after separate human authorization.
 
 Earlier milestone checklists below are retained as an implementation record. Some unchecked planning lines are superseded by later verified work and should not be read as current release status.
 
@@ -66,7 +66,7 @@ The player should feel three scales operating at once:
 ## Locked Design Decisions
 
 - [x] Campaign scope begins with the foundation tradition in 753 BC.
-- [x] The core campaign judgment remains at 264 BC; four explicit opt-in continuations extend the represented campaign to the settlement of 27 BC.
+- [x] The core campaign judgment remains at 264 BC; seven explicit opt-in continuations extend the represented campaign to AD 117.
 - [x] The first two acts are **Hill Settlements** and **City of Kings**.
 - [x] Later acts are **The Early Republic**, **Sack and Reconstruction**, and **Roads to Italy**.
 - [x] The game remains fully playable without AI, an account, or a remote service.

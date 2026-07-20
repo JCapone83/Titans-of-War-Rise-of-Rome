@@ -6,4 +6,5 @@ dist/
 .vite/
 playwright-report/
 test-results/
+release/
 docs/art_concepts/
