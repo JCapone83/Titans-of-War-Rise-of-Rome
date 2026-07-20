@@ -49,9 +49,33 @@ const TIBER_AVENTINE = {
   ],
 }
 
+const FORUM_QUIRINAL = {
+  id: 'forum-quirinal',
+  label: 'Forum valley',
+  shortLabel: 'Forum',
+  title: 'Forum Valley and Quirinal',
+  eyebrow: 'Drain the low ground and bind it to the northern height',
+  alt: 'Seasonally wet Forum lowland and dry Quirinal terraces prepared for settlement',
+  background: '/images/scenes/forum-quirinal-terrain-v1.webp',
+  districts: ['forum', 'quirinal'],
+  gates: [
+    { id: 'forum-gate', districtId: 'forum', x: 49, y: 96, label: 'Valley approach' },
+    { id: 'quirinal-gate', districtId: 'quirinal', x: 96, y: 6, label: 'Quirinal approach' },
+  ],
+  plots: [
+    { id: 'forum-1', districtId: 'forum', x: 21, y: 82, scale: 0.74, depth: 82, roadParent: 'forum-2' },
+    { id: 'forum-2', districtId: 'forum', x: 38, y: 56, scale: 0.68, depth: 56, roadParent: 'forum-3' },
+    { id: 'forum-3', districtId: 'forum', x: 50, y: 72, scale: 0.72, depth: 72, roadParent: 'forum-gate' },
+    { id: 'forum-4', districtId: 'forum', x: 78, y: 73, scale: 0.71, depth: 73, roadParent: 'forum-3' },
+    { id: 'quirinal-1', districtId: 'quirinal', x: 74, y: 43, scale: 0.61, depth: 43, roadParent: 'quirinal-2' },
+    { id: 'quirinal-2', districtId: 'quirinal', x: 67, y: 25, scale: 0.56, depth: 25, roadParent: 'quirinal-3' },
+    { id: 'quirinal-3', districtId: 'quirinal', x: 84, y: 11, scale: 0.52, depth: 11, roadParent: 'quirinal-gate' },
+  ],
+}
+
 export const DEFAULT_SCENE_ID = PALATINE_CAPITOLINE.id
 
-export const ROME_SCENES = [PALATINE_CAPITOLINE, TIBER_AVENTINE]
+export const ROME_SCENES = [PALATINE_CAPITOLINE, TIBER_AVENTINE, FORUM_QUIRINAL]
 
 export function sceneForId(sceneId) {
   return ROME_SCENES.find((scene) => scene.id === sceneId) ?? PALATINE_CAPITOLINE

@@ -88,7 +88,7 @@ test('terrain scene road links connect occupied plots to district gates', () => 
 
 test('hill terrain is the default and the Tiber scene fills its seven district plots deterministically', () => {
   assert.equal(DEFAULT_SCENE_ID, 'palatine-capitoline')
-  assert.deepEqual(ROME_SCENES.map((scene) => scene.id), ['palatine-capitoline', 'tiber-aventine'])
+  assert.deepEqual(ROME_SCENES.map((scene) => scene.id), ['palatine-capitoline', 'tiber-aventine', 'forum-quirinal'])
   assert.equal(sceneForId('unknown-scene').id, DEFAULT_SCENE_ID)
 
   const state = createInitialState()
@@ -108,6 +108,29 @@ test('hill terrain is the default and the Tiber scene fills its seven district p
   assert.equal(districtGate(scene, 'aventine').id, 'aventine-gate')
   assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'tiber-gate'), true)
   assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'aventine-gate'), true)
+})
+
+test('Forum Valley and Quirinal complete deterministic terrain coverage for every construction district', () => {
+  const state = createInitialState()
+  state.buildings = [
+    ...Array.from({ length: 4 }, (_, index) => ({ instanceId: `f-${index}`, districtId: 'forum', buildingId: 'drainage-ditch', name: 'Forum Work', familyId: 'drainage', tier: 1, condition: 100 })),
+    ...Array.from({ length: 3 }, (_, index) => ({ instanceId: `q-${index}`, districtId: 'quirinal', buildingId: 'palatine-huts', name: 'Quirinal Work', familyId: 'housing', tier: 1, condition: 100 })),
+    { instanceId: 'p-1', districtId: 'palatine', buildingId: 'timber-shrine', name: 'Palatine Shrine', familyId: 'shrine', tier: 1, condition: 100 },
+  ]
+
+  const scene = sceneForId('forum-quirinal')
+  const assignments = assignBuildingsToScene(state, scene.id)
+  assert.equal(scene.plots.length, 7)
+  assert.deepEqual(scene.districts, ['forum', 'quirinal'])
+  assert.deepEqual(assignments.map(({ building }) => building.instanceId), ['f-0', 'f-1', 'f-2', 'f-3', 'q-0', 'q-1', 'q-2'])
+  assert.equal(new Set(assignments.map(({ plot }) => plot.id)).size, 7)
+  assert.equal(districtGate(scene, 'forum').id, 'forum-gate')
+  assert.equal(districtGate(scene, 'quirinal').id, 'quirinal-gate')
+  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'forum-gate'), true)
+  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'quirinal-gate'), true)
+
+  const coveredDistricts = new Set(ROME_SCENES.flatMap((item) => item.districts))
+  assert.deepEqual([...coveredDistricts].sort(), ['aventine', 'capitoline', 'forum', 'palatine', 'quirinal', 'tiber'])
 })
 
 test('soundtrack catalog contains six self-hosted verified recordings', () => {

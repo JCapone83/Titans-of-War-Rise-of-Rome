@@ -182,3 +182,13 @@ This image is interface terrain, not archaeological evidence or a reconstruction
 - SHA-256: `0428d6c337a967e1a5490ccdf0a09aaa89cde7a874c60d9496e740371d5e4d49`
 
 This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. It was generated using only project-authored direction and the existing Palatine-Capitoline terrain plate as a style and continuity reference.
+
+### Forum Valley and Quirinal terrain
+
+- File: `public/images/scenes/forum-quirinal-terrain-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Rights basis: Original game artwork produced for this project; no source photograph is embedded or redistributed.
+- Historical scope: An interpretive view of seasonally wet Forum lowland and drier Quirinal terraces before dense urban construction. The watercourses, clearings, and paths are composed for strategy play rather than claimed as a surveyed eighth-century BC plan.
+- SHA-256: `b08cb66289fcb3527cc4f3a9c4a7a6ec6972e835ce76a945ec7bcbbe65628a73`
+
+This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. It was generated using only project-authored direction and the two existing project terrain plates as style and continuity references.

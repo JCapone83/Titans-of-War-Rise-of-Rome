@@ -203,6 +203,7 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .terrain-scene { position: relative; isolation: isolate; width: 100%; height: clamp(420px, 50vw, 640px); overflow: hidden; background: #283021; }
 .terrain-scene-background { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; user-select: none; transition: filter .2s ease; }
 .terrain-scene.map-mode-water .terrain-scene-background, .terrain-scene.map-mode-drainage .terrain-scene-background, .terrain-scene.map-mode-defense .terrain-scene-background { filter: brightness(.62) saturate(.72); }
+.terrain-scene[data-scene="forum-quirinal"].map-mode-drainage .terrain-scene-background { filter: brightness(.76) saturate(.82); }
 .scene-road-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
 .scene-road { position: absolute; display: block; height: 5px; transform-origin: left center; border: 1px solid #635234; background: #ad9362; opacity: .68; box-shadow: 0 2px 2px #17130d88; }
 .scene-road.improved { height: 7px; border-color: #6f6753; background: #b7ac91; box-shadow: inset 0 1px #ded3b8, 0 2px 2px #17130d99; }
