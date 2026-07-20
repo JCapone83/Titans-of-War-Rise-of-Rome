@@ -83,6 +83,13 @@ export const ERAS = [
     turns: [62, 70],
     summary: 'Build the capital at its greatest first-century scale while guard brokerage, military recognition, palace land, fire, provision, and succession test the public city beneath the monuments.',
   },
+  {
+    id: 'trajanic-capital',
+    name: 'Trajanic Capital',
+    span: 'AD 96-117',
+    turns: [71, 76],
+    summary: 'Join expansion, administration, water, harbor supply, public provision, maintenance, constitutional continuity, and succession at the empire\'s greatest territorial extent.',
+  },
 ]
 
 export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27, 23, 19, 13, 9, 2, -6, -14, -14, -23, -41, -54, -64, -69, -75, -80, -96, -97, -102, -106, -109, -112, -117]

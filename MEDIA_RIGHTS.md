@@ -80,4 +80,17 @@ The completed Act XI project-art set contains eight transparent PNG assets produ
 
 The assets use transparent RGBA PNG presentation and remain byte-identical to their approved production batches. Their evidence-status labels describe the reconstruction treatment used in the game and do not claim archaeological certainty. The Act XI project-art gate is complete; later revisions still require separate historical, provenance, alpha, and browser review.
 
+## Act XII project art
+
+The completed Act XII project-art set contains six transparent PNG assets produced with the built-in OpenAI image-generation tool under project-authored historical art direction on July 20, 2026. They are historically informed game reconstructions rather than archaeological evidence:
+
+- `public/images/projects/forum-trajan-v1.png` — Evidence-led integrated complex with reconstructed upper architecture
+- `public/images/projects/trajan-administrative-complex-v1.png` — Evidence-led office and archive synthesis
+- `public/images/projects/baths-trajan-v1.png` — Evidence-led bath precinct and hydraulic synthesis
+- `public/images/projects/aqua-traiana-v1.png` — Evidence-led distributed water-system synthesis
+- `public/images/projects/trajanic-portus-v1.png` — Evidence-led dual-harbor and supply-system synthesis
+- `public/images/projects/trajanic-circus-v1.png` — Evidence-led valley and circulation synthesis
+
+The prior Act XI Aqua Claudia, Claudian Portus, and Flavian Amphitheatre assets were used only as original-project style and continuity references. The original Titans of Constantinople AD 532 map was consulted only for the long Hippodrome track's compositional geometry when directing the Circus Maximus asset; no Byzantine building, wall, church, palace, or source pixel was copied into the Roman reconstruction. Each Act XII render was produced anew, converted to transparent RGBA, and visually reviewed against the project's AD 117 boundary. Detailed reconstruction limits and rejection criteria are recorded in `docs/ACT_XII_VISUAL_PRODUCTION_REPORT.md`.
+
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
-import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, ERAS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
@@ -9,7 +9,7 @@ import { TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStra
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToTrajanicCapital, enterTrajanicCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
-import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
+import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, TRAJANIC_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, artForTrajanicProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -1549,6 +1549,8 @@ test('version 15 AD 96 saves migrate to a resumable boundary', () => {
 })
 
 test('Act XII projects carry evidence, stages, costs, and recurring burdens', () => {
+  assert.equal(ERAS[12].id, 'trajanic-capital')
+  assert.deepEqual(ERAS[12].turns, [71, 76])
   assert.deepEqual(Object.keys(TRAJANIC_CAPITAL_PROJECTS).sort(), ['aquaTraiana', 'bathsTrajan', 'forumTrajan', 'trajanAdministrativeComplex', 'trajanicCircus', 'trajanicPortus'].sort())
   for (const definition of Object.values(TRAJANIC_CAPITAL_PROJECTS)) {
     assert.ok(definition.summary.length >= 80)
@@ -1557,6 +1559,26 @@ test('Act XII projects carry evidence, stages, costs, and recurring burdens', ()
     assert.ok(Object.keys(definition.cost).length >= 2)
     assert.ok(Object.keys(definition.upkeepResources ?? {}).length + Object.keys(definition.upkeepTrajanic ?? {}).length >= 1)
   }
+})
+
+test('complete Trajanic Capital visual set maps all six project artworks', () => {
+  const expected = {
+    forumTrajan: '/images/projects/forum-trajan-v1.png',
+    trajanAdministrativeComplex: '/images/projects/trajan-administrative-complex-v1.png',
+    bathsTrajan: '/images/projects/baths-trajan-v1.png',
+    aquaTraiana: '/images/projects/aqua-traiana-v1.png',
+    trajanicPortus: '/images/projects/trajanic-portus-v1.png',
+    trajanicCircus: '/images/projects/trajanic-circus-v1.png',
+  }
+  assert.deepEqual(Object.keys(TRAJANIC_PROJECT_ART).sort(), Object.keys(expected).sort())
+  for (const [id, src] of Object.entries(expected)) {
+    const art = TRAJANIC_PROJECT_ART[id]
+    assert.equal(art.src, src)
+    assert.ok(art.alt.length >= 40)
+    assert.ok(art.evidence.length >= 25)
+    assert.equal(artForTrajanicProject(id), art)
+  }
+  assert.equal(artForTrajanicProject('unknown'), null)
 })
 
 test('AD 96 outcome and chronicle expose Imperial Operating Systems without a Hadrianic Pantheon', () => {

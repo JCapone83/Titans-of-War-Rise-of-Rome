@@ -1,5 +1,5 @@
 import { TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear } from '../game/data.js'
-import { civilSettlementProjectStage } from '../game/projectArt.js'
+import { artForTrajanicProject, civilSettlementProjectStage } from '../game/projectArt.js'
 import { trajanicProjectAvailability } from '../game/simulation.js'
 
 export function TrajanicWorksPanel({ state, onWork }) {
@@ -13,8 +13,12 @@ export function TrajanicWorksPanel({ state, onWork }) {
       const progress = Math.min(definition.seasons, Math.max(0, project?.progress ?? 0))
       const stage = civilSettlementProjectStage(project, definition)
       const percent = Math.round(progress / definition.seasons * 100)
+      const art = artForTrajanicProject(definition.id)
       return <article key={definition.id} className={project?.completed ? 'public-work complete' : 'public-work'}>
-        <div className="imperial-project-stage" data-stage={stage.key}><span>{definition.evidence}</span><strong>{stage.label}</strong></div>
+        {art ? <figure className="civil-project-art" data-stage={stage.key}>
+          <img src={art.src} alt={art.alt} />
+          <figcaption><span>{art.evidence}</span><strong>{stage.label}</strong></figcaption>
+        </figure> : <div className="imperial-project-stage" data-stage={stage.key}><span>{definition.evidence}</span><strong>{stage.label}</strong></div>}
         <div className="public-work-heading"><strong>{definition.name}</strong><span>{project?.completed ? 'Operating' : `${progress}/${definition.seasons} stages`}</span></div>
         <small>Available {formatYear(TURN_YEARS[definition.unlockTurn - 1])}</small>
         <p>{definition.summary}</p>

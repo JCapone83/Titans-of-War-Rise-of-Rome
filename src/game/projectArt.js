@@ -64,6 +64,39 @@ export const IMPERIAL_PROJECT_ART = {
   },
 }
 
+export const TRAJANIC_PROJECT_ART = {
+  forumTrajan: {
+    src: '/images/projects/forum-trajan-v1.png',
+    alt: 'Isometric reconstruction of the Forum of Trajan with Basilica Ulpia, libraries, the Column, porticoes, exedrae, and retaining works.',
+    evidence: 'Evidence-led integrated complex with reconstructed upper architecture',
+  },
+  trajanAdministrativeComplex: {
+    src: '/images/projects/trajan-administrative-complex-v1.png',
+    alt: 'Isometric administrative compound with hearing hall, archives, offices, clerical rooms, service courts, and controlled entrances.',
+    evidence: 'Evidence-led office and archive synthesis',
+  },
+  bathsTrajan: {
+    src: '/images/projects/baths-trajan-v1.png',
+    alt: 'Isometric reconstruction of the Baths of Trajan with bathing halls, palaestra courts, gardens, service rooms, and Sette Sale cistern support.',
+    evidence: 'Evidence-led bath precinct and hydraulic synthesis',
+  },
+  aquaTraiana: {
+    src: '/images/projects/aqua-traiana-v1.png',
+    alt: 'Isometric hydraulic network showing Aqua Traiana spring captures, covered conduits, inspection works, reservoir, short arcade, and distribution branches.',
+    evidence: 'Evidence-led distributed water-system synthesis',
+  },
+  trajanicPortus: {
+    src: '/images/projects/trajanic-portus-v1.png',
+    alt: 'Isometric reconstruction of Trajanic Portus with the retained Claudian outer harbor, hexagonal inner basin, canals, quays, and warehouses.',
+    evidence: 'Evidence-led dual-harbor and supply-system synthesis',
+  },
+  trajanicCircus: {
+    src: '/images/projects/trajanic-circus-v1.png',
+    alt: 'Isometric reconstruction of the Trajanic Circus Maximus with track, spina, starting gates, tiered seating, service routes, and surrounding valley works.',
+    evidence: 'Evidence-led valley and circulation synthesis',
+  },
+}
+
 export const AUGUSTAN_PROJECT_ART = {
   palatineOfficialPrecinct: {
     src: '/images/projects/house-of-augustus-v1.png',
@@ -128,6 +161,7 @@ const STAGES = {
 export const artForCivilSettlementProject = (projectId) => CIVIL_SETTLEMENT_PROJECT_ART[projectId] ?? null
 export const artForAugustanProject = (projectId) => AUGUSTAN_PROJECT_ART[projectId] ?? null
 export const artForImperialProject = (projectId) => IMPERIAL_PROJECT_ART[projectId] ?? null
+export const artForTrajanicProject = (projectId) => TRAJANIC_PROJECT_ART[projectId] ?? null
 
 export function augustanCapitalLandmarks(state) {
   if (!state?.augustanCity || state.era < 10) return []
