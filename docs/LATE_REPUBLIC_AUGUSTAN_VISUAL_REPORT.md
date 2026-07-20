@@ -28,6 +28,10 @@ The Agrippan Pantheon is a conservative late-first-century-BC sacred precinct. T
 
 These assets are approved visual inputs, not an implemented Act X. They must not be added to a runtime mapping until the corresponding project definitions, dates, evidence labels, construction stages, maintenance burdens, and deterministic tests exist. Theatre of Pompey may instead be used on a late-Republic historical-context surface after that surface has a stable implementation contract.
 
+## Current runtime use
+
+Theatre of Pompey alone is now used on the Ides historical-context surface. The Forum of Augustus, Mausoleum of Augustus, Theatre of Marcellus, and Agrippan Pantheon remain preproduction assets for a future Act X implementation.
+
 ## Production record
 
 The assets were generated with the built-in OpenAI image-generation tool under project-authored prompts on July 19, 2026. Flat chroma backgrounds were removed locally with the standard Codex chroma-key helper. Each final file is a 1536 by 1024 RGBA PNG with transparent corners. The first Theatre of Marcellus pass was rejected because its facade read too strongly as the Colosseum; the accepted revision reduces the exterior to two dominant arcaded levels and clarifies the half-round theater plan.

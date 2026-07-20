@@ -17,6 +17,12 @@ export function HistoricalContextPanel({ open, turn, consulted, onConsult, onClo
               <span>{note.category}</span>
               <h3>{note.title}</h3>
               <p>{note.text}</p>
+              {note.image && (
+                <figure className="history-note-art">
+                  <img src={note.image.src} alt={note.image.alt} loading="lazy" />
+                  <figcaption>{note.image.evidence}</figcaption>
+                </figure>
+              )}
               <small>{note.evidence}</small>
             </article>
           ))}

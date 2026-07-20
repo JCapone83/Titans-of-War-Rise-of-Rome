@@ -7,7 +7,7 @@ import { calculateCivilSettlementScore, calculateItalianScore, calculateMetropol
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 import { continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
-import { HISTORICAL_NOTES } from '../src/game/historicalContext.js'
+import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { CIVIL_SETTLEMENT_PROJECT_ART, artForCivilSettlementProject, civilSettlementProjectStage } from '../src/game/projectArt.js'
 import { existsSync } from 'node:fs'
@@ -1246,6 +1246,16 @@ test('three Act IX strategies reach 27 BC with distinct viable operating settlem
 
 test('historical context covers the complete Civil War and Settlement act', () => {
   for (const turn of [49, 50, 51, 52, 53, 54]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)), `missing historical context for turn ${turn}`)
+})
+
+test('Ides context exposes the approved Theatre of Pompey visual', () => {
+  const idesNote = notesForTurn(51).find((note) => note.id === 'ides-succession')
+  assert.deepEqual(idesNote.image, {
+    src: '/images/projects/theatre-of-pompey-v1.png',
+    alt: 'Isometric reconstruction of the Theatre of Pompey, its Temple of Venus Victrix, portico garden, and attached curia precinct.',
+    evidence: 'Text-and-evidence synthesis',
+  })
+  assert.equal(notesForTurn(50).some((note) => note.image?.src === idesNote.image.src), false)
 })
 
 test('every Civil Settlement work has project art', () => {

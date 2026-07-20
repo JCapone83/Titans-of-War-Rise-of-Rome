@@ -218,6 +218,11 @@ export const HISTORICAL_NOTES = [
     id: 'ides-succession', title: 'The Ides Removed a Dictator, Not His Obligations', category: 'Contemporary intervention + later narrative', turns: [51],
     text: 'Caesar\'s death left laws, offices, provincial assignments, debts, veterans, promised lands, and armed followers in place. Amnesty and ratification could preserve continuity, but no accepted succession rule determined who controlled the Caesarian coalition or enforced the settlement.',
     evidence: 'Cicero, Philippics and Letters to Atticus 14-16; Nicolaus of Damascus, Life of Augustus; Appian, Civil Wars 2-3; Plutarch, Caesar, Brutus, and Antony; Suetonius, Julius Caesar. Cicero is an active partisan, and the fuller narratives are later and shaped by known outcomes.',
+    image: {
+      src: '/images/projects/theatre-of-pompey-v1.png',
+      alt: 'Isometric reconstruction of the Theatre of Pompey, its Temple of Venus Victrix, portico garden, and attached curia precinct.',
+      evidence: 'Text-and-evidence synthesis',
+    },
   },
   {
     id: 'triumviral-extraction', title: 'War Finance, Proscription, and Italian Land', category: 'Ancient narrative + local and material evidence', turns: [52],
