@@ -1,5 +1,5 @@
-import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, IMPERIAL_CAPITAL_PROJECTS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, formatYear, getCouncil, getDistrict, getFamily, getTier } from './data.js'
-import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState } from './initialState.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, IMPERIAL_CAPITAL_PROJECTS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createTrajanicCapitalState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
@@ -138,6 +138,14 @@ export const updateAugustanCity = (augustan, changes = {}) => {
 export const updateImperialCapital = (imperial, changes = {}) => {
   if (!imperial) return imperial
   return Object.fromEntries(Object.entries(imperial).map(([key, value]) => [
+    key,
+    typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
+  ]))
+}
+
+export const updateTrajanicCapital = (trajanic, changes = {}) => {
+  if (!trajanic) return trajanic
+  return Object.fromEntries(Object.entries(trajanic).map(([key, value]) => [
     key,
     typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
   ]))
@@ -1131,8 +1139,11 @@ export function resolveCouncil(state, optionId) {
   const nextImperialCapital = state.imperialCapital
     ? updateImperialCapital({ ...createImperialCapitalState(state.augustanCity), ...state.imperialCapital }, impacts.imperial)
     : state.imperialCapital
+  const nextTrajanicCapital = state.trajanicCapital
+    ? updateTrajanicCapital({ ...createTrajanicCapitalState(state.imperialCapital), ...state.trajanicCapital }, impacts.trajanic)
+    : state.trajanicCapital
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
-  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, flags: nextFlags }
+  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, trajanicCapital: nextTrajanicCapital, flags: nextFlags }
   return {
     ...state,
     resources: addResources(state.resources, impacts.resources),
@@ -1150,6 +1161,7 @@ export function resolveCouncil(state, optionId) {
     civilSettlement: nextCivilSettlement,
     augustanCity: nextAugustanCity,
     imperialCapital: nextImperialCapital,
+    trajanicCapital: nextTrajanicCapital,
     nextWorksBonus,
     actionsMax: Math.max(state.actionsUsed ?? 0, workforceSummary(capacityState).constructionCapacity),
     councilResolved: true,
@@ -1917,8 +1929,9 @@ export function forecastSeason(state) {
   const civilSettlement = civilSettlementForecast(state)
   const augustanCity = augustanCityForecast(state)
   const imperialCapital = imperialCapitalForecast(state)
+  const trajanicCapital = trajanicCapitalForecast(state)
   return {
-    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta, republicStrain?.resourceDelta, civilSettlement?.resourceDelta, augustanCity?.resourceDelta, imperialCapital?.resourceDelta),
+    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta, republicStrain?.resourceDelta, civilSettlement?.resourceDelta, augustanCity?.resourceDelta, imperialCapital?.resourceDelta, trajanicCapital?.resourceDelta),
     pressures: civicPressures(state),
     actionsRemaining: actionRemaining(state),
     population: projectPopulation(state),
@@ -1935,7 +1948,177 @@ export function forecastSeason(state) {
     civilSettlement,
     augustanCity,
     imperialCapital,
+    trajanicCapital,
   }
+}
+
+function trajanicProgramSelected(state, keys, values) {
+  const flags = state.flags ?? {}
+  const choices = state.choiceLog ?? []
+  return keys.some((key) => {
+    const value = flags[key]
+    return Boolean(value) && (value === true || values.includes(value))
+  }) || values.some((value) => Object.values(flags).includes(value) || choices.some((choice) => choice.optionId === value))
+}
+
+function trajanicPrerequisiteReason(state, projectId) {
+  if (['forumTrajan', 'trajanAdministrativeComplex'].includes(projectId) && !trajanicProgramSelected(
+    state,
+    ['trajanicForumProgram', 'integratedForumProgram', 'quirinalForumProgram'],
+    ['integrated-forum-program', 'integrated-quirinal-forum', 'quirinal-forum-program'],
+  )) return 'The integrated Quirinal/forum program must be authorized before this project can begin.'
+  if (projectId === 'bathsTrajan' && !trajanicProgramSelected(
+    state,
+    ['domusAureaConversion', 'domusAureaGround', 'flavianSettlement'],
+    ['domus-aurea-conversion', 'public-conversion'],
+  )) return 'The former Domus Aurea ground must be converted to public use before the Baths of Trajan can begin.'
+  if (projectId === 'aquaTraiana' && !trajanicProgramSelected(
+    state,
+    ['trajanicWaterProgram', 'waterProgram', 'aquaTraianaProgram'],
+    ['water-program', 'trajanic-water-program', 'aqua-traiana-program'],
+  )) return 'The turn-75 water program must be authorized before Aqua Traiana can begin.'
+  if (projectId === 'trajanicPortus') {
+    const retainedPortus = state.imperialCapital?.projects?.claudianPortus?.completed === true
+    const harborProgram = trajanicProgramSelected(
+      state,
+      ['trajanicHarborProgram', 'harborProgram', 'portusProgram'],
+      ['harbor-program', 'trajanic-harbor-program', 'portus-program'],
+    )
+    if (!retainedPortus) return 'The Claudian Portus must be retained before the Trajanic inner harbor can begin.'
+    if (!harborProgram) return 'The turn-75 harbor program must be authorized before the Trajanic inner harbor can begin.'
+  }
+  if (projectId === 'trajanicCircus' && !trajanicProgramSelected(
+    state,
+    ['circusValleyContinuity', 'valleyContinuity', 'trajanicCircusProgram'],
+    ['circus-program', 'trajanic-circus-program', 'valley-continuity'],
+  )) return 'Inherited Circus valley continuity and the turn-76 reconstruction program are required before the Trajanic Circus can begin.'
+  return null
+}
+
+export function trajanicProjectAvailability(state, projectId) {
+  const blocked = (reason) => ({ available: false, ok: false, reason })
+  if (!state.trajanicCapital || state.era < 12) return blocked('Trajanic Capital public works are not yet available.')
+  const definition = TRAJANIC_CAPITAL_PROJECTS[projectId]
+  const project = state.trajanicCapital.projects?.[projectId]
+  if (!definition || !project) return blocked('Choose a valid Trajanic Capital work.')
+  if (state.turn < definition.unlockTurn) return blocked(`Available in ${formatYear(TURN_YEARS[definition.unlockTurn - 1])}.`)
+  if (project.completed) return blocked(`${definition.name} is operating.`)
+  if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this turn.`)
+  if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this turn.')
+  const prerequisiteReason = trajanicPrerequisiteReason(state, projectId)
+  if (prerequisiteReason) return blocked(prerequisiteReason)
+  const affordability = affordabilityFailure(state, definition.cost)
+  if (affordability) return blocked(affordability)
+  return { available: true, ok: true, definition, project }
+}
+
+export function workTrajanicProject(state, projectId) {
+  const availability = trajanicProjectAvailability(state, projectId)
+  if (!availability.ok) return { state, error: availability.reason }
+  const { definition, project } = availability
+  const progress = project.progress + 1
+  const completed = progress >= project.requiredSeasons
+  const nextProject = { ...project, progress, completed, lastWorkedTurn: state.turn }
+  let trajanicCapital = { ...state.trajanicCapital, projects: { ...state.trajanicCapital.projects, [projectId]: nextProject } }
+  let metrics = state.metrics
+  if (completed) {
+    metrics = addMap(metrics, definition.completionMetrics)
+    trajanicCapital = updateTrajanicCapital(trajanicCapital, definition.completionTrajanic)
+  }
+  return {
+    state: {
+      ...state,
+      resources: addResources(state.resources, reverseChanges(definition.cost)),
+      metrics,
+      trajanicCapital,
+      actionsUsed: (state.actionsUsed ?? 0) + 1,
+      actionLog: appendAction(state, { type: 'trajanic-capital-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
+    },
+    message: completed ? `${definition.name} is operating; its service and recurring burden enter the Trajanic ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} stages.`,
+  }
+}
+
+export function trajanicCapitalForecast(state) {
+  if (!state.trajanicCapital || state.era < 12) return null
+  const t = { ...createTrajanicCapitalState(state.imperialCapital ?? {}), ...state.trajanicCapital }
+  const works = t.projects ?? {}
+  const completedWorks = Object.entries(works).filter(([, project]) => project.completed)
+  const burdens = completedWorks.reduce((result, [id]) => {
+    const definition = TRAJANIC_CAPITAL_PROJECTS[id]
+    return {
+      resourceDelta: mergeChanges(result.resourceDelta, definition?.upkeepResources),
+      metricDelta: mergeChanges(result.metricDelta, definition?.upkeepMetrics),
+      trajanicChanges: mergeChanges(result.trajanicChanges, definition?.upkeepTrajanic),
+    }
+  }, { resourceDelta: {}, metricDelta: {}, trajanicChanges: {} })
+  const maintenanceDebt = t.maintenanceDebt ?? 0
+  const maintenanceCapacity = t.maintenanceCapacity ?? 50
+  const conquestDependence = t.conquestDependence ?? 0
+  const capitalSupply = t.capitalSupply ?? 50
+  const publicProvision = t.publicProvision ?? 50
+  const treasuryWeak = (state.resources?.treasury ?? 0) < 35 || (t.treasuryResilience ?? 50) < 40
+  const debtPressure = Math.max(0, Math.ceil((maintenanceDebt - 35) / 15))
+  const conquestPressure = Math.max(0, Math.ceil((conquestDependence - 45) / 15))
+  const supplyPressure = Math.max(0, Math.ceil((50 - capitalSupply) / 20))
+  const provisionPressure = Math.max(0, Math.ceil((50 - publicProvision) / 20))
+  const changes = mergeChanges(burdens.trajanicChanges, {
+    maintenanceDebt: completedWorks.length && maintenanceCapacity < 60 ? 1 : 0,
+    conquestDependence: treasuryWeak ? 2 : 0,
+    treasuryResilience: treasuryWeak || debtPressure ? -(treasuryWeak ? 2 : 1) : 0,
+    capitalSupply: -(debtPressure + conquestPressure > 0 ? 1 : 0),
+    publicProvision: -(debtPressure + provisionPressure > 0 ? 1 : 0),
+    provincialTrust: conquestPressure > 0 ? -conquestPressure : 0,
+    frontierCommand: conquestPressure >= 2 ? -1 : 0,
+    successionSettlement: treasuryWeak || conquestPressure >= 2 ? -1 : 0,
+    constitutionalContinuity: treasuryWeak || conquestPressure >= 2 ? -1 : 0,
+  })
+  const projected = {
+    ...updateTrajanicCapital(t, changes),
+    projects: structuredClone(works),
+  }
+  const resourcePressure = {
+    treasury: -debtPressure * 2 - conquestPressure - (treasuryWeak ? 2 : 0),
+    grain: -(supplyPressure + provisionPressure),
+  }
+  return {
+    ...projected,
+    changes,
+    projected,
+    resourceDelta: mergeChanges({ treasury: 10 }, resourcePressure, burdens.resourceDelta),
+    metricDelta: {
+      order: -(debtPressure + conquestPressure),
+      food: -(supplyPressure + provisionPressure),
+      sanitation: provisionPressure >= 2 ? -1 : 0,
+      ...burdens.metricDelta,
+    },
+    publicWorks: {
+      completed: completedWorks.map(([id]) => id),
+      resourceDelta: burdens.resourceDelta,
+      metricDelta: burdens.metricDelta,
+      trajanicChanges: burdens.trajanicChanges,
+    },
+    notes: [
+      'Dacian-era revenues provide a modest treasury flow before the capital pays its recurring obligations.',
+      debtPressure ? 'Maintenance debt is recurring: neglected works consume reserves and reduce provision.' : 'Maintenance capacity is carrying the completed capital works this season.',
+      conquestPressure ? 'Conquest dependence is recurring: frontier gains are being asked to cover ordinary capital operations.' : 'The capital is not yet dependent on a new conquest to meet ordinary obligations.',
+      treasuryWeak ? 'Weak treasury resilience narrows the state\'s room to repair, provision, and settle succession.' : 'Treasury resilience leaves room for repair and constitutional settlement.',
+      supplyPressure ? 'Weak capital supply exposes households to recurring grain and transport pressure.' : 'Capital supply remains sufficient for the current operating burden.',
+      provisionPressure ? 'Weak public provision turns maintenance shortfalls into visible civic pressure.' : 'Public provision is keeping the monumental capital socially serviceable.',
+    ],
+  }
+}
+
+export function trajanicCapitalSystems(state) {
+  if (!state?.trajanicCapital || state.era < 12) return []
+  const t = state.trajanicCapital
+  const value = (key, fallback = 50) => t[key] ?? fallback
+  return [
+    capitalSystem('succession-constitution', 'Succession and constitution', value('successionSettlement') * 0.45 + value('constitutionalContinuity') * 0.55, ['Adoption and succession settlement', 'Constitutional continuity', 'Recognized transfer'], ['forumTrajan', 'trajanAdministrativeComplex']),
+    capitalSystem('frontier-provinces', 'Frontier and provinces', value('frontierCommand') * 0.45 + value('provincialTrust') * 0.55, ['Frontier command', 'Provincial trust', 'Accountable administration'], ['trajanAdministrativeComplex', 'trajanicPortus']),
+    capitalSystem('treasury-conquest', 'Treasury and conquest', value('treasuryResilience') * 0.55 + (100 - value('conquestDependence')) * 0.45, ['Treasury resilience', 'Conquest dependence', 'Debt capacity'], ['forumTrajan', 'trajanicPortus']),
+    capitalSystem('capital-supply-provision', 'Capital supply and provision', value('capitalSupply') * 0.55 + value('publicProvision') * 0.45, ['Capital supply', 'Public provision', 'Harbor and water redundancy'], ['aquaTraiana', 'trajanicPortus', 'bathsTrajan']),
+    capitalSystem('maintenance-public-works', 'Maintenance and public works', value('maintenanceCapacity') * 0.65 + (100 - value('maintenanceDebt')) * 0.35, ['Maintenance capacity', 'Maintenance debt', 'Operating public works'], Object.keys(t.projects ?? {})),
+  ]
 }
 
 export function networkCoverage(state) {
@@ -2192,7 +2375,7 @@ export function advanceTurn(state) {
   const pressures = forecast.pressures
   const event = timedEvent(state)
   const resourceDelta = mergeChanges(forecast.resourceDelta, event?.resources)
-  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta, forecast.republicStrain?.metricDelta, forecast.civilSettlement?.metricDelta, forecast.augustanCity?.metricDelta, forecast.imperialCapital?.metricDelta)
+  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta, forecast.republicStrain?.metricDelta, forecast.civilSettlement?.metricDelta, forecast.augustanCity?.metricDelta, forecast.imperialCapital?.metricDelta, forecast.trajanicCapital?.metricDelta)
   const nextResources = addResources(state.resources, resourceDelta)
   let nextMetrics = addMap(state.metrics, metricDelta)
   const shortages = Object.entries(nextResources).filter(([key, value]) => value === 0 && ['grain', 'timber', 'treasury'].includes(key))
@@ -2257,8 +2440,13 @@ export function advanceTurn(state) {
   if (forecast.augustanCity) report.notes.push(...forecast.augustanCity.notes)
   report.imperialCapitalChanges = forecast.imperialCapital?.changes ?? null
   if (forecast.imperialCapital) report.notes.push(...forecast.imperialCapital.notes)
+  report.trajanicCapitalChanges = forecast.trajanicCapital?.changes ?? null
+  if (forecast.trajanicCapital) {
+    report.notes.push(...forecast.trajanicCapital.notes)
+    report.trajanicCapitalProjection = forecast.trajanicCapital.projected
+  }
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, reports: [...state.reports, report] }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, trajanicCapital: forecast.trajanicCapital?.projected ?? state.trajanicCapital, reports: [...state.reports, report] }
   if (forecast.mediterranean?.publicWorks) {
     shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
     report.publicWorks = forecast.mediterranean.publicWorks
@@ -2268,6 +2456,7 @@ export function advanceTurn(state) {
   if (forecast.civilSettlement?.publicWorks) report.civilSettlementPublicWorks = forecast.civilSettlement.publicWorks
   if (forecast.augustanCity?.publicWorks) report.augustanCityPublicWorks = forecast.augustanCity.publicWorks
   if (forecast.imperialCapital?.publicWorks) report.imperialCapitalPublicWorks = forecast.imperialCapital.publicWorks
+  if (forecast.trajanicCapital?.publicWorks) report.trajanicCapitalPublicWorks = forecast.trajanicCapital.publicWorks
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
   if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
   if (state.turn === 41) return { state: { ...state, ...shared, outcome: 'metropolitan-complete' }, report }
@@ -2275,6 +2464,7 @@ export function advanceTurn(state) {
   if (state.turn === 54) return { state: { ...state, ...shared, outcome: 'civil-settlement-complete' }, report }
   if (state.turn === 61) return { state: { ...state, ...shared, outcome: 'augustan-city-complete' }, report }
   if (state.turn === 70) return { state: { ...state, ...shared, outcome: 'imperial-capital-complete' }, report }
+  if (state.turn === 76) return { state: { ...state, ...shared, turn: 76, outcome: 'trajanic-capital-complete' }, report }
   if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }

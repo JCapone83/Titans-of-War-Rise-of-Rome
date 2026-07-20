@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
 import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
+import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
@@ -1569,4 +1569,45 @@ test('AD 96 outcome and chronicle expose Imperial Operating Systems without a Ha
   assert.match(markdown, /### Imperial Operating Systems/)
   assert.doesNotMatch(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.summary, /ruin|medieval/i)
   assert.doesNotMatch(JSON.stringify(IMPERIAL_CAPITAL_PROJECTS), /coffered dome|oculus/i)
+})
+
+test('Act XII council impacts update the Trajanic ledger', () => {
+  const state = {
+    ...createInitialState(), version: 16, era: 12, turn: 71,
+    imperialCapital: createImperialCapitalState(), trajanicCapital: createTrajanicCapitalState(createImperialCapitalState()),
+    council: getCouncil(71), councilResolved: false, actionsUsed: 0, actionsMax: 3,
+  }
+  const before = state.trajanicCapital.successionSettlement
+  const resolved = resolveCouncil(state, 'recorded-adoption')
+  assert.ok(resolved.trajanicCapital.successionSettlement > before)
+  assert.equal(resolved.flags.trajanicSuccession, 'recorded-adoption')
+})
+
+test('Act XII project gates and recurring burdens are explicit', () => {
+  let state = {
+    ...createInitialState(), version: 16, era: 12, turn: 73,
+    resources: { grain: 100, timber: 100, stone: 100, bronze: 100, treasury: 100 },
+    imperialCapital: createImperialCapitalState(), trajanicCapital: createTrajanicCapitalState(createImperialCapitalState()),
+    council: getCouncil(73), councilResolved: false, actionsUsed: 0, actionsMax: 3,
+  }
+  assert.equal(trajanicProjectAvailability(state, 'forumTrajan').available, false)
+  state = resolveCouncil(state, 'integrated-forum-program')
+  for (let step = 0; step < TRAJANIC_CAPITAL_PROJECTS.forumTrajan.seasons; step += 1) {
+    state = { ...state, turn: 73 + step, council: null, councilResolved: true, actionsUsed: 0 }
+    const result = workTrajanicProject(state, 'forumTrajan')
+    assert.equal(result.error, undefined)
+    state = result.state
+  }
+  assert.equal(state.trajanicCapital.projects.forumTrajan.completed, true)
+  const forecast = trajanicCapitalForecast(state)
+  assert.ok(forecast.publicWorks.completed.includes('forumTrajan'))
+  assert.ok(forecast.resourceDelta.treasury < 12)
+})
+
+test('Act XII operating pressure penalizes debt and conquest dependence', () => {
+  const base = { ...createInitialState(), version: 16, era: 12, turn: 76, trajanicCapital: createTrajanicCapitalState(createImperialCapitalState()) }
+  const strong = { ...base, trajanicCapital: { ...base.trajanicCapital, maintenanceCapacity: 80, maintenanceDebt: 5, conquestDependence: 5, treasuryResilience: 80, capitalSupply: 80, publicProvision: 80 } }
+  const brittle = { ...base, trajanicCapital: { ...base.trajanicCapital, maintenanceCapacity: 25, maintenanceDebt: 85, conquestDependence: 85, treasuryResilience: 25, capitalSupply: 30, publicProvision: 30 } }
+  assert.ok(trajanicCapitalForecast(strong).resourceDelta.treasury > trajanicCapitalForecast(brittle).resourceDelta.treasury)
+  assert.ok(trajanicCapitalSystems(strong).reduce((sum, system) => sum + system.score, 0) > trajanicCapitalSystems(brittle).reduce((sum, system) => sum + system.score, 0))
 })
