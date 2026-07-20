@@ -7,6 +7,8 @@ import { CivicRail } from './components/CivicRail.jsx'
 import { DecisionCouncil } from './components/DecisionCouncil.jsx'
 import { EraTransition } from './components/EraTransition.jsx'
 import { HistoricalContextPanel } from './components/HistoricalContextPanel.jsx'
+import { HomeCreditsPanel } from './components/HomeCreditsPanel.jsx'
+import { HomeScreen } from './components/HomeScreen.jsx'
 import { ProjectLedger } from './components/ProjectLedger.jsx'
 import { RepublicPanel } from './components/RepublicPanel.jsx'
 import { ReconstructionPanel } from './components/ReconstructionPanel.jsx'
@@ -34,34 +36,38 @@ import { TurnReport } from './components/TurnReport.jsx'
 import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
 import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
-import { createInitialState, migrateState } from './game/initialState.js'
+import { createInitialState } from './game/initialState.js'
+import { describeCampaign, hasCampaignProgress, parseCampaignSnapshot } from './game/homeScreen.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, continueToTrajanicCapital, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain, enterTrajanicCapital } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
 import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from './game/simulation.js'
 
 const STORAGE_KEY = 'titans-of-war-birth-of-rome-v1'
 
+function storedCampaign() {
+  return parseCampaignSnapshot(localStorage.getItem(STORAGE_KEY))
+}
+
 function restoreState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    const migrated = migrateState(saved)
-    if (migrated) return migrated
-  } catch {
-    // A corrupt local save should never prevent a new campaign.
-  }
-  return createInitialState()
+  return storedCampaign() ?? createInitialState()
 }
 
 export default function App() {
   const [state, setState] = useState(restoreState)
+  const [screen, setScreen] = useState('home')
+  const [hasSavedCampaign, setHasSavedCampaign] = useState(() => Boolean(storedCampaign()))
+  const [campaignStarted, setCampaignStarted] = useState(() => Boolean(storedCampaign()))
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [creditsOpen, setCreditsOpen] = useState(false)
   const [soundtrackOpen, setSoundtrackOpen] = useState(false)
-  const [walkthroughOpen, setWalkthroughOpen] = useState(() => !localStorage.getItem('birth-of-rome-walkthrough-seen'))
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false)
   const [report, setReport] = useState(null)
   const [message, setMessage] = useState('')
   const [toast, setToast] = useState('')
   const [surface, setSurface] = useState('city')
   const era = ERAS[state.era]
+  const homeCampaign = useMemo(() => describeCampaign(state), [state])
+  const canContinue = hasSavedCampaign || campaignStarted || hasCampaignProgress(state)
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
   const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition && !state.metropolitanTransition && !state.strainTransition && !state.settlementTransition && !state.augustanTransition && !state.imperialCapitalTransition && !state.trajanicCapitalTransition ? calculateOutcome(state) : null, [state])
 
@@ -69,6 +75,7 @@ export default function App() {
     const handleKey = (event) => {
       if (event.key === 'Escape') {
         setHistoryOpen(false)
+        setCreditsOpen(false)
         setSoundtrackOpen(false)
         setWalkthroughOpen(false)
       }
@@ -121,6 +128,8 @@ export default function App() {
 
   const save = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    setHasSavedCampaign(true)
+    setCampaignStarted(true)
     setToast('Campaign saved in this browser.')
   }
 
@@ -131,8 +140,41 @@ export default function App() {
     const fresh = createInitialState()
     localStorage.removeItem(STORAGE_KEY)
     setState(fresh)
+    setHasSavedCampaign(false)
+    setCampaignStarted(true)
     setReport(null)
     setMessage('')
+  }
+
+  const openCampaign = () => {
+    setCampaignStarted(true)
+    setScreen('game')
+    setCreditsOpen(false)
+    if (!localStorage.getItem('birth-of-rome-walkthrough-seen')) setWalkthroughOpen(true)
+  }
+
+  const beginNewCampaign = () => {
+    if (canContinue && !window.confirm('Begin a new campaign? The current saved or in-memory position will be replaced.')) return
+    localStorage.removeItem(STORAGE_KEY)
+    setState(createInitialState())
+    setHasSavedCampaign(false)
+    setCampaignStarted(true)
+    setReport(null)
+    setMessage('')
+    setHistoryOpen(false)
+    setCreditsOpen(false)
+    setSoundtrackOpen(false)
+    setScreen('game')
+    if (!localStorage.getItem('birth-of-rome-walkthrough-seen')) setWalkthroughOpen(true)
+  }
+
+  const openHome = () => {
+    setScreen('home')
+    setHistoryOpen(false)
+    setCreditsOpen(false)
+    setSoundtrackOpen(false)
+    setWalkthroughOpen(false)
+    setReport(null)
   }
 
   const closeWalkthrough = () => {
@@ -142,6 +184,28 @@ export default function App() {
 
   const consult = (noteId) => {
     if (!state.consultedNotes.includes(noteId)) setState({ ...state, consultedNotes: [...state.consultedNotes, noteId] })
+  }
+
+  if (screen === 'home') {
+    return (
+      <div className="app-shell home-shell">
+        <HomeScreen
+          canContinue={canContinue}
+          campaignSummary={homeCampaign.summary}
+          historyOpen={historyOpen}
+          creditsOpen={creditsOpen}
+          musicOpen={soundtrackOpen}
+          onPrimary={openCampaign}
+          onNewCampaign={beginNewCampaign}
+          onOpenHistory={() => setHistoryOpen(true)}
+          onOpenCredits={() => setCreditsOpen(true)}
+          onToggleMusic={() => setSoundtrackOpen((current) => !current)}
+        />
+        <SoundtrackControl open={soundtrackOpen} turn={state.turn} onClose={() => setSoundtrackOpen(false)} />
+        <HistoricalContextPanel open={historyOpen} turn={state.turn} consulted={state.consultedNotes} onConsult={consult} onClose={() => setHistoryOpen(false)} />
+        <HomeCreditsPanel open={creditsOpen} onClose={() => setCreditsOpen(false)} />
+      </div>
+    )
   }
 
   return (
@@ -155,6 +219,7 @@ export default function App() {
         onOpenHistory={() => setHistoryOpen(true)}
         onToggleMusic={() => setSoundtrackOpen((current) => !current)}
         onOpenWalkthrough={() => setWalkthroughOpen(true)}
+        onOpenHome={openHome}
         onSave={save}
         onExport={exportCampaign}
         onRestart={restart}

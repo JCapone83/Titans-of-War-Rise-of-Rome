@@ -81,6 +81,12 @@ npm run build
 npm run preview
 ```
 
+## Campaign Home
+
+The game opens on a full campaign home rather than dropping the player into an active turn. **Begin Campaign** starts a fresh settlement. After play has begun, **Continue Campaign** returns to the current in-memory position and shows its era, date, and turn; a browser save remains available through the campaign toolbar. **New Campaign** requires confirmation before it replaces a saved or active position.
+
+Use the Home control in the campaign toolbar to return to the home screen without changing or silently saving the current simulation. Historical Method, Credits and Rights, and the opt-in Music control are available before entering play.
+
 ## Soundtrack
 
 Birth of Rome includes an opt-in, self-hosted six-track classical soundtrack. Open the music control in the campaign header to see the recording recommended for the current era, select another recording, adjust volume, or mute playback. No music plays until the player presses Play, and every recording includes a direct source-and-rights link. All audio is served from the installed game; playback requires no account, model, API, or internet connection.

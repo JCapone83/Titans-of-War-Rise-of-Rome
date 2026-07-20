@@ -7,6 +7,7 @@ import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImp
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runAllTrajanicCapitalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 import { parseStoredMuted, parseStoredVolume, soundtrackTrackIdForTurn, soundtrackTracks } from '../src/game/soundtrack.js'
+import { describeCampaign, hasCampaignProgress, parseCampaignSnapshot } from '../src/game/homeScreen.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToTrajanicCapital, enterTrajanicCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
@@ -14,6 +15,32 @@ import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
+
+test('home screen rejects absent corrupt and incompatible saves', () => {
+  assert.equal(parseCampaignSnapshot(null), null)
+  assert.equal(parseCampaignSnapshot(''), null)
+  assert.equal(parseCampaignSnapshot('{broken'), null)
+  assert.equal(parseCampaignSnapshot(JSON.stringify({ ...createInitialState(), version: 999 })), null)
+})
+
+test('home screen summarizes valid campaign progress', () => {
+  const state = { ...createInitialState(), turn: 76, era: 12 }
+  const restored = parseCampaignSnapshot(JSON.stringify(state))
+  const summary = describeCampaign(restored)
+  assert.equal(summary.era, 'Trajanic Capital')
+  assert.equal(summary.year, 'AD 117')
+  assert.equal(summary.turn, 76)
+  assert.equal(summary.totalTurns, 76)
+  assert.equal(summary.summary, 'Trajanic Capital · AD 117 · Turn 76 of 76')
+})
+
+test('home screen recognizes in-memory campaign progress', () => {
+  const initial = createInitialState()
+  assert.equal(hasCampaignProgress(initial), false)
+  assert.equal(hasCampaignProgress({ ...initial, turn: 2 }), true)
+  assert.equal(hasCampaignProgress({ ...initial, buildings: [{ instanceId: 'hut' }] }), true)
+  assert.equal(hasCampaignProgress({ ...initial, choiceLog: [{ turn: 1, optionId: 'a' }] }), true)
+})
 
 test('soundtrack catalog contains six self-hosted verified recordings', () => {
   const hashes = {

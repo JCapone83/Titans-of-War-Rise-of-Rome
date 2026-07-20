@@ -1,7 +1,7 @@
-import { BookOpen, Download, HelpCircle, Music2, RotateCcw, Save } from 'lucide-react'
+import { BookOpen, Download, HelpCircle, Home, Music2, RotateCcw, Save } from 'lucide-react'
 import { TURN_YEARS, formatYear } from '../game/data.js'
 
-export function TopBar({ era, turn, year, historyOpen, musicOpen, onOpenHistory, onToggleMusic, onOpenWalkthrough, onSave, onExport, onRestart }) {
+export function TopBar({ era, turn, year, historyOpen, musicOpen, onOpenHome, onOpenHistory, onToggleMusic, onOpenWalkthrough, onSave, onExport, onRestart }) {
   return (
     <header className="topbar">
       <div className="brand-block">
@@ -17,12 +17,13 @@ export function TopBar({ era, turn, year, historyOpen, musicOpen, onOpenHistory,
         <small>Turn {turn} of {TURN_YEARS.length}</small>
       </div>
       <nav className="top-actions" aria-label="Campaign tools">
+        <button className="icon-button" onClick={onOpenHome} title="Home" aria-label="Open home screen"><Home /></button>
         <button className="icon-button" onClick={onOpenHistory} title="Historical knowledge" aria-label="Open historical knowledge" aria-haspopup="dialog" aria-expanded={historyOpen}><BookOpen /></button>
         <button className="icon-button" onClick={onToggleMusic} title={musicOpen ? 'Close soundtrack' : 'Open soundtrack'} aria-label={musicOpen ? 'Close soundtrack' : 'Open soundtrack'} aria-expanded={musicOpen}><Music2 /></button>
         <button className="icon-button" onClick={onOpenWalkthrough} title="Walkthrough" aria-label="Open walkthrough"><HelpCircle /></button>
         <button className="icon-button desktop-action" onClick={onSave} title="Save campaign" aria-label="Save campaign"><Save /></button>
         <button className="icon-button desktop-action" onClick={onExport} title="Export chronicle" aria-label="Export chronicle"><Download /></button>
-        <button className="icon-button" onClick={onRestart} title="Restart" aria-label="Restart campaign"><RotateCcw /></button>
+        <button className="icon-button mobile-optional" onClick={onRestart} title="Restart" aria-label="Restart campaign"><RotateCcw /></button>
       </nav>
     </header>
   )

@@ -148,3 +148,15 @@ The soundtrack is opt-in and self-hosted. The program does not contact the sourc
 - SHA-256: `184a48b9fd9bc4e42ee0f145246da66b7455fbd860f43c9c639a136e9ea70f70`
 
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.
+
+## Campaign home artwork
+
+### Early Rome at the Tiber dawn
+
+- File: `public/images/home/early-rome-tiber-dawn.png`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Rights basis: OpenAI-assisted original game artwork produced for this project; no source photograph is embedded or redistributed.
+- Historical scope: A bounded interpretation of settlement beside the Tiber around 753-700 BC, using timber, thatch, wattle, livestock, river craft, and separated hill communities. It intentionally excludes later monumental Rome.
+- SHA-256: `70c80ee1ff51865fdd64dc2a9a43f527ffc1215dba4e06b65083cd109a30397e`
+
+The image is interface background art rather than archaeological evidence. It must not be presented as a reconstruction of one documented view or named event.
