@@ -50,6 +50,13 @@ const CONTENT = {
     unlocks: ['Metropolitan ledger', 'Forum capacity', 'Provincial command pressure'],
     action: 'Enter the metropolis',
   },
+  strain: {
+    eyebrow: '133-121 BC - reform outlives its authors',
+    title: 'Republic Under Strain',
+    text: 'The Gracchan conflicts leave land, grain, service, citizenship, courts, and political procedure unsettled. Rome must govern Italy and the provinces while military commands acquire constituencies of their own.',
+    unlocks: ['Constitutional ledger', 'Dated civic works', 'Command and demobilization risk'],
+    action: 'Enter the late Republic',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

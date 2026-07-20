@@ -67,6 +67,22 @@ export function calculateMetropolitanScore(state) {
   return { score: bounded, grade: grade(bounded), capacity: Math.round(capacity), boundedPower: Math.round(boundedPower), household: Math.round(household), statusLegibility: Math.round(statusLegibility), physical: Math.round(physical), completed, active }
 }
 
+export function calculateRepublicStrainScore(state) {
+  if (!state.republicStrain) return null
+  const s = state.republicStrain
+  const projects = Object.values(s.projects ?? {})
+  const completed = projects.filter((project) => project.completed).length
+  const active = projects.filter((project) => !project.completed && project.progress > 0).length
+  const civicChannels = Math.max(0, Math.min(100, (s.courtCapacity + s.archiveIntegrity + s.popularConsentChannels) / 3))
+  const commandLimits = Math.max(0, Math.min(100, (s.senateCommandControl + s.demobilizationCapacity + (100 - s.commanderPersonalLoyalty) + (100 - s.emergencyPowersPrecedent)) / 4))
+  const italianSettlement = Math.max(0, Math.min(100, (s.citizenshipIntegration + (100 - s.italianClaimsPressure)) / 2))
+  const civilOrder = Math.max(0, Math.min(100, ((100 - s.landTitleDisputes) + (100 - s.streetViolence) + s.urbanFireResponse) / 3))
+  const physical = Math.max(0, Math.min(100, 45 + completed * 11 + active * 4))
+  const score = Math.round(civicChannels * 0.23 + commandLimits * 0.27 + italianSettlement * 0.2 + civilOrder * 0.15 + physical * 0.15)
+  const bounded = Math.max(0, Math.min(100, score))
+  return { score: bounded, grade: grade(bounded), civicChannels: Math.round(civicChannels), commandLimits: Math.round(commandLimits), italianSettlement: Math.round(italianSettlement), civilOrder: Math.round(civilOrder), physical: Math.round(physical), completed, active }
+}
+
 export function calculateOutcome(state) {
   const average = (keys) => keys.reduce((sum, key) => sum + state.metrics[key], 0) / keys.length
   const drainage = hasBuilding(state, 'cloaca-works') ? 12 : hasBuilding(state, 'drainage-ditch') ? 5 : -10
@@ -84,12 +100,13 @@ export function calculateOutcome(state) {
   const civic = Math.round(average(['order', 'auspices']) + 8 - factionSpread * 0.35 + (republic ? (republicanConsent - 40) * 0.25 : 0) + (reconstruction ? (reconstruction.recordsIntegrity - 50) * 0.08 + (reconstruction.latinTrust - 50) * 0.06 : 0))
   const logistics = Math.round(average(['food', 'water', 'trade']) + Math.min(10, state.resources.grain + state.resources.treasury) / 2 - damagedWorks * 2 - (republic ? republic.debtStrain * 0.08 : 0) - (reconstruction ? reconstruction.displaced * 0.08 : 0))
   const military = Math.round(state.metrics.readiness + countFamily(state, 'defense') * 5 - Math.max(0, 45 - state.metrics.food) * 0.25 - (republic ? Math.max(0, republic.levyBurden - 35) * 0.15 : 0) - (reconstruction ? reconstruction.wallUrgency * 0.05 : 0))
-  const expectedCouncils = state.turn >= 30 ? 24 + Math.min(12, state.turn - 29) : state.turn >= 29 ? 24 : state.turn >= 23 ? 18 : state.turn >= 20 ? 15 : state.turn >= 16 ? 11 : state.turn >= 13 ? 8 : 5
+  const expectedCouncils = state.turn >= 30 ? 24 + Math.min(19, state.turn - 29) : state.turn >= 29 ? 24 : state.turn >= 23 ? 18 : state.turn >= 20 ? 15 : state.turn >= 16 ? 11 : state.turn >= 13 ? 8 : 5
   const actThreeContinuity = state.turn >= 16 ? (state.flags?.veiiResolution ? 3 : -3) + (state.flags?.gallicPlan ? 3 : -3) : 0
   const actFourContinuity = state.turn >= 20 ? (state.flags?.reconstructionPolicy ? 4 : -4) + (state.flags?.latinSettlement ? 4 : -4) : 0
   const regionalContinuity = state.turn >= 23 ? (state.flags?.regionalDoctrine ? 3 : -3) + (state.flags?.regionalCharter ? 3 : -3) + (state.flags?.regionalSettlement ? 3 : -3) : 0
   const italianContinuity = state.turn >= 29 ? ['caudineResponse', 'appianPriority', 'samniteSettlement', 'sentinumPlan', 'pyrrhicPosture', 'pyrrhicEndgame', 'mediterraneanDoctrine'].reduce((sum, key) => sum + (state.flags?.[key] ? 1 : -1), 0) : 0
-  const continuity = Math.round(56 + (hasBuilding(state, 'cloaca-works') ? 10 : 0) + (hasBuilding(state, 'podium-temple') ? 10 : 0) + (state.choiceLog.length === expectedCouncils ? 8 : 0) + Math.min(8, tierTwoWorks * 2) - unfinishedProjects * 4 - Math.abs(state.buildings.length - 10) * 2 + (state.flags?.tribunesEstablished ? 4 : 0) + actThreeContinuity + actFourContinuity + regionalContinuity + italianContinuity)
+  const strainContinuity = state.turn >= 48 ? ['landGrainSettlement', 'italianSettlement', 'emergencyCommand', 'sullanSettlement', 'archiveSettlement', 'assemblySettlement', 'rubiconSettlement'].reduce((sum, key) => sum + (state.flags?.[key] ? 1 : -1), 0) : 0
+  const continuity = Math.round(56 + (hasBuilding(state, 'cloaca-works') ? 10 : 0) + (hasBuilding(state, 'podium-temple') ? 10 : 0) + (state.choiceLog.length === expectedCouncils ? 8 : 0) + Math.min(8, tierTwoWorks * 2) - unfinishedProjects * 4 - Math.abs(state.buildings.length - 10) * 2 + (state.flags?.tribunesEstablished ? 4 : 0) + actThreeContinuity + actFourContinuity + regionalContinuity + italianContinuity + strainContinuity)
   const scores = {
     'Urban Design': Math.max(0, Math.min(100, urban)),
     'Civic Balance': Math.max(0, Math.min(100, civic)),
@@ -111,9 +128,12 @@ export function calculateOutcome(state) {
   }
   const metropolitanScore = calculateMetropolitanScore(state)
   if (metropolitanScore && state.turn >= 37) scores['Conquest and Metropolis'] = metropolitanScore.score
+  const strainScore = calculateRepublicStrainScore(state)
+  if (strainScore && state.turn >= 42) scores['Republic Under Strain'] = strainScore.score
   const overall = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.keys(scores).length)
   let title = 'A City Still Becoming'
-  if (state.turn >= 41) title = scores['Conquest and Metropolis'] >= 70 ? 'A Metropolitan Republic With Working Limits' : 'Conquest Outruns the Republican City'
+  if (state.turn >= 48) title = scores['Republic Under Strain'] >= 70 ? 'A Republic Still Capable of Settlement' : 'Command Outruns the Republic'
+  else if (state.turn >= 41) title = scores['Conquest and Metropolis'] >= 70 ? 'A Metropolitan Republic With Working Limits' : 'Conquest Outruns the Republican City'
   else if (state.turn >= 36) title = scores['Mediterranean Republic'] >= 70 ? 'The Mediterranean Republic Endures' : 'Mediterranean Victory With Unpaid Obligations'
   else if (state.turn >= 32) title = 'The Mediterranean Opening'
   else if (state.turn >= 29 && overall >= 72) title = 'Rome Reaches the Mediterranean Threshold'
@@ -125,7 +145,7 @@ export function calculateOutcome(state) {
     title,
     overall,
     summary: overall >= 72
-      ? state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
+      ? state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
       : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
     grades: Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, { score: value, grade: grade(value) }])),
   }

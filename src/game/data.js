@@ -55,9 +55,16 @@ export const ERAS = [
     turns: [37, 41],
     summary: 'Convert conquest into public capacity without allowing crowding, contracts, commands, or patrons to consume the republican city.',
   },
+  {
+    id: 'republic-under-strain',
+    name: 'Republic Under Strain',
+    span: '133-49 BC',
+    turns: [42, 48],
+    summary: 'Test whether land, citizenship, courts, assemblies, and military command can be revised without making emergency power permanent.',
+  },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49]
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -163,6 +170,59 @@ export const METROPOLITAN_PROJECTS = {
     upkeepResources: { treasury: -1 },
     upkeepMetropolitan: { patronageConcentration: 1 },
     burdenLabel: 'Roofing, paving, drains, policing, and access to the backing rooms remain recurring obligations.',
+  },
+}
+
+export const REPUBLIC_STRAIN_PROJECTS = {
+  landCensusRegistry: {
+    id: 'landCensusRegistry', name: 'Land and Census Registry', seasons: 3, unlockTurn: 42,
+    cost: { timber: 1 },
+    summary: 'Survey rooms, duplicate tablets, census rolls, and hearing space make land claims reviewable without pretending that records alone settle disputed possession.',
+    completionMetrics: { order: 4, trade: 2 },
+    completionStrain: { landTitleDisputes: -13, courtCapacity: 7, archiveIntegrity: 7, citizenshipIntegration: 4 },
+    upkeepResources: { treasury: -1 },
+    upkeepStrain: { courtCapacity: 1 },
+    burdenLabel: 'Surveyors, copyists, hearings, and duplicate records require continuing appropriations.',
+  },
+  citizenshipRegisters: {
+    id: 'citizenshipRegisters', name: 'Italian Citizenship Registers', seasons: 3, unlockTurn: 43,
+    cost: { timber: 1, grain: 1 },
+    summary: 'Distributed enrollment, census verification, voting assignments, and municipal copies turn a legal concession into an administrable Italian citizenship.',
+    completionMetrics: { order: 5, trade: 2 },
+    completionStrain: { citizenshipIntegration: 19, italianClaimsPressure: -18, courtCapacity: 5, archiveIntegrity: 5 },
+    upkeepResources: { treasury: -1 },
+    upkeepStrain: { citizenshipIntegration: 1 },
+    burdenLabel: 'Enrollment, appeals, municipal copies, and revised levy rolls remain active work.',
+  },
+  forumCourts: {
+    id: 'forumCourts', name: 'Forum Courts and Assembly Routes', seasons: 3, unlockTurn: 42,
+    cost: { stone: 1, timber: 1 }, prerequisite: 'republicanBasilica',
+    summary: 'Defined hearing spaces, posted routes, barriers, and stewarded approaches preserve lawful assembly and court business in a crowded civic core.',
+    completionMetrics: { order: 6, trade: 3 },
+    completionStrain: { courtCapacity: 14, popularConsentChannels: 12, streetViolence: -8 },
+    upkeepResources: { treasury: -1 },
+    upkeepStrain: { streetViolence: -1 },
+    burdenLabel: 'Clerks, route control, repairs, and equal access must be funded beyond the dedication.',
+  },
+  tabularium: {
+    id: 'tabularium', name: 'Tabularium State Archive', seasons: 2, unlockTurn: 45,
+    cost: { stone: 1 }, prerequisite: 'landCensusRegistry',
+    summary: 'A massive archive and retaining complex at the Capitoline slope gives accounts, laws, treaties, and titles guarded continuity without inventing its disputed upper form.',
+    completionMetrics: { order: 5, trade: 2 },
+    completionStrain: { archiveIntegrity: 24, courtCapacity: 9, landTitleDisputes: -8, emergencyPowersPrecedent: -3 },
+    upkeepResources: { treasury: -1 },
+    upkeepStrain: { archiveIntegrity: 1 },
+    burdenLabel: 'Guards, copyists, fire protection, indexing, and record transfer remain permanent charges.',
+  },
+  watchStations: {
+    id: 'watchStations', name: 'Watch and Service Stations', seasons: 3, unlockTurn: 45,
+    cost: { timber: 1 },
+    summary: 'Small junction compounds store buckets, hooks, ladders, lamps, route tablets, and hand carts: a bounded republican precursor, not the later imperial vigiles.',
+    completionMetrics: { order: 5, sanitation: 3 },
+    completionStrain: { urbanFireResponse: 19, streetViolence: -10, popularConsentChannels: 3 },
+    upkeepResources: { treasury: -1 },
+    upkeepStrain: { urbanFireResponse: 1 },
+    burdenLabel: 'Night patrols, equipment, water access, and accountable local command require recurring service.',
   },
 }
 
@@ -638,6 +698,79 @@ COUNCILS.push(
 
 COUNCILS.push(
   {
+    turn: 42, id: 'land-commission-and-grain', title: 'Land Commission and Grain', speaker: 'Tribunes, senators, commissioners, possessors, veterans, tenants, grain officers, and Italian delegates',
+    prompt: 'The Gracchan conflicts have made land, grain, military service, and constitutional procedure inseparable in public debate. What rule should survive the men who first pressed it?',
+    context: 'Appian and Plutarch provide the fullest connected narratives, but both wrote long afterward and shaped events around character and constitutional decline. Surviving agrarian-law evidence confirms complex claims and procedures without supplying a complete transcript of the conflicts.',
+    options: [
+      { id: 'recorded-commission', label: 'Continue a bounded commission under recorded appeal', detail: 'Survey public claims, preserve hearings, and pair limited allotments with measured grain contracts, accepting delay and a large judicial burden.', impacts: { resources: { treasury: -5, grain: -2 }, metrics: { order: 3, food: 3 }, strain: { landTitleDisputes: -9, courtCapacity: 7, popularConsentChannels: 7, emergencyPowersPrecedent: -3, streetViolence: -2 }, flags: { landGrainSettlement: 'recorded-commission' } } },
+      { id: 'colonial-outlets', label: 'Use colonial outlets and bounded grain relief', detail: 'Move part of the land demand to surveyed settlements and relieve the city market, while shifting title disputes and obligations into Italian and provincial communities.', impacts: { resources: { treasury: -3, grain: 4 }, metrics: { food: 5, readiness: 3 }, strain: { landTitleDisputes: -4, italianClaimsPressure: 4, demobilizationCapacity: 8, courtCapacity: 2, popularConsentChannels: 2 }, flags: { landGrainSettlement: 'colonial-outlets' } } },
+      { id: 'senatorial-restoration', label: 'End the commission and restore senatorial disposal', detail: 'Close the extraordinary machinery and reduce immediate administrative conflict, leaving possession and military-service claims to ordinary influence and future bargaining.', impacts: { resources: { treasury: 4 }, metrics: { order: -2, trade: 3 }, strain: { landTitleDisputes: 10, courtCapacity: -4, popularConsentChannels: -10, streetViolence: 8, emergencyPowersPrecedent: 4 }, flags: { landGrainSettlement: 'senatorial-restoration' } } },
+    ],
+  },
+  {
+    turn: 43, id: 'italian-claims', title: 'Italian Claims and Roman Citizenship', speaker: 'Senators, tribunes, censors, allied delegates, municipal magistrates, commanders, and treasury officers',
+    prompt: 'Italian communities have carried war, tax, and military obligations without equal access to Roman decisions. How should citizenship and administration be joined?',
+    context: 'The Social War followed decades of varied claims and proposals, not one uniform Italian program. Citizenship grants during and after the war required enrollment, census, voting assignments, municipal adjustment, and military settlement before legal language became operating reality.',
+    options: [
+      { id: 'staged-citizenship', label: 'Grant staged citizenship with distributed enrollment', detail: 'Authorize citizenship while funding municipal copies, census review, and voting assignments so inclusion can operate beyond a single declaration.', impacts: { resources: { treasury: -6, timber: -2 }, metrics: { order: 5, readiness: 2 }, strain: { citizenshipIntegration: 17, italianClaimsPressure: -16, courtCapacity: 5, archiveIntegrity: 5, senateCommandControl: -2 }, flags: { italianSettlement: 'staged-citizenship' } } },
+      { id: 'negotiated-compacts', label: 'Negotiate status by community and service record', detail: 'Preserve differentiated compacts and offer wider rights in stages, reducing immediate registry cost while leaving unequal standing and future bargaining.', impacts: { resources: { treasury: -3 }, metrics: { trade: 4, order: 2 }, strain: { citizenshipIntegration: 8, italianClaimsPressure: -7, courtCapacity: 2, landTitleDisputes: 3, popularConsentChannels: 2 }, flags: { italianSettlement: 'negotiated-compacts' } } },
+      { id: 'delay-and-mobilize', label: 'Delay inclusion and mobilize against coercion', detail: 'Treat armed pressure as a threat to lawful authority, preserving immediate senatorial discretion while risking a wider war and a harsher later settlement.', impacts: { resources: { treasury: -5, grain: -3 }, metrics: { readiness: 7, order: -7 }, strain: { citizenshipIntegration: -7, italianClaimsPressure: 18, commanderPersonalLoyalty: 7, emergencyPowersPrecedent: 8, streetViolence: 5 }, flags: { italianSettlement: 'military-delay' } } },
+    ],
+  },
+  {
+    turn: 44, id: 'emergency-command', title: 'Emergency Command and the Eastern War', speaker: 'Consuls, senators, tribunes, veteran officers, creditors, Italian delegates, and envoys from the East',
+    prompt: 'An eastern command, recent Italian war, and rival claims to military authority collide. What rule governs command when ordinary competition threatens armed reversal?',
+    context: 'The transfer of the Mithridatic command and Sulla\'s march on Rome established precedents whose exact motives are filtered through later narratives. The decisive institutional fact is that military command and domestic political settlement became directly entangled.',
+    options: [
+      { id: 'ordinary-command-review', label: 'Keep the command within ordinary office and review', detail: 'Require a dated mandate, public accounts, and a successor named through the established sequence, accepting slower concentration and intense political bargaining.', impacts: { resources: { treasury: -3 }, metrics: { readiness: 2, order: 4 }, strain: { senateCommandControl: 9, commanderPersonalLoyalty: -8, emergencyPowersPrecedent: -6, courtCapacity: 4, popularConsentChannels: 3 }, flags: { emergencyCommand: 'ordinary-review' } } },
+      { id: 'single-command-with-audit', label: 'Grant one extended command with an audit and return date', detail: 'Concentrate the eastern war under one experienced commander while binding finance, recruitment, and succession to a published review.', impacts: { resources: { treasury: -4, grain: -2 }, metrics: { readiness: 7, order: 1 }, strain: { senateCommandControl: 3, commanderPersonalLoyalty: 4, emergencyPowersPrecedent: 4, demobilizationCapacity: 3, archiveIntegrity: 2 }, flags: { emergencyCommand: 'extended-audited' } } },
+      { id: 'competing-commands', label: 'Balance factions with competing commands', detail: 'Divide men, provinces, and promises among rival leaders so no one monopolizes force, accepting confused orders and personal recruitment.', impacts: { resources: { treasury: -6, grain: -3 }, metrics: { readiness: 3, order: -8 }, strain: { senateCommandControl: -12, commanderPersonalLoyalty: 15, emergencyPowersPrecedent: 11, streetViolence: 8, demobilizationCapacity: -5 }, flags: { emergencyCommand: 'competing-commands' } } },
+    ],
+  },
+  {
+    turn: 45, id: 'sullan-settlement', title: 'The Sullan Settlement', speaker: 'Senators, magistrates, veterans, dispossessed households, jurists, municipal delegates, and treasury officers',
+    prompt: 'Victory has returned an army to Rome. Courts, titles, offices, and veteran claims must be settled under the shadow of confiscation. Which institutions survive the settlement?',
+    context: 'The dictatorship, proscriptions, confiscations, colonies, Senate enlargement, and limits on the tribunate are broadly attested, but surviving totals and individual motives vary. The game separates military victory from the administrative durability of the settlement.',
+    options: [
+      { id: 'recorded-demobilization', label: 'Demobilize through recorded grants and ordinary trials', detail: 'Survey veteran grants, hear title claims, and prosecute named offenses in ordinary forms, accepting cost, delay, and continued political opposition.', impacts: { resources: { treasury: -7, grain: -3 }, metrics: { order: 4, readiness: -2 }, strain: { demobilizationCapacity: 15, landTitleDisputes: -8, courtCapacity: 9, archiveIntegrity: 7, emergencyPowersPrecedent: -5, commanderPersonalLoyalty: -5 }, flags: { sullanSettlement: 'recorded-demobilization' } } },
+      { id: 'proscription-and-colonies', label: 'Use proscription, confiscation, and veteran colonies', detail: 'Finance victory and settle soldiers through seizure under concentrated authority, gaining immediate compliance while multiplying title disputes and personal military obligation.', impacts: { resources: { treasury: 10, grain: 3 }, metrics: { order: -4, readiness: 7 }, strain: { demobilizationCapacity: 10, landTitleDisputes: 19, courtCapacity: -9, archiveIntegrity: -6, emergencyPowersPrecedent: 17, commanderPersonalLoyalty: 15, streetViolence: 10 }, flags: { sullanSettlement: 'proscription-colonies' } } },
+      { id: 'temporary-dictatorship', label: 'Authorize a temporary dictatorship with mixed courts', detail: 'Permit concentrated reconstruction for a fixed term while preserving tribunes, municipal appeals, and mixed juries as checks on confiscation.', impacts: { resources: { treasury: -2 }, metrics: { order: 6, readiness: 4 }, strain: { senateCommandControl: 5, emergencyPowersPrecedent: 7, courtCapacity: 7, archiveIntegrity: 5, streetViolence: -3, demobilizationCapacity: 7 }, flags: { sullanSettlement: 'bounded-dictatorship' } } },
+    ],
+  },
+  {
+    turn: 46, id: 'archives-and-courts', title: 'Archives, Courts, and the Post-Sullan City', speaker: 'Censors, quaestors, praetors, scribes, jurists, contractors, and municipal petitioners',
+    prompt: 'Confiscations, new citizens, provincial accounts, and revised courts have outgrown scattered records. What should anchor legal continuity?',
+    context: 'The structure commonly called the Tabularium is traditionally dated to 78 BC, though the ancient name and use of every part remain debated. Its monumental substructure securely represents the growing physical demands of records, accounts, and the Capitoline-Forum connection.',
+    options: [
+      { id: 'public-archive-system', label: 'Build a guarded public archive and copying system', detail: 'Unify accounts, laws, treaties, and title copies under controlled access while preserving municipal and magistrate duplicates.', impacts: { resources: { treasury: -6, stone: -3 }, metrics: { order: 5, trade: 2 }, strain: { archiveIntegrity: 16, courtCapacity: 10, landTitleDisputes: -7, emergencyPowersPrecedent: -3 }, flags: { archiveSettlement: 'public-system' } } },
+      { id: 'patronal-legal-halls', label: 'License patronal halls to carry hearings and copies', detail: 'Expand capacity quickly through leading houses and advocates, leaving access and preservation dependent on private networks.', impacts: { resources: { treasury: -2, stone: -1 }, metrics: { trade: 5 }, strain: { courtCapacity: 9, archiveIntegrity: 3, popularConsentChannels: -5, commanderPersonalLoyalty: 3, streetViolence: 2 }, metropolitan: { patronageConcentration: 7 }, flags: { archiveSettlement: 'patronal-halls' } } },
+      { id: 'magistrate-custody', label: 'Keep separate records under annual magistrates', detail: 'Avoid a costly central project and preserve office autonomy, accepting uneven copying, transfer loss, and weaker title verification.', impacts: { resources: { treasury: 3 }, metrics: { order: -2 }, strain: { archiveIntegrity: -9, courtCapacity: -4, landTitleDisputes: 7, senateCommandControl: 2 }, flags: { archiveSettlement: 'magistrate-custody' } } },
+    ],
+  },
+  {
+    turn: 47, id: 'city-of-assemblies', title: 'The City of Assemblies', speaker: 'Consuls, tribunes, senators, jurists, neighborhood leaders, merchants, and watch officers',
+    prompt: 'Elections, trials, debt, grain, and allegations of conspiracy draw crowds into narrow routes. How should the city preserve public business without surrendering it to armed clients?',
+    context: 'Late republican political violence involved officeholders, associations, patrons, crowds, courts, and armed followers in changing combinations. Later speeches and histories are indispensable but partisan; no faction possessed a neutral transcript of the city.',
+    options: [
+      { id: 'open-routes-and-trials', label: 'Protect open routes, posted meetings, and ordinary trials', detail: 'Fund watch stations and crowd routes while keeping arrests and prosecutions within reviewable forms.', impacts: { resources: { treasury: -5, timber: -2 }, metrics: { order: 6, trade: 2 }, strain: { streetViolence: -12, popularConsentChannels: 10, courtCapacity: 7, urbanFireResponse: 7, emergencyPowersPrecedent: -3 }, flags: { assemblySettlement: 'open-routes' } } },
+      { id: 'licensed-associations', label: 'License associations under named patrons', detail: 'Use organized neighborhood and occupational groups to manage crowds and provision, accepting stronger patronal command over attendance.', impacts: { resources: { treasury: -2, grain: 2 }, metrics: { order: 2, food: 3 }, strain: { streetViolence: -3, popularConsentChannels: 4, commanderPersonalLoyalty: 6, emergencyPowersPrecedent: 3, urbanFireResponse: 2 }, metropolitan: { patronageConcentration: 6 }, flags: { assemblySettlement: 'licensed-associations' } } },
+      { id: 'emergency-curfew', label: 'Impose emergency curfew and magistrate detention', detail: 'Clear the civic core quickly under extraordinary authority, reducing immediate crowds while weakening ordinary consent and legal review.', impacts: { resources: { treasury: -3 }, metrics: { order: 5, trade: -4 }, strain: { streetViolence: -5, popularConsentChannels: -13, courtCapacity: -7, emergencyPowersPrecedent: 13, senateCommandControl: 3 }, flags: { assemblySettlement: 'emergency-curfew' } } },
+    ],
+  },
+  {
+    turn: 48, id: 'command-at-the-rubicon', title: 'Command at the Italian Boundary', speaker: 'Consuls, senators, tribunes, Caesarian and Pompeian envoys, veteran officers, treasury officials, and Italian municipal delegates',
+    prompt: 'A provincial command approaches its legal end while rival forces and ultimatums narrow the room for settlement. What rule should govern the return of armies to civic authority?',
+    context: 'Caesar\'s crossing in 49 BC followed years of competition over commands, prosecution risk, elections, provincial settlements, and the standing of Pompey. Caesar, Cicero, Appian, Plutarch, and Cassius Dio preserve incompatible perspectives; the campaign stops before resolving the civil war.',
+    options: [
+      { id: 'mutual-disarmament', label: 'Require mutual disarmament and a mediated return', detail: 'Set dates for relinquishing commands, guarantee lawful candidacy and trial, and place demobilization under mixed senatorial, tribunician, and municipal witnesses.', impacts: { resources: { treasury: -6, grain: -2 }, metrics: { order: 7, readiness: -3 }, strain: { commanderPersonalLoyalty: -13, senateCommandControl: 11, emergencyPowersPrecedent: -8, demobilizationCapacity: 12, popularConsentChannels: 6, streetViolence: -5 }, flags: { rubiconSettlement: 'mutual-disarmament' } } },
+      { id: 'senatorial-ultimatum', label: 'Issue the senatorial ultimatum and prepare Italy', detail: 'Demand immediate surrender of the disputed command and mobilize under the Senate, defending formal authority while risking that soldiers follow their commander across the boundary.', impacts: { resources: { treasury: -5, grain: -4 }, metrics: { readiness: 8, order: -5 }, strain: { senateCommandControl: 5, commanderPersonalLoyalty: 10, emergencyPowersPrecedent: 9, demobilizationCapacity: -6, streetViolence: 7 }, flags: { rubiconSettlement: 'senatorial-ultimatum' } } },
+      { id: 'single-restoring-command', label: 'Authorize one restoring command over Italy', detail: 'Concentrate force in the leader judged most capable of preventing wider war, accepting that constitutional settlement now depends on personal obedience.', impacts: { resources: { treasury: -3, grain: -3 }, metrics: { readiness: 10, order: 1 }, strain: { senateCommandControl: -11, commanderPersonalLoyalty: 17, emergencyPowersPrecedent: 15, demobilizationCapacity: -8, popularConsentChannels: -5 }, flags: { rubiconSettlement: 'restoring-command' } } },
+    ],
+  },
+)
+
+COUNCILS.push(
+  {
     turn: 37, id: 'triumph-or-capacity', title: 'Triumph or Capacity', speaker: 'Censors, senators, treasury officers, allied delegates, and returning commanders',
     prompt: 'Eastern victory enlarges the treasury and the claims upon it. Which obligation should receive first call on the windfall?',
     context: 'The wars of the early second century BC brought indemnities, booty, captives, artworks, commands, and public expectations into Rome. Ancient narratives describe triumphs and settlements more readily than the full accounts behind them.',
@@ -726,6 +859,13 @@ export const OBJECTIVES = [
   { from: 39, to: 39, text: 'Settle commands and spoils without allowing victory to outrun public accounts.' },
   { from: 40, to: 40, text: 'Decide whether the victories of 146 BC enlarge public capacity, extraction, or bounded command.' },
   { from: 41, to: 41, text: 'Meet the land, grain, and service crisis without pretending one measure resolves every obligation.' },
+  { from: 42, to: 42, text: 'Decide which land, grain, and appeal machinery should survive the Gracchan conflicts.' },
+  { from: 43, to: 43, text: 'Turn Italian citizenship claims into an administrable settlement before war decides them.' },
+  { from: 44, to: 44, text: 'Keep military command from becoming the final court of domestic politics.' },
+  { from: 45, to: 45, text: 'Settle victory, veterans, courts, and land titles without making confiscation the constitution.' },
+  { from: 46, to: 46, text: 'Give laws, accounts, and titles physical continuity in the post-Sullan city.' },
+  { from: 47, to: 47, text: 'Preserve assemblies and trials amid crowding, patronage, and armed political competition.' },
+  { from: 48, to: 48, text: 'Judge whether armies can return to civic authority before civil war becomes the settlement.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

@@ -65,6 +65,7 @@ def main() -> None:
         "docs/REGIONAL_SPINE_BALANCE_REPORT.md": "Strategic Depth",
         "docs/ACT_V_BALANCE_REPORT.md": "Appian Persistence",
         "docs/ACT_VII_OPENING_BALANCE_REPORT.md": "200-133 BC",
+        "docs/ACT_VIII_BALANCE_REPORT.md": "133-49 BC",
         "docs/ART_DIRECTION_AND_ASSET_SPEC.md": "Approve one Palatine Huts master first",
         "docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md": "Palatine Huts",
         "docs/BATCH_5_STRUCTURE_CONCEPT_BIBLE.md": "Comitium",
@@ -147,6 +148,19 @@ def main() -> None:
     require("src/game/outcomes.js", "calculateMetropolitanScore")
     require("src/game/campaignExport.js", "Metropolitan Public Works")
     require("src/game/historicalContext.js", "gracchan-threshold")
+    require("src/game/data.js", "REPUBLIC_STRAIN_PROJECTS")
+    require("src/game/data.js", "The Sullan Settlement")
+    require("src/game/data.js", "Command at the Italian Boundary")
+    require("src/game/initialState.js", "createRepublicStrainState")
+    require("src/game/continuation.js", "continueToRepublicUnderStrain")
+    require("src/game/simulation.js", "republicStrainForecast")
+    require("src/game/simulation.js", "workRepublicStrainProject")
+    require("src/game/outcomes.js", "calculateRepublicStrainScore")
+    require("src/components/RepublicStrainPanel.jsx", "Constitutional ledger")
+    require("src/components/RepublicStrainWorksPanel.jsx", "Late-Republic works")
+    require("src/game/referenceStrategies.js", "runAllRepublicStrainStrategies")
+    require("scripts/run-balance.mjs", "Act VIII Republic Under Strain strategies")
+    require("src/game/historicalContext.js", "rubicon-threshold")
     require("src/game/data.js", "first-secession")
     require("src/game/data.js", "veii-settlement")
     require("src/game/data.js", "gallic-approach")

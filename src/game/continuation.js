@@ -1,5 +1,5 @@
 import { getCouncil } from './data.js'
-import { createMediterraneanState, createMetropolitanState } from './initialState.js'
+import { createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
 import { calculateOutcome } from './outcomes.js'
 
 export function freezeCoreJudgment(state) {
@@ -159,6 +159,41 @@ export function enterMetropolis(state) {
     nextWorksBonus: 0,
     selectedBuildingId: null,
     council: getCouncil(37),
+    councilResolved: false,
+  }
+}
+
+export function continueToRepublicUnderStrain(state) {
+  if (state.turn !== 41 || state.outcome !== 'metropolitan-complete' || state.strainTransition) return state
+  return { ...state, strainTransition: true }
+}
+
+export function enterRepublicUnderStrain(state) {
+  if (!state.strainTransition || state.turn !== 41 || state.outcome !== 'metropolitan-complete') return state
+  const bridgeExists = (state.chronologyBridges ?? []).some((bridge) => bridge.id === 'gracchan-conflicts')
+  const bridge = {
+    id: 'gracchan-conflicts',
+    fromYear: 133,
+    toYear: 121,
+    mediterraneanChanges: {},
+    notes: [
+      'The deaths of Tiberius and Gaius Gracchus do not settle the land, grain, military-service, citizenship, and constitutional disputes they made unavoidable.',
+      'The continuation begins in 121 BC with every inherited work, account, compact, and metropolitan burden preserved.',
+    ],
+  }
+  return {
+    ...state,
+    version: 12,
+    turn: 42,
+    era: 8,
+    outcome: null,
+    strainTransition: false,
+    republicStrain: state.republicStrain ?? createRepublicStrainState(),
+    chronologyBridges: bridgeExists ? state.chronologyBridges : [...(state.chronologyBridges ?? []), bridge],
+    actionsUsed: 0,
+    nextWorksBonus: 0,
+    selectedBuildingId: null,
+    council: getCouncil(42),
     councilResolved: false,
   }
 }

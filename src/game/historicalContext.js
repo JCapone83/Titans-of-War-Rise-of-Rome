@@ -174,6 +174,36 @@ export const HISTORICAL_NOTES = [
     text: 'By 133 BC, public land, long military service, tenancy, wealth, imported grain, Italian obligations, urban migration, and competition for command pressed on one another. Ancient writers selected different causes and moral lessons. The evidence supports a linked crisis, not a single self-explaining statistic or an inevitable reform program.',
     evidence: 'Appian, Civil Wars 1.7-27; Plutarch, Tiberius Gracchus 5-21; Polybius 6.19-26 for the levy system; agrarian law evidence including the later lex agraria of 111 BC. Appian and Plutarch are much later than the events and should be compared with legal, demographic, military, and archaeological evidence rather than treated as transcripts.',
   },
+  {
+    id: 'gracchan-aftermath', title: 'Reform After the Gracchi', category: 'Later narrative + agrarian law evidence', turns: [42],
+    text: 'The deaths of Tiberius and Gaius Gracchus did not remove the land, grain, service, and procedural questions attached to their programs. Commissions, colonies, market provision, possession, and appeal remained practical disputes even when later writers organized them around personalities and constitutional decline.',
+    evidence: 'Appian, Civil Wars 1.7-27; Plutarch, Tiberius Gracchus and Gaius Gracchus; fragments and inscriptions associated with the lex agraria of 111 BC. The narratives are late and rhetorically shaped; the legal evidence is partial and technically disputed.',
+  },
+  {
+    id: 'social-war-citizenship', title: 'The Social War and Citizenship in Practice', category: 'Ancient narrative + law + municipal evidence', turns: [43],
+    text: 'Italian communities entered the conflict with different histories, demands, and calculations. Rome answered war with successive grants whose implementation required census work, municipal records, voting assignments, levy revision, and adjudication. Citizenship was a legal settlement and an administrative project.',
+    evidence: 'Appian, Civil Wars 1.34-53; Velleius Paterculus 2.15-17; Cicero, Pro Balbo and Pro Archia for citizenship administration; the lex Plautia Papiria and related measures as preserved through later legal and literary testimony. Exact enrollment and voting arrangements remain debated.',
+  },
+  {
+    id: 'marius-sulla-command', title: 'Command Becomes Domestic Power', category: 'Ancient narrative under partisan conditions', turns: [44, 45],
+    text: 'The Social War and Mithridatic command gave rival leaders armies, officers, creditors, veterans, and political claims that ordinary annual competition could no longer contain. Sulla\'s marches demonstrated that a Roman army might become an instrument for settling Roman offices and laws.',
+    evidence: 'Appian, Civil Wars 1.55-106; Plutarch, Marius and Sulla; fragments of Sisenna and Sallust; Cicero\'s later references. The sequence is broadly recoverable, but speeches, motives, totals, and moral portraits reflect later political argument.',
+  },
+  {
+    id: 'tabularium-records', title: 'The Tabularium and the Burden of Records', category: 'Archaeology + inscription + cautious identification', turns: [46],
+    text: 'The great Capitoline substructure traditionally called the Tabularium belongs to the post-Sullan rebuilding and is securely monumental, but the ancient name and use of every room are not. The game uses it as evidence that accounts, laws, treaties, and title records required guarded space, copying, access, and fire protection.',
+    evidence: 'Inscription CIL 6.1314 naming Q. Lutatius Catulus and the substruction; archaeological study of the Capitoline-Forum complex; ancient references to public tabulae and archives. The common identification should be presented with its architectural and functional uncertainties.',
+  },
+  {
+    id: 'late-republic-streets', title: 'Assemblies, Courts, and Street Force', category: 'Contemporary speeches + later histories', turns: [47],
+    text: 'Late republican public action took place through assemblies, courts, elections, processions, associations, patronal followings, and sometimes organized force. Crowds were not one permanent faction, and emergency policing could protect public business or become another weapon in officeholding competition.',
+    evidence: 'Cicero, In Catilinam, Pro Sestio, and Pro Milone; Sallust, Bellum Catilinae; Asconius\' commentaries; Appian, Civil Wars 2. Contemporary speeches are partisan forensic and political evidence, not neutral crowd reports.',
+  },
+  {
+    id: 'rubicon-threshold', title: 'The 49 BC Command Crisis', category: 'Participant accounts + correspondence + later narrative', turns: [48],
+    text: 'The final crisis joined command duration, prosecution risk, candidacy, Senate procedure, Pompey\'s position, Caesar\'s army, and fear of renewed disorder. No single slogan explains the crossing. The game stops at the boundary so a civil-war outcome is not smuggled into the choice itself.',
+    evidence: 'Caesar, Civil War 1.1-32; Cicero, Letters to Atticus 7 and Letters to Friends 16; Appian, Civil Wars 2.25-40; Plutarch, Caesar and Pompey; Cassius Dio 41. Caesar is a participant defending his conduct, Cicero writes amid uncertainty, and the connected narratives are later.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

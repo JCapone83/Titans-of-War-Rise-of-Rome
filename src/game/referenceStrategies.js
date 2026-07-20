@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
-import { continueToMediterranean, continueToMetropolis, enterHannibalicEmergency, enterMediterranean, enterMetropolis } from './continuation.js'
-import { calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject, workMetropolitanProject } from './simulation.js'
+import { continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
+import { calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -507,5 +507,50 @@ export function runAllMetropolitanStrategies() {
       state = result.state
     }
     return { strategy, state, outcome: calculateOutcome(state), metropolitanScore: calculateMetropolitanScore(state), skipped, ledger }
+  })
+}
+
+export const REPUBLIC_STRAIN_STRATEGIES = [
+  {
+    id: 'recorded-republic', name: 'Recorded Republic',
+    councils: { 42: 'recorded-commission', 43: 'staged-citizenship', 44: 'ordinary-command-review', 45: 'recorded-demobilization', 46: 'public-archive-system', 47: 'open-routes-and-trials', 48: 'mutual-disarmament' },
+    projectPriorities: { 42: 'landCensusRegistry', 43: 'landCensusRegistry', 44: 'landCensusRegistry', 45: 'tabularium', 46: 'tabularium', 47: 'forumCourts', 48: 'forumCourts' },
+  },
+  {
+    id: 'integrated-italy', name: 'Integrated Italy',
+    councils: { 42: 'colonial-outlets', 43: 'staged-citizenship', 44: 'single-command-with-audit', 45: 'temporary-dictatorship', 46: 'public-archive-system', 47: 'open-routes-and-trials', 48: 'mutual-disarmament' },
+    projectPriorities: { 42: 'landCensusRegistry', 43: 'citizenshipRegisters', 44: 'citizenshipRegisters', 45: 'citizenshipRegisters', 46: 'watchStations', 47: 'watchStations', 48: 'watchStations' },
+  },
+  {
+    id: 'bounded-command-settlement', name: 'Bounded Command Settlement',
+    councils: { 42: 'colonial-outlets', 43: 'negotiated-compacts', 44: 'single-command-with-audit', 45: 'temporary-dictatorship', 46: 'public-archive-system', 47: 'open-routes-and-trials', 48: 'mutual-disarmament' },
+    projectPriorities: { 42: 'landCensusRegistry', 43: 'landCensusRegistry', 44: 'landCensusRegistry', 45: 'watchStations', 46: 'watchStations', 47: 'watchStations' },
+  },
+]
+
+export function runAllRepublicStrainStrategies() {
+  const bases = runAllMetropolitanStrategies()
+  return REPUBLIC_STRAIN_STRATEGIES.map((strategy, index) => {
+    let state = enterRepublicUnderStrain(continueToRepublicUnderStrain(bases[index].state))
+    const skipped = []
+    const ledger = []
+    while (state.outcome !== 'republic-strain-complete') {
+      const optionId = strategy.councils[state.turn]
+      if (state.council && !state.councilResolved) {
+        if (!optionId) skipped.push({ turn: state.turn, reason: 'No Republic Under Strain council choice declared.' })
+        else state = resolveCouncil(state, optionId)
+      }
+      const projectId = strategy.projectPriorities[state.turn]
+      if (projectId && actionRemaining(state)) {
+        const work = workRepublicStrainProject(state, projectId)
+        if (work.error) skipped.push({ turn: state.turn, projectId, reason: work.error })
+        else state = work.state
+      }
+      ledger.push({ turn: state.turn, republicStrain: { ...state.republicStrain, projects: structuredClone(state.republicStrain.projects ?? {}) }, resources: { ...state.resources }, bridges: structuredClone(state.chronologyBridges ?? []) })
+      const result = advanceTurn(state)
+      if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+      state = result.state
+    }
+    return { strategy, state, outcome: calculateOutcome(state), strainScore: calculateRepublicStrainScore(state), skipped, ledger }
   })
 }
