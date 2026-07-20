@@ -1,6 +1,6 @@
 import { TURN_YEARS, formatYear } from './data.js'
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { regionalForecast, workforceSummary } from './simulation.js'
+import { augustanCapitalSystems, regionalForecast, workforceSummary } from './simulation.js'
 
 const section = (title, lines) => [`## ${title}`, ...lines, ''].join('\n')
 const projectLines = (projects, unit = 'seasons', complete = 'complete') => Object.values(projects ?? {}).map((project) => `- ${project.id}: ${project.completed ? complete : `${project.progress}/${project.requiredSeasons} ${unit}`}`)
@@ -16,6 +16,7 @@ export function campaignMarkdown(state) {
   const strainScore = calculateRepublicStrainScore(state)
   const civilScore = calculateCivilSettlementScore(state)
   const augustanScore = calculateAugustanCityScore(state)
+  const capitalSystems = augustanCapitalSystems(state)
   const output = [
     '# Titans of War: Birth of Rome',
     '',
@@ -169,6 +170,9 @@ export function campaignMarkdown(state) {
     `- Succession capacity: ${augustanScore.succession}`,
     ...ledgerLines(state.augustanCity),
     `- The Augustan City score: ${augustanScore.grade} (${augustanScore.score})`,
+    '### Capital Operating Systems',
+    ...capitalSystems.map((system) => `- ${system.name}: ${system.score}/100 (${system.status})`),
+    `- Landmark works: ${augustanScore.completed} operating; ${augustanScore.active} active`,
     '### Augustan Public Works',
     ...projectLines(state.augustanCity.projects, 'stages', 'operating'),
   ]))

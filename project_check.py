@@ -208,6 +208,13 @@ def main() -> None:
     require("src/game/referenceStrategies.js", "runAllAugustanCityStrategies")
     require("scripts/run-balance.mjs", "Act X The Augustan City strategies")
     require("src/game/historicalContext.js", "succession-ad14")
+    require("src/game/projectArt.js", "AUGUSTAN_PROJECT_SITES")
+    require("src/game/projectArt.js", "augustanCapitalLandmarks")
+    require("src/game/simulation.js", "augustanCapitalSystems")
+    require("src/components/CityMap.jsx", "Augustan capital")
+    require("src/components/OutcomeOverlay.jsx", "Capital legacy")
+    require("src/game/campaignExport.js", "Capital Operating Systems")
+    require("docs/ACT_X_CAPITAL_INTEGRATION_REPORT.md", "No Act XI")
     for asset in [
         "house-of-augustus-v1.png", "mausoleum-of-augustus-v1.png", "agrippan-pantheon-v1.png",
         "baths-of-agrippa-v1.png", "theatre-of-marcellus-v1.png", "ara-pacis-v1.png",

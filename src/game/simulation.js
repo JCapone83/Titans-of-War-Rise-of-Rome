@@ -1720,6 +1720,47 @@ export function augustanCityForecast(state) {
   }
 }
 
+const capitalSystem = (id, name, value, drivers, works) => {
+  const score = Math.round(clamp(value))
+  const status = score >= 75 ? 'Resilient' : score >= 60 ? 'Operating' : score >= 45 ? 'Strained' : 'Exposed'
+  return { id, name, score, status, drivers, works }
+}
+
+export function augustanCapitalSystems(state) {
+  if (!state?.augustanCity || state.era < 10) return []
+  const a = state.augustanCity
+  return [
+    capitalSystem(
+      'civic-government',
+      'Civic government',
+      (a.senateMagistrateCapacity + a.urbanAdministration + a.publicAccess + a.provincialCommandBalance) / 4 - Math.max(0, a.patronageConcentration - 55) * 0.2,
+      ['Senate and magistrates', 'Urban administration', 'Public access', 'Provincial review'],
+      ['forumAugustus', 'araPacis', 'palatineOfficialPrecinct'],
+    ),
+    capitalSystem(
+      'public-provision',
+      'Public provision',
+      (a.annonaReliability + a.publicAccess + a.maintenanceCapacity + a.urbanAdministration) / 4,
+      ['Annona reliability', 'Public access', 'Maintenance', 'Administration'],
+      ['bathsAgrippa', 'agrippanPantheon', 'theatreMarcellus'],
+    ),
+    capitalSystem(
+      'urban-safety',
+      'Urban safety',
+      a.fireCoverage * 0.45 + a.maintenanceCapacity * 0.3 + a.urbanAdministration * 0.25,
+      ['Fire coverage', 'Maintenance', 'Ward administration'],
+      ['vigilesWardNetwork', 'bathsAgrippa'],
+    ),
+    capitalSystem(
+      'succession-memory',
+      'Succession and memory',
+      a.successionConfidence * 0.4 + Math.min(a.householdStanding, a.senateMagistrateCapacity) * 0.25 + a.monumentMemory * 0.2 + a.provincialCommandBalance * 0.15,
+      ['Succession confidence', 'Household and Senate balance', 'Public memory', 'Command recognition'],
+      ['mausoleumAugustus', 'palatineOfficialPrecinct', 'araPacis'],
+    ),
+  ]
+}
+
 export function forecastSeason(state) {
   const production = sumBuildingMaps(state, 'production')
   const upkeep = reverseChanges(sumBuildingMaps(state, 'upkeep'))

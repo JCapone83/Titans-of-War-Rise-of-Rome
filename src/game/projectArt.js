@@ -64,6 +64,17 @@ export const AUGUSTAN_PROJECT_ART = {
   },
 }
 
+export const AUGUSTAN_PROJECT_SITES = {
+  palatineOfficialPrecinct: { name: 'Palatine Official Precinct', zone: 'Palatine', x: 54, y: 39, unlockTurn: 55 },
+  mausoleumAugustus: { name: 'Mausoleum of Augustus', zone: 'Campus Martius', x: 18, y: 17, unlockTurn: 55 },
+  agrippanPantheon: { name: "Agrippa's Pantheon Precinct", zone: 'Campus Martius', x: 29, y: 34, unlockTurn: 55 },
+  bathsAgrippa: { name: 'Baths of Agrippa', zone: 'Campus Martius', x: 20, y: 47, unlockTurn: 56 },
+  theatreMarcellus: { name: 'Theatre of Marcellus', zone: 'Circus Flaminius', x: 30, y: 72, unlockTurn: 57 },
+  araPacis: { name: 'Ara Pacis Augustae', zone: 'Campus Martius', x: 10, y: 31, unlockTurn: 57 },
+  forumAugustus: { name: 'Forum of Augustus', zone: 'Roman Forum / Subura', x: 45, y: 57, unlockTurn: 59 },
+  vigilesWardNetwork: { name: 'Vigiles Ward Network', zone: 'Urban wards', x: 72, y: 52, unlockTurn: 60 },
+}
+
 const STAGES = {
   reserved: { key: 'reserved', label: 'Reserved site' },
   foundations: { key: 'foundations', label: 'Foundations and service' },
@@ -73,6 +84,26 @@ const STAGES = {
 
 export const artForCivilSettlementProject = (projectId) => CIVIL_SETTLEMENT_PROJECT_ART[projectId] ?? null
 export const artForAugustanProject = (projectId) => AUGUSTAN_PROJECT_ART[projectId] ?? null
+
+export function augustanCapitalLandmarks(state) {
+  if (!state?.augustanCity || state.era < 10) return []
+  return Object.entries(AUGUSTAN_PROJECT_SITES).flatMap(([id, site]) => {
+    if (state.turn < site.unlockTurn) return []
+    const project = state.augustanCity.projects?.[id]
+    const art = artForAugustanProject(id)
+    if (!project || !art) return []
+    const stage = augustanProjectStage(project, { seasons: project.requiredSeasons })
+    return [{
+      id,
+      ...site,
+      art,
+      stage,
+      progress: Math.max(0, project.progress ?? 0),
+      requiredSeasons: Math.max(1, project.requiredSeasons ?? 1),
+      completed: Boolean(project.completed),
+    }]
+  })
+}
 
 export function civilSettlementProjectStage(project, definition) {
   const progress = Math.max(0, Number(project?.progress) || 0)

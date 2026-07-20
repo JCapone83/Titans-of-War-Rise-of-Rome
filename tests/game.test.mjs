@@ -2,14 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
 import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, formatYear, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
+import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
-import { AUGUSTAN_PROJECT_ART, CIVIL_SETTLEMENT_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
+import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -1350,4 +1350,51 @@ test('three Act X strategies reach distinct viable settlements at AD 14', () => 
     assert.ok(calculateAugustanCityScore(result.state))
     assert.match(campaignMarkdown(result.state), /The Augustan City[\s\S]+succession/i)
   }
+})
+
+test('Augustan capital sites are unique, bounded, and chronology gated', () => {
+  assert.deepEqual(Object.keys(AUGUSTAN_PROJECT_SITES).sort(), Object.keys(AUGUSTAN_PROJECTS).sort())
+  const positions = new Set()
+  for (const site of Object.values(AUGUSTAN_PROJECT_SITES)) {
+    assert.ok(site.x >= 0 && site.x <= 100)
+    assert.ok(site.y >= 0 && site.y <= 100)
+    positions.add(`${site.x}:${site.y}`)
+  }
+  assert.equal(positions.size, 8)
+  const beforeAct = { ...createInitialState(), augustanCity: createAugustanState() }
+  assert.deepEqual(augustanCapitalLandmarks(beforeAct), [])
+  const opening = { ...beforeAct, era: 10, turn: 55 }
+  const landmarks = augustanCapitalLandmarks(opening)
+  assert.deepEqual(landmarks.map((landmark) => landmark.id).sort(), ['agrippanPantheon', 'mausoleumAugustus', 'palatineOfficialPrecinct'])
+  assert.ok(landmarks.every((landmark) => landmark.stage.key === 'reserved'))
+  const worked = workAugustanProject({ ...opening, resources: { grain: 20, timber: 20, stone: 20, bronze: 5, treasury: 20 }, actionsUsed: 0, actionsMax: 2 }, 'palatineOfficialPrecinct').state
+  assert.equal(augustanCapitalLandmarks(worked).find((landmark) => landmark.id === 'palatineOfficialPrecinct').stage.key, 'foundations')
+})
+
+test('Augustan capital systems are bounded and respond to their operating measures', () => {
+  const state = { ...createInitialState(), era: 10, turn: 60, augustanCity: createAugustanState() }
+  const systems = augustanCapitalSystems(state)
+  assert.equal(systems.length, 4)
+  assert.deepEqual(systems.map((system) => system.name), ['Civic government', 'Public provision', 'Urban safety', 'Succession and memory'])
+  assert.ok(systems.every((system) => system.score >= 0 && system.score <= 100 && system.drivers.length >= 3 && system.works.length >= 2))
+  const improved = augustanCapitalSystems({ ...state, augustanCity: { ...state.augustanCity, fireCoverage: 100 } })
+  assert.ok(improved.find((system) => system.id === 'urban-safety').score > systems.find((system) => system.id === 'urban-safety').score)
+  assert.equal(improved.find((system) => system.id === 'civic-government').score, systems.find((system) => system.id === 'civic-government').score)
+})
+
+test('AD 14 capital legacy reaches the outcome and chronicle without adding Act XI', () => {
+  const result = runAllAugustanCityStrategies()[0]
+  const outcome = calculateOutcome(result.state)
+  assert.equal(result.state.turn, 61)
+  assert.equal(outcome.capitalLegacy.systems.length, 4)
+  assert.equal(outcome.capitalLegacy.operatingForm, result.augustanScore.operatingForm)
+  assert.equal(outcome.capitalLegacy.completed, result.augustanScore.completed)
+  assert.match(campaignMarkdown(result.state), /Capital Operating Systems[\s\S]+Urban safety[\s\S]+Landmark works:/)
+  assert.equal(TURN_YEARS.length, 61)
+})
+
+test('Augustan capital keeps the pre-Hadrianic Pantheon guardrail', () => {
+  const pantheon = AUGUSTAN_PROJECT_ART.agrippanPantheon
+  assert.match(pantheon.alt, /disputed Augustan temple precinct/)
+  assert.doesNotMatch(`${pantheon.alt} ${AUGUSTAN_PROJECT_SITES.agrippanPantheon.name}`, /coffer|oculus|domed rotunda/i)
 })

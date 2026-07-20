@@ -55,6 +55,8 @@ This `0.1.0` campaign contains 61 deterministic turns and 56 political councils.
 - Three viable 27 BC operating forms: an Augustan-style principate, a negotiated republican restoration, and a collegial military oligarchy
 - Seven Augustan councils, twelve operating measures, and eight staged works spanning the revised settlement of 23 BC through the succession of AD 14
 - Evidence-labeled project art that distinguishes reconstruction, synthesis, hypothesis, and game abstraction, including an explicitly pre-Hadrianic Agrippan Pantheon
+- An Augustan Capital View that places unlocked landmarks schematically on the city surface and distinguishes reserved sites, foundations, structural shells, and operating works
+- Four derived capital systems—civic government, public provision, urban safety, and succession and memory—with an AD 14 capital legacy summary
 - Three viable Augustan operating forms: an administrative principate, a civic compact, and a household-centered principate
 - Local save/restore through schema version 14, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
 
@@ -82,7 +84,7 @@ After 509 BC, office structure matters directly. Paired annual magistrates cap t
 
 The **Season Forecast** exposes known production, upkeep, structural penalties, and population change before the player ends a turn. It explains expected births, arrivals, departures, and illness without revealing floods or enemy action in advance. The district inspector records condition and permits damaged works to be repaired, upgraded in place, or cleared for limited salvage.
 
-Run `npm run balance` to execute the published reference strategies from the hill settlements through AD 14. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act IX](docs/ACT_IX_BALANCE_REPORT.md) and [Act X](docs/ACT_X_BALANCE_REPORT.md).
+Run `npm run balance` to execute the published reference strategies from the hill settlements through AD 14. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act IX](docs/ACT_IX_BALANCE_REPORT.md), [Act X](docs/ACT_X_BALANCE_REPORT.md), and the [Augustan capital integration](docs/ACT_X_CAPITAL_INTEGRATION_REPORT.md).
 
 The campaign retains five city grades and adds separate grades for each later operating system:
 

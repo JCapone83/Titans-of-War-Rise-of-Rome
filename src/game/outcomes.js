@@ -1,4 +1,4 @@
-import { countFamily, hasBuilding, regionalForecast } from './simulation.js'
+import { augustanCapitalSystems, countFamily, hasBuilding, regionalForecast } from './simulation.js'
 
 const grade = (score) => score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F'
 
@@ -206,6 +206,12 @@ export function calculateOutcome(state) {
   else if (overall >= 85) title = 'The Seven Hills Become Rome'
   else if (overall >= 72) title = 'A Durable City of Kings'
   else if (overall < 55) title = 'A Confederation Under Strain'
+  const capitalLegacy = state.turn >= 61 && augustanCityScore ? {
+    operatingForm: augustanCityScore.operatingForm,
+    systems: augustanCapitalSystems(state),
+    completed: augustanCityScore.completed,
+    active: augustanCityScore.active,
+  } : null
   return {
     title,
     overall,
@@ -213,5 +219,6 @@ export function calculateOutcome(state) {
       ? state.turn >= 61 ? `Rome reaches AD 14 as a ${augustanCityScore.operatingForm.toLowerCase()}. Authority, Senate and magistrates, public access, provincial command, maintenance, fire response, memory, and succession are judged as separate operating systems.` : state.turn >= 54 ? `Rome reaches 27 BC as ${operatingFormArticle} ${operatingFormName}, with constitutional language judged separately from command, demobilization, courts, finance, Italian titles, public provision, and succession.` : state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
       : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
     grades: Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, { score: value, grade: grade(value) }])),
+    capitalLegacy,
   }
 }
