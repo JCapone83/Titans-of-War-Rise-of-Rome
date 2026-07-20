@@ -1,5 +1,5 @@
 import { getCouncil } from './data.js'
-import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
+import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createMediterraneanState, createMetropolitanState, createRepublicStrainState, createTrajanicCapitalState } from './initialState.js'
 import { calculateOutcome } from './outcomes.js'
 
 export function freezeCoreJudgment(state) {
@@ -266,6 +266,29 @@ export function enterAugustanCity(state) {
     selectedBuildingId: null,
     council: getCouncil(55),
     councilResolved: false,
+  }
+}
+
+export function continueToTrajanicCapital(state) {
+  if (state.turn !== 70 || state.outcome !== 'imperial-capital-complete' || state.trajanicCapitalTransition) return state
+  return { ...state, trajanicCapitalTransition: true }
+}
+
+export function enterTrajanicCapital(state) {
+  if (!state.trajanicCapitalTransition || state.turn !== 70 || state.outcome !== 'imperial-capital-complete') return state
+  const bridgeExists = (state.chronologyBridges ?? []).some((bridge) => bridge.id === 'imperial-capital-to-trajanic-capital')
+  const bridge = {
+    id: 'imperial-capital-to-trajanic-capital', fromYear: 96, toYear: 97, mediterraneanChanges: {},
+    notes: [
+      'The AD 96 succession remains a complete imperial-capital endpoint until the player records continuation into the Trajanic settlement.',
+      'The inherited capital, frontier, treasury, provincial obligations, constitutional forms, and maintenance burdens remain in the new ledger.',
+    ],
+  }
+  return {
+    ...state, version: 16, turn: 71, era: 12, outcome: null, trajanicCapitalTransition: false,
+    trajanicCapital: state.trajanicCapital ?? createTrajanicCapitalState(state.imperialCapital),
+    chronologyBridges: bridgeExists ? state.chronologyBridges : [...(state.chronologyBridges ?? []), bridge],
+    actionsUsed: 0, nextWorksBonus: 0, selectedBuildingId: null, council: getCouncil(71), councilResolved: false,
   }
 }
 

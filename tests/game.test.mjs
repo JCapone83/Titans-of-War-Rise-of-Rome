@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
-import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
+import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
-import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
+import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToTrajanicCapital, enterTrajanicCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
@@ -347,7 +347,7 @@ test('version three saves remove legacy labor and gain workforce and projects', 
   delete old.workforceAllocation
   delete old.projects
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal('labor' in migrated.resources, false)
   assert.equal(Object.values(migrated.workforceAllocation).reduce((sum, value) => sum + value, 0), 100)
   assert.deepEqual(migrated.projects, [])
@@ -359,7 +359,7 @@ test('version one saves migrate to the current population state', () => {
   delete old.actionsMax
   delete old.actionLog
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.actionsMax, 2)
   assert.deepEqual(migrated.actionLog, [])
   assert.equal(migrated.population.total, 1030)
@@ -369,7 +369,7 @@ test('version two saves retain mechanics while gaining population', () => {
   const old = { ...createInitialState(), version: 2, actionsUsed: 1, actionLog: [{ type: 'build' }] }
   delete old.population
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.actionsUsed, 1)
   assert.equal(migrated.actionLog.length, 1)
   assert.equal(migrated.population.districts.palatine, 450)
@@ -560,7 +560,7 @@ test('three Act III reference strategies complete cleanly at C or better', () =>
 
 test('a completed version four campaign migrates to a resumable republic transition', () => {
   const migrated = migrateState({ ...createInitialState(), version: 4, turn: 10, era: 1, outcome: 'complete' })
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.outcome, 'acts-complete')
   assert.equal(migrated.republicTransition, true)
   assert.equal(enterEarlyRepublic(migrated).turn, 11)
@@ -609,7 +609,7 @@ test('Tier IV works remain locked until reconstruction', () => {
 test('a version five save completed at turn sixteen opens reconstruction', () => {
   const saved = { ...createInitialState(), version: 5, era: 2, turn: 16, republic: createRepublicState(), war: createWarState(), outcome: 'complete' }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.outcome, 'act-three-complete')
   assert.equal(migrated.reconstructionTransition, true)
 })
@@ -716,7 +716,7 @@ test('version seven regional completion migrates to the Italian transition', () 
     italianTransition: undefined,
   }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.outcome, 'regional-complete')
   assert.equal(migrated.italianTransition, true)
   assert.equal(migrated.turn, 23)
@@ -916,7 +916,7 @@ test('turn thirty-two opens a visible bridge without exposing the final outcome'
 test('version nine Mediterranean endpoint migrates to the Hannibalic bridge', () => {
   const old = { ...mediterraneanOpeningEndpoint(), version: 9, outcome: 'mediterranean-complete', hannibalicTransition: undefined }
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.turn, 32)
   assert.equal(migrated.outcome, 'mediterranean-opening-complete')
   assert.equal(migrated.hannibalicTransition, true)
@@ -1129,7 +1129,7 @@ test('completed late-Republic works add visible recurring burdens', () => {
 test('version 11 late-Republic saves migrate missing ledgers and projects', () => {
   const saved = { ...createInitialState(), version: 11, era: 8, turn: 45, republicStrain: { archiveIntegrity: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.republicStrain.archiveIntegrity, 63)
   assert.deepEqual(Object.keys(migrated.republicStrain.projects), Object.keys(REPUBLIC_STRAIN_PROJECTS))
 })
@@ -1211,7 +1211,7 @@ test('completed civil-settlement works expose visible recurring burdens', () => 
 test('version 12 civil-settlement saves migrate missing ledgers and projects', () => {
   const saved = { ...createInitialState(), version: 12, era: 9, turn: 51, civilSettlement: { archiveContinuity: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.civilSettlement.archiveContinuity, 63)
   assert.deepEqual(Object.keys(migrated.civilSettlement.projects), Object.keys(CIVIL_SETTLEMENT_PROJECTS))
 })
@@ -1293,7 +1293,7 @@ test('Act X starts only through the explicit Civil Settlement continuation', () 
 })
 
 test('Act X chronology crosses from BC to AD without double suffixes', () => {
-  assert.equal(TURN_YEARS.length, 70)
+  assert.equal(TURN_YEARS.length, 76)
   assert.deepEqual(TURN_YEARS.slice(54, 61), [23, 19, 13, 9, 2, -6, -14])
   assert.equal(formatYear(23), '23 BC')
   assert.equal(formatYear(-6), 'AD 6')
@@ -1328,10 +1328,10 @@ test('Augustan work consumes shared capacity and enters the forecast', () => {
   assert.ok(augustanCityForecast(worked.state).projected)
 })
 
-test('v13 Augustan saves migrate to v15 without losing succession state', () => {
+test('v13 Augustan saves migrate to v16 without losing succession state', () => {
   const saved = { ...createInitialState(), version: 13, era: 10, turn: 57, augustanCity: { successionConfidence: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.augustanCity.successionConfidence, 63)
   assert.deepEqual(Object.keys(migrated.augustanCity.projects), Object.keys(createAugustanProjects()))
 })
@@ -1390,7 +1390,7 @@ test('AD 14 capital legacy remains complete before entering Act XI', () => {
   assert.equal(outcome.capitalLegacy.operatingForm, result.augustanScore.operatingForm)
   assert.equal(outcome.capitalLegacy.completed, result.augustanScore.completed)
   assert.match(campaignMarkdown(result.state), /Capital Operating Systems[\s\S]+Urban safety[\s\S]+Landmark works:/)
-  assert.equal(TURN_YEARS.length, 70)
+  assert.equal(TURN_YEARS.length, 76)
 })
 
 test('Augustan capital keeps the pre-Hadrianic Pantheon guardrail', () => {
@@ -1414,8 +1414,8 @@ test('Act XI starts only through the explicit AD 14 continuation', () => {
 })
 
 test('Act XI chronology covers nine councils from AD 14 through AD 96', () => {
-  assert.equal(TURN_YEARS.length, 70)
-  assert.deepEqual(TURN_YEARS.slice(-9), [-14, -23, -41, -54, -64, -69, -75, -80, -96])
+  assert.equal(TURN_YEARS.length, 76)
+  assert.deepEqual(TURN_YEARS.slice(61, 70), [-14, -23, -41, -54, -64, -69, -75, -80, -96])
   for (let turn = 62; turn <= 70; turn += 1) {
     assert.equal(getCouncil(turn).options.length, 3)
     assert.ok(getObjective(turn).length > 20)
@@ -1424,10 +1424,10 @@ test('Act XI chronology covers nine councils from AD 14 through AD 96', () => {
   }
 })
 
-test('v14 Augustan saves migrate to v15 before the Imperial Capital transition', () => {
+test('v14 Augustan saves migrate to v16 before the Imperial Capital transition', () => {
   const saved = { ...createInitialState(), version: 14, turn: 61, era: 10, outcome: 'augustan-city-complete', augustanCity: createAugustanState() }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 15)
+  assert.equal(migrated.version, 16)
   assert.equal(migrated.imperialCapital, null)
   assert.equal(migrated.augustanCity.projects.agrippanPantheon.id, 'agrippanPantheon')
 })
@@ -1516,6 +1516,47 @@ test('three Act XI strategies reach AD 96 with distinct viable capital settlemen
   assert.ok(results.every((result) => result.state.turn === 70 && result.state.outcome === 'imperial-capital-complete'))
   assert.ok(results.every((result) => result.imperialScore.score >= 60 && result.skipped.length === 0))
   assert.equal(new Set(results.map((result) => result.imperialScore.operatingForm)).size, 3)
+})
+
+test('Act XII chronology covers AD 96 through AD 117', () => {
+  assert.equal(TURN_YEARS.length, 76)
+  assert.deepEqual(TURN_YEARS.slice(69), [-96, -97, -102, -106, -109, -112, -117])
+  for (let turn = 71; turn <= 76; turn += 1) {
+    assert.equal(getCouncil(turn).options.length, 3)
+    assert.ok(getCouncil(turn).context.length >= 120)
+    assert.ok(getObjective(turn).length > 20)
+  }
+})
+
+test('Act XII starts only through the explicit AD 96 continuation', () => {
+  const endpoint = { ...createInitialState(), version: 15, turn: 70, era: 11, outcome: 'imperial-capital-complete', imperialCapital: createImperialCapitalState() }
+  assert.equal(enterTrajanicCapital(endpoint), endpoint)
+  const pending = continueToTrajanicCapital(endpoint)
+  assert.equal(pending.trajanicCapitalTransition, true)
+  const entered = enterTrajanicCapital(pending)
+  assert.equal(entered.version, 16)
+  assert.equal(entered.turn, 71)
+  assert.equal(entered.era, 12)
+  assert.equal(entered.outcome, null)
+  assert.deepEqual(Object.keys(entered.trajanicCapital.projects).sort(), Object.keys(createTrajanicCapitalProjects()).sort())
+})
+
+test('version 15 AD 96 saves migrate to a resumable boundary', () => {
+  const migrated = migrateState({ ...createInitialState(), version: 15, turn: 70, era: 11, outcome: 'imperial-capital-complete' })
+  assert.equal(migrated.version, 16)
+  assert.equal(migrated.outcome, 'imperial-capital-complete')
+  assert.equal(migrated.trajanicCapital, null)
+})
+
+test('Act XII projects carry evidence, stages, costs, and recurring burdens', () => {
+  assert.deepEqual(Object.keys(TRAJANIC_CAPITAL_PROJECTS).sort(), ['aquaTraiana', 'bathsTrajan', 'forumTrajan', 'trajanAdministrativeComplex', 'trajanicCircus', 'trajanicPortus'].sort())
+  for (const definition of Object.values(TRAJANIC_CAPITAL_PROJECTS)) {
+    assert.ok(definition.summary.length >= 80)
+    assert.ok(definition.evidence.length >= 20)
+    assert.ok(definition.seasons >= 3)
+    assert.ok(Object.keys(definition.cost).length >= 2)
+    assert.ok(Object.keys(definition.upkeepResources ?? {}).length + Object.keys(definition.upkeepTrajanic ?? {}).length >= 1)
+  }
 })
 
 test('AD 96 outcome and chronicle expose Imperial Operating Systems without a Hadrianic Pantheon', () => {

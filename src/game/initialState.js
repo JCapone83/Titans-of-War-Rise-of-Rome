@@ -257,8 +257,32 @@ export const createImperialCapitalState = (augustan = {}) => ({
   projects: createImperialCapitalProjects(),
 })
 
+export const createTrajanicCapitalProjects = () => ({
+  forumTrajan: { id: 'forumTrajan', progress: 0, requiredSeasons: 5, completed: false, lastWorkedTurn: null },
+  trajanAdministrativeComplex: { id: 'trajanAdministrativeComplex', progress: 0, requiredSeasons: 4, completed: false, lastWorkedTurn: null },
+  bathsTrajan: { id: 'bathsTrajan', progress: 0, requiredSeasons: 4, completed: false, lastWorkedTurn: null },
+  aquaTraiana: { id: 'aquaTraiana', progress: 0, requiredSeasons: 4, completed: false, lastWorkedTurn: null },
+  trajanicPortus: { id: 'trajanicPortus', progress: 0, requiredSeasons: 5, completed: false, lastWorkedTurn: null },
+  trajanicCircus: { id: 'trajanicCircus', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+})
+
+export const createTrajanicCapitalState = (imperial = {}) => ({
+  successionSettlement: Math.max(35, imperial?.successionConfidence ?? 48),
+  frontierCommand: Math.max(38, imperial?.armyRecognition ?? 50),
+  conquestDependence: 18,
+  treasuryResilience: Math.max(35, imperial?.imperialAuthority ?? 48),
+  publicProvision: Math.max(38, imperial?.publicProvision ?? 50),
+  provincialTrust: Math.max(35, imperial?.provincialTrust ?? 45),
+  administrativeCapacity: Math.max(38, imperial?.senateCompact ?? 48),
+  capitalSupply: Math.max(35, imperial?.harborSupply ?? 45),
+  maintenanceCapacity: Math.max(36, imperial?.maintenanceCapacity ?? 45),
+  maintenanceDebt: 0,
+  constitutionalContinuity: Math.max(35, imperial?.senateCompact ?? 48),
+  projects: createTrajanicCapitalProjects(),
+})
+
 export const createInitialState = () => ({
-  version: 15,
+  version: 16,
   turn: 1,
   era: 0,
   resources: { grain: 12, timber: 12, stone: 4, bronze: 2, treasury: 7 },
@@ -292,6 +316,7 @@ export const createInitialState = () => ({
   settlementTransition: false,
   augustanTransition: false,
   imperialCapitalTransition: false,
+  trajanicCapitalTransition: false,
   republic: null,
   war: null,
   reconstruction: null,
@@ -303,6 +328,7 @@ export const createInitialState = () => ({
   civilSettlement: null,
   augustanCity: null,
   imperialCapital: null,
+  trajanicCapital: null,
   coreJudgment: null,
   chronologyBridges: [],
   outcome: null,
@@ -311,11 +337,11 @@ export const createInitialState = () => ({
 })
 
 export function migrateState(saved) {
-  if (!saved || saved.turn < 1 || saved.turn > 70) return null
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(saved.version)) return null
+  if (!saved || saved.turn < 1 || saved.turn > 76) return null
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(saved.version)) return null
   const population = saved.population ?? createInitialPopulation()
   const workforceAllocation = saved.workforceAllocation ?? createInitialWorkforceAllocation()
-  if ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(saved.version)) {
+  if ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(saved.version)) {
     const completedOldRepublic = saved.era >= 2 && saved.turn === 13 && saved.outcome === 'complete'
     const completedOldActThree = saved.era === 2 && saved.turn === 16 && saved.outcome === 'complete'
     const completedOldActFour = saved.era === 3 && saved.turn === 20 && saved.outcome === 'complete'
@@ -323,7 +349,7 @@ export function migrateState(saved) {
     const completedMediterraneanOpening = saved.version === 9 && saved.turn === 32 && saved.outcome === 'mediterranean-complete'
     return {
       ...saved,
-      version: 15,
+      version: 16,
       outcome: completedOldRepublic ? null : completedOldActThree ? 'act-three-complete' : completedOldActFour ? 'act-four-complete' : completedOldRegional ? 'regional-complete' : completedMediterraneanOpening ? 'mediterranean-opening-complete' : saved.outcome,
       resources: withoutLegacyLabor(saved.resources),
       population,
@@ -347,6 +373,7 @@ export function migrateState(saved) {
       settlementTransition: saved.settlementTransition ?? false,
       augustanTransition: saved.augustanTransition ?? false,
       imperialCapitalTransition: saved.imperialCapitalTransition ?? false,
+      trajanicCapitalTransition: saved.trajanicCapitalTransition ?? false,
       coreJudgment: saved.coreJudgment ?? null,
       chronologyBridges: saved.chronologyBridges ?? [],
       metropolitan: saved.era >= 7 ? { ...createMetropolitanState(), ...(saved.metropolitan ?? {}), projects: { ...createMetropolitanProjects(), ...(saved.metropolitan?.projects ?? {}) } } : null,
@@ -354,13 +381,14 @@ export function migrateState(saved) {
       civilSettlement: saved.era >= 9 ? { ...createCivilSettlementState(), ...(saved.civilSettlement ?? {}), projects: { ...createCivilSettlementProjects(), ...(saved.civilSettlement?.projects ?? {}) } } : null,
       augustanCity: saved.era >= 10 ? { ...createAugustanState(saved.civilSettlement ?? {}), ...(saved.augustanCity ?? {}), projects: { ...createAugustanProjects(), ...(saved.augustanCity?.projects ?? {}) } } : null,
       imperialCapital: saved.era >= 11 ? { ...createImperialCapitalState(saved.augustanCity ?? {}), ...(saved.imperialCapital ?? {}), projects: { ...createImperialCapitalProjects(), ...(saved.imperialCapital?.projects ?? {}) } } : null,
+      trajanicCapital: saved.era >= 12 ? { ...createTrajanicCapitalState(saved.imperialCapital ?? {}), ...(saved.trajanicCapital ?? {}), projects: { ...createTrajanicCapitalProjects(), ...(saved.trajanicCapital?.projects ?? {}) } } : null,
       actionsMax: Math.max(saved.actionsUsed ?? 0, migratedWorksCapacity(population, workforceAllocation, saved.nextWorksBonus ?? 0, saved.republic, saved.flags?.magistrateMode)),
     }
   }
   const completedRoyalCampaign = saved.version === 4 && saved.turn === 10 && saved.outcome
   return {
     ...saved,
-    version: 15,
+    version: 16,
     resources: withoutLegacyLabor(saved.resources),
     selectedBuildingId: saved.selectedBuildingId ?? null,
     actionsUsed: saved.actionsUsed ?? 0,
@@ -381,6 +409,7 @@ export function migrateState(saved) {
     settlementTransition: false,
     augustanTransition: false,
     imperialCapitalTransition: false,
+    trajanicCapitalTransition: false,
     republic: null,
     war: null,
     reconstruction: null,
@@ -388,6 +417,7 @@ export function migrateState(saved) {
     civilSettlement: null,
     augustanCity: null,
     imperialCapital: null,
+    trajanicCapital: null,
     regional: null,
     italian: null,
     mediterranean: null,

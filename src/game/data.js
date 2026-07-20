@@ -85,7 +85,7 @@ export const ERAS = [
   },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27, 23, 19, 13, 9, 2, -6, -14, -14, -23, -41, -54, -64, -69, -75, -80, -96]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27, 23, 19, 13, 9, 2, -6, -14, -14, -23, -41, -54, -64, -69, -75, -80, -96, -97, -102, -106, -109, -112, -117]
 
 export const formatYear = (year) => year < 0 ? `AD ${Math.abs(year)}` : `${year} BC`
 
@@ -439,6 +439,51 @@ export const IMPERIAL_CAPITAL_PROJECTS = {
     completionImperial: { imperialAuthority: 10, successionConfidence: 4, palaceConcentration: 14, senateCompact: -5, maintenanceCapacity: -3 },
     upkeepResources: { treasury: -2 }, upkeepImperial: { palaceConcentration: 1, maintenanceCapacity: -1 },
     burdenLabel: 'Audiences, archives, guards, kitchens, water, heating, staff, ceremony, and repairs enlarge the permanent court.',
+  },
+}
+
+export const TRAJANIC_CAPITAL_PROJECTS = {
+  forumTrajan: {
+    id: 'forumTrajan', name: 'Forum of Trajan, Basilica Ulpia, Libraries, and Column', seasons: 5, unlockTurn: 73,
+    cost: { stone: 7, timber: 3, bronze: 2, treasury: 8 }, evidence: 'Evidence-led integrated complex; exact phasing and excavation limits remain uncertain',
+    summary: 'Excavate the Quirinal shoulder and join forum, Basilica Ulpia, libraries, and the Column in one administrative and commemorative precinct whose surviving remains establish the broad program more securely than every working sequence.',
+    completionMetrics: { order: 8, trade: 5, auspices: 4 }, completionTrajanic: { administrativeCapacity: 14, capitalSupply: 8, constitutionalContinuity: 5, provincialTrust: 3 },
+    upkeepResources: { treasury: -2 }, upkeepTrajanic: { maintenanceCapacity: -1, maintenanceDebt: 1 }, burdenLabel: 'Courts, records, libraries, ceremonies, stairs, retaining walls, and public movement require permanent staff, inspection, and repair.', prerequisite: 'quirinal-excavation'
+  },
+  trajanAdministrativeComplex: {
+    id: 'trajanAdministrativeComplex', name: 'Trajanic Administrative Complex', seasons: 4, unlockTurn: 73,
+    cost: { stone: 5, timber: 2, bronze: 1, treasury: 6 }, evidence: 'Evidence-led office and archive synthesis with uncertain internal arrangements',
+    summary: 'Provide linked offices, archives, courts, service rooms, and controlled routes around the new forum so imperial business can be recorded and carried without naming the complex as a market or erasing its administrative purpose.',
+    completionMetrics: { order: 6, trade: 4 }, completionTrajanic: { administrativeCapacity: 16, provincialTrust: 5, constitutionalContinuity: 4, successionSettlement: 3 },
+    upkeepResources: { treasury: -2 }, upkeepTrajanic: { administrativeCapacity: 1, maintenanceCapacity: -1 }, burdenLabel: 'Clerks, archives, messengers, legal rooms, guards, water, and account review enlarge the permanent civil establishment.', prerequisite: 'quirinal-excavation'
+  },
+  bathsTrajan: {
+    id: 'bathsTrajan', name: 'Baths of Trajan and Sette Sale Support', seasons: 4, unlockTurn: 74,
+    cost: { stone: 6, timber: 3, treasury: 6, bronze: 2 }, evidence: 'Evidence-led conversion of Domus Aurea ground; service connections and phases remain partly uncertain',
+    summary: 'Convert and bury portions of the Domus Aurea beneath a public bathing establishment, carrying water, cisterns, fuel, staff, and the Sette Sale support into an operating burden rather than treating dedication as completion.',
+    completionMetrics: { water: 7, sanitation: 9, order: 4 }, completionTrajanic: { publicProvision: 14, capitalSupply: 4, maintenanceCapacity: -2, constitutionalContinuity: 2 },
+    upkeepResources: { treasury: -2, grain: -1 }, upkeepTrajanic: { maintenanceCapacity: -2, maintenanceDebt: 2 }, burdenLabel: 'Water lifting, cisterns, fuel, attendants, cleaning, storage, heating, and repairs make the baths a lasting charge.', prerequisite: 'domus-aurea-ground'
+  },
+  aquaTraiana: {
+    id: 'aquaTraiana', name: 'Aqua Traiana Capture and Conduit System', seasons: 4, unlockTurn: 75,
+    cost: { stone: 5, timber: 2, bronze: 1, treasury: 7 }, evidence: 'Evidence-led distributed water system; source routes and later repairs are not wholly recoverable',
+    summary: 'Capture, convey, inspect, and distribute water through a network of sources, conduits, reservoirs, and district branches, treating Aqua Traiana as a distributed system rather than another Aqua Claudia arcade.',
+    completionMetrics: { water: 12, sanitation: 6 }, completionTrajanic: { publicProvision: 12, capitalSupply: 8, maintenanceCapacity: -1, provincialTrust: 2 },
+    upkeepResources: { treasury: -2 }, upkeepTrajanic: { maintenanceCapacity: -2, maintenanceDebt: 1 }, burdenLabel: 'Source rights, channels, reservoirs, leaks, crews, and district distribution require continuing inspection and treasury.', prerequisite: 'aqua-capacity'
+  },
+  trajanicPortus: {
+    id: 'trajanicPortus', name: 'Trajanic Portus and Hexagonal Inner Basin', seasons: 5, unlockTurn: 75,
+    cost: { stone: 7, timber: 4, bronze: 2, treasury: 8 }, evidence: 'Evidence-led harbor expansion; exact transfer channels and flood works remain partly uncertain',
+    summary: 'Retain the Claudian harbor while adding the hexagonal inner basin, Tiber transfer, grain handling, and flood resilience so the port enlarges supply without pretending that weather, silt, craft, and storage have disappeared.',
+    completionMetrics: { food: 10, trade: 9, water: 3 }, completionTrajanic: { capitalSupply: 16, publicProvision: 12, provincialTrust: 6, maintenanceCapacity: -2 },
+    upkeepResources: { treasury: -3, grain: -1 }, upkeepTrajanic: { maintenanceCapacity: -2, maintenanceDebt: 2 }, burdenLabel: 'Dredging, quays, transfer craft, warehouses, flood banks, roads, and grain inspection consume recurring funds.', prerequisite: 'claudian-portus-retained'
+  },
+  trajanicCircus: {
+    id: 'trajanicCircus', name: 'Trajanic Circus and Inherited Valley Completion', seasons: 3, unlockTurn: 76,
+    cost: { stone: 4, timber: 2, bronze: 1, treasury: 5 }, evidence: 'Evidence-led final stage of the inherited valley; exact dedication sequence remains uncertain',
+    summary: 'Complete the inherited valley as a circus precinct with circulation, seating, water, service routes, and ceremonial order, making the final stage a continuation of accumulated urban work rather than an isolated new foundation.',
+    completionMetrics: { order: 7, trade: 5, sanitation: 3 }, completionTrajanic: { constitutionalContinuity: 8, publicProvision: 7, capitalSupply: 5, maintenanceCapacity: -1 },
+    upkeepResources: { treasury: -2, grain: -1 }, upkeepTrajanic: { maintenanceCapacity: -2, maintenanceDebt: 1 }, burdenLabel: 'Crowd routes, seating, water, spectacle service, sanitation, ceremonies, and repairs remain annual obligations.', prerequisite: 'inherited-valley'
   },
 }
 
@@ -1267,6 +1312,39 @@ COUNCILS.push(
   },
 )
 
+COUNCILS.push(
+  { turn: 71, id: 'nerva-army-adoption', title: 'Nerva, the Army, and Recorded Adoption', speaker: 'Senators, legionary envoys, Praetorian officers, jurists, and household witnesses', prompt: 'How shall the new princeps bind army recognition, Senate record, and succession?', context: 'Nerva was made princeps after Domitian, and the adoption of Trajan is securely associated with the settlement of the succession, though the private negotiations, timing, and weight of each constituency are not fully recoverable. The decision concerns commands, oaths, records, and the dignity of offices.', options: [
+    { id: 'recorded-adoption', label: 'Record adoption before Senate and army', detail: 'Publish the adoption, renew commands, and place the transfer before witnesses whose records can be cited after the princeps is gone.', impacts: { resources: { treasury: -3 }, metrics: { order: 5, readiness: 3 }, trajanic: { successionSettlement: 16, frontierCommand: 6, constitutionalContinuity: 8, provincialTrust: 4 }, flags: { trajanicSuccession: 'recorded-adoption' } } },
+    { id: 'army-first-recognition', label: 'Secure the armies before the record', detail: 'Carry recognition through commanders and oaths first, accepting that the Senate and provincial communities will read the settlement after force has spoken.', impacts: { resources: { treasury: -1, grain: -1 }, metrics: { readiness: 8, order: -2 }, trajanic: { successionSettlement: 9, frontierCommand: 12, constitutionalContinuity: -5, provincialTrust: -2 }, flags: { trajanicSuccession: 'army-first-recognition' } } },
+    { id: 'senate-guarded-transfer', label: 'Make Senate consent the hinge', detail: 'Require senatorial forms, dated appointments, and guarded oaths before accepting the adopted heir, trading speed for constitutional visibility.', impacts: { resources: { treasury: -4 }, metrics: { order: 7, readiness: -2 }, trajanic: { successionSettlement: 12, frontierCommand: 2, constitutionalContinuity: 14, provincialTrust: 3 }, flags: { trajanicSuccession: 'senate-guarded-transfer' } } },
+  ] },
+  { turn: 72, id: 'dacian-war-revenue', title: 'Dacian War, Frontier Commitments, and Veterans', speaker: 'Commanders, veterans, treasury officers, senators, provincial envoys, and grain contractors', prompt: 'How shall conquest, frontier service, veterans, and revenue be ordered?', context: 'Trajan’s Dacian wars are attested by coinage, literary accounts, monuments, and the Column, but the complete financial sequence and every veteran settlement are not preserved. Frontier commitments require pay, roads, supply, and commands while conquered revenue and spoils invite competing dispositions.', options: [
+    { id: 'frontier-and-veteran-rolls', label: 'Fund frontier rolls and veteran settlements', detail: 'Keep the new command supplied and enter veterans on dated rolls, reserving revenue for discharge, roads, and garrisons.', impacts: { resources: { treasury: -5, grain: -2 }, metrics: { readiness: 7, order: 4 }, trajanic: { frontierCommand: 14, successionSettlement: 3, treasuryResilience: -3, provincialTrust: 7, conquestDependence: -5 }, flags: { dacianRevenue: 'frontier-veteran-rolls' } } },
+    { id: 'conquest-treasury', label: 'Send conquest revenue to the treasury', detail: 'Make receipts and spoils replenish the central account before enlarging settlements, accepting delayed claims and continued dependence upon victory.', impacts: { resources: { treasury: 10, grain: 2 }, metrics: { readiness: 3, order: -2 }, trajanic: { frontierCommand: 7, treasuryResilience: 15, conquestDependence: 12, provincialTrust: -4, maintenanceDebt: 3 }, flags: { dacianRevenue: 'central-treasury' } } },
+    { id: 'provincial-disposition', label: 'Settle revenue through provincial offices', detail: 'Leave a measured share with roads, communities, and veteran boards under inspection, slowing central receipts while strengthening local obligations.', impacts: { resources: { treasury: 3, stone: 2 }, metrics: { trade: 4, order: 3 }, trajanic: { frontierCommand: 8, treasuryResilience: 6, provincialTrust: 14, conquestDependence: -7, administrativeCapacity: 5 }, flags: { dacianRevenue: 'provincial-disposition' } } },
+  ] },
+  { turn: 73, id: 'quirinal-forum-program', title: 'Quirinal Excavation and the New Forum', speaker: 'Architects, senators, clerks, landholders, veterans, builders, and petitioners', prompt: 'What order shall govern the excavation and integrated forum program?', context: 'The Forum of Trajan, Basilica Ulpia, libraries, and Column are securely associated with the imperial capital, while the precise acquisition, excavation, and construction sequence is less certain. The Quirinal ground, administrative business, commemorative language, and public circulation must be made to answer together.', options: [
+    { id: 'integrated-forum-program', label: 'Excavate and build the integrated precinct', detail: 'Join the forum, basilica, libraries, and Column under one surveyed program, recording land, retaining work, offices, and ceremonial access.', impacts: { resources: { treasury: -7, stone: -4 }, metrics: { order: 6, trade: 4 }, trajanic: { administrativeCapacity: 14, capitalSupply: 7, constitutionalContinuity: 6, maintenanceDebt: 3 }, flags: { quirinalProgram: 'integrated-precinct' } } },
+    { id: 'administrative-first', label: 'Raise offices and archives first', detail: 'Secure courts, records, and controlled routes before the commemorative works, preserving capacity while postponing the fullest visual claim.', impacts: { resources: { treasury: -4, stone: -2 }, metrics: { order: 8 }, trajanic: { administrativeCapacity: 16, provincialTrust: 4, constitutionalContinuity: 8, capitalSupply: 3 }, flags: { quirinalProgram: 'administrative-first' } } },
+    { id: 'monumental-dedication', label: 'Make the Column and memory the hinge', detail: 'Let victory, relief, and dynastic memory organize the excavation, accepting that offices and public routes will remain dependent on the finished precinct.', impacts: { resources: { treasury: -6, stone: -5 }, metrics: { auspices: 8, order: 2 }, trajanic: { administrativeCapacity: 5, capitalSupply: 5, constitutionalContinuity: 10, maintenanceDebt: 5 }, flags: { quirinalProgram: 'monumental-dedication' } } },
+  ] },
+  { turn: 74, id: 'baths-domus-aurea-conversion', title: 'Baths of Trajan and the Buried Palace', speaker: 'Water officers, furnace keepers, builders, household agents, senators, and neighborhood delegates', prompt: 'How shall the Domus Aurea ground be converted while bearing water, fuel, staff, and repair?', context: 'The Baths of Trajan occupied ground associated with Nero’s Domus Aurea, and the surviving remains support a major public bathing establishment; the precise treatment of buried rooms, water arrangements, and Sette Sale service is not completely preserved. Conversion therefore creates operating burdens as well as public provision.', options: [
+    { id: 'public-conversion', label: 'Convert and bury the palace fabric', detail: 'Lay the baths over the former palace ground, retain useful cistern and storage arrangements, and charge fuel, attendants, water, and maintenance to public accounts.', impacts: { resources: { treasury: -6, stone: -4 }, metrics: { water: 6, sanitation: 8 }, trajanic: { publicProvision: 14, capitalSupply: 4, maintenanceCapacity: -4, maintenanceDebt: 3 }, flags: { domusAureaConversion: 'public-baths' } } },
+    { id: 'service-before-splendor', label: 'Secure cisterns and Sette Sale first', detail: 'Build the water, storage, furnace, and staff foundation before opening grand halls, accepting a slower dedication and clearer recurring burden.', impacts: { resources: { treasury: -5, stone: -3, timber: -1 }, metrics: { water: 9, sanitation: 5 }, trajanic: { publicProvision: 10, capitalSupply: 7, maintenanceCapacity: -2, maintenanceDebt: 1 }, flags: { domusAureaConversion: 'service-first' } } },
+    { id: 'restricted-operation', label: 'Open a smaller supervised bath', detail: 'Limit the first operating establishment to manageable water, fuel, staff, and cleaning accounts while leaving parts of the palace ground buried and unused.', impacts: { resources: { treasury: -3, stone: -2 }, metrics: { sanitation: 4, order: 3 }, trajanic: { publicProvision: 7, capitalSupply: 2, maintenanceCapacity: 2, maintenanceDebt: -2 }, flags: { domusAureaConversion: 'restricted-operation' } } },
+  ] },
+  { turn: 75, id: 'aqua-portus-grain', title: 'Aqua Traiana, Portus, and the Tiber Transfer', speaker: 'Aquarii, harbor prefects, grain officers, boatmen, engineers, and provincial merchants', prompt: 'How shall water, the inner basin, grain, and flood resilience be joined?', context: 'Trajanic works at the water supply and Portus are known through remains, inscriptions, literary evidence, and later changes, but exact routes and operating arrangements are not wholly recoverable. The hexagonal inner basin was added to the retained Claudian harbor, while Tiber transfer and flood risk remained practical burdens.', options: [
+    { id: 'distributed-supply-and-basin', label: 'Join distributed water to the inner basin', detail: 'Fund capture, conduits, reservoirs, quays, transfer craft, grain stores, and flood banks as one inspected supply chain.', impacts: { resources: { treasury: -8, stone: -5, timber: -2 }, metrics: { water: 8, food: 8, trade: 6 }, trajanic: { capitalSupply: 16, publicProvision: 13, provincialTrust: 7, maintenanceCapacity: -4, maintenanceDebt: 4 }, flags: { waterPortusProgram: 'joined-supply' } } },
+    { id: 'grain-first-portus', label: 'Put grain transfer before new water', detail: 'Add the hexagonal basin, warehouses, and Tiber handling to the Claudian harbor first, accepting that district water will wait.', impacts: { resources: { treasury: -7, stone: -5, timber: -3 }, metrics: { food: 10, trade: 8 }, trajanic: { capitalSupply: 15, publicProvision: 12, provincialTrust: 5, maintenanceCapacity: -3, maintenanceDebt: 3 }, flags: { waterPortusProgram: 'grain-first' } } },
+    { id: 'water-first-resilience', label: 'Secure sources and flood defenses first', detail: 'Lay the distributed capture and conduit system and strengthen banks before enlarging transfer, preserving resilience at the cost of slower grain throughput.', impacts: { resources: { treasury: -6, stone: -4 }, metrics: { water: 12, sanitation: 5 }, trajanic: { capitalSupply: 9, publicProvision: 9, provincialTrust: 6, maintenanceCapacity: -2, maintenanceDebt: 1 }, flags: { waterPortusProgram: 'water-first' } } },
+  ] },
+  { turn: 76, id: 'ad-117-settlement', title: 'The Frontier and the Settlement of AD 117', speaker: 'The princeps, Senate, commanders, treasury officers, provincial envoys, maintenance crews, and city delegates', prompt: 'What settlement shall carry the frontier, treasury, succession, provinces, and works beyond AD 117?', context: 'Trajan died in AD 117 after a reign marked by frontier expansion and extensive building. The exact succession arrangements and financial condition are debated in ancient and modern records; the game records uncertainty while asking how commands, treasury, provincial trust, maintenance, and constitutional continuity should be left.', options: [
+    { id: 'constitutional-settlement', label: 'Record a constitutional and succession settlement', detail: 'Publish commands, succession terms, provincial obligations, maintenance accounts, and Senate forms before the frontier consumes the transfer.', impacts: { resources: { treasury: -5 }, metrics: { order: 7, readiness: 2 }, trajanic: { successionSettlement: 15, frontierCommand: 5, treasuryResilience: 5, provincialTrust: 9, maintenanceCapacity: 4, constitutionalContinuity: 16 }, flags: { ad117Settlement: 'constitutional-record' } } },
+    { id: 'frontier-and-treasury', label: 'Hold the frontier and treasury first', detail: 'Preserve commands, reserves, and supply routes under the existing authority, accepting that succession and constitutional form will follow the immediate necessity.', impacts: { resources: { treasury: 5, grain: -2 }, metrics: { readiness: 8, order: -2 }, trajanic: { successionSettlement: 6, frontierCommand: 14, treasuryResilience: 12, provincialTrust: 2, maintenanceCapacity: -3, conquestDependence: 8, constitutionalContinuity: -4 }, flags: { ad117Settlement: 'frontier-treasury' } } },
+    { id: 'provincial-trust-and-maintenance', label: 'Bind provinces and works to the settlement', detail: 'Leave inspectable shares for provincial communities and maintenance crews, reducing immediate central receipts while making the inherited capital more carryable.', impacts: { resources: { treasury: -3, stone: 1 }, metrics: { trade: 4, order: 4 }, trajanic: { successionSettlement: 10, frontierCommand: 5, treasuryResilience: 4, provincialTrust: 16, maintenanceCapacity: 10, maintenanceDebt: -6, constitutionalContinuity: 9 }, flags: { ad117Settlement: 'provincial-maintenance' } } },
+  ] },
+)
+
 export const OBJECTIVES = [
   { from: 1, to: 2, text: 'Shelter the first households and secure water.' },
   { from: 3, to: 4, text: 'Open exchange without leaving the river undefended.' },
@@ -1333,6 +1411,12 @@ export const OBJECTIVES = [
   { from: 68, to: 68, text: 'Turn victory into provision, public access, and maintainable works rather than display alone.' },
   { from: 69, to: 69, text: 'Open the Flavian Amphitheatre while funding crowd routes, safety, service, and future substructures.' },
   { from: 70, to: 70, text: 'Judge what survives the palace and ruler at the succession of AD 96.' },
+  { from: 71, to: 71, text: 'Bind succession, Senate record, and army recognition without making any one constituency the whole settlement.' },
+  { from: 72, to: 72, text: 'Disposition Dacian revenue among frontier command, veterans, treasury resilience, and provincial obligations.' },
+  { from: 73, to: 73, text: 'Excavate and govern the integrated Forum of Trajan program without allowing commemoration to displace administration.' },
+  { from: 74, to: 74, text: 'Convert imperial ground into public baths while accounting for water, fuel, staff, cisterns, and buried fabric.' },
+  { from: 75, to: 75, text: 'Join Aqua Traiana, the added Portus basin, Tiber transfer, grain stores, and flood defense into one supply system.' },
+  { from: 76, to: 76, text: 'Leave AD 117 with frontier, succession, treasury, provinces, maintenance, and constitutional practice still operable.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null
