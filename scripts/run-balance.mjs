@@ -1,4 +1,4 @@
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { IMPERIAL_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 const results = runAllReferenceStrategies()
 for (const result of results) {
@@ -119,3 +119,15 @@ for (const result of augustanCity) {
   if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
 }
 if (augustanCity.some((result) => result.state.turn !== 61 || result.state.outcome !== 'augustan-city-complete' || result.outcome.overall < 58 || result.augustanScore.score < 58 || result.skipped.length)) process.exitCode = 1
+
+console.log('\nAct XI Imperial Capital strategies')
+const imperialCapital = runAllImperialCapitalStrategies()
+for (const result of imperialCapital) {
+  const score = result.imperialScore
+  const projects = Object.values(result.state.imperialCapital.projects)
+  console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Imperial Capital ${score.grade} (${score.score}) | ${score.operatingForm} | AD 96`)
+  console.log(`  Transfer ${score.transfer} | Provision ${score.provision} | Safety ${score.safety} | Public city ${score.publicCity} | Provincial ${score.provincial} | Physical ${score.physical}`)
+  console.log(`  Imperial works: ${projects.filter((project) => project.completed).map((project) => project.id).join(', ') || 'none'} operating; ${projects.filter((project) => !project.completed && project.progress > 0).map((project) => `${project.id} ${project.progress}/${project.requiredSeasons}`).join(', ') || 'none active'}`)
+  if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
+}
+if (IMPERIAL_CAPITAL_STRATEGIES.length !== 3 || imperialCapital.some((result) => result.state.turn !== 70 || result.state.outcome !== 'imperial-capital-complete' || result.outcome.overall < 60 || result.imperialScore.score < 60 || result.skipped.length)) process.exitCode = 1

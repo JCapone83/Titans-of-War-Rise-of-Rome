@@ -71,6 +71,13 @@ const CONTENT = {
     unlocks: ['Augustan operating ledger', 'Eight evidence-labeled projects', 'The first succession test'],
     action: 'Enter the Augustan City',
   },
+  imperial: {
+    eyebrow: 'AD 14 - the founder is gone',
+    title: 'Imperial Capital',
+    text: 'The principate has survived one transfer, but succession now joins guards, provincial armies, Senate recognition, palace access, grain, harbor, water, fire, and public land. Rome will become visually magnificent while those operating relationships grow harder to govern.',
+    unlocks: ['Imperial operating ledger', 'Eight staged capital projects', 'Fire, army, palace, and succession crises'],
+    action: 'Enter the Imperial Capital',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

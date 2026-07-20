@@ -76,9 +76,16 @@ export const ERAS = [
     turns: [55, 61],
     summary: 'Test whether one household can concentrate command while leaving magistrates, public access, urban services, and succession strong enough to outlive the founder.',
   },
+  {
+    id: 'imperial-capital',
+    name: 'Imperial Capital',
+    span: 'AD 14-96',
+    turns: [62, 70],
+    summary: 'Build the capital at its greatest first-century scale while guard brokerage, military recognition, palace land, fire, provision, and succession test the public city beneath the monuments.',
+  },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27, 23, 19, 13, 9, 2, -6, -14]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27, 23, 19, 13, 9, 2, -6, -14, -14, -23, -41, -54, -64, -69, -75, -80, -96]
 
 export const formatYear = (year) => year < 0 ? `AD ${Math.abs(year)}` : `${year} BC`
 
@@ -357,6 +364,81 @@ export const AUGUSTAN_PROJECTS = {
     completionAugustan: { urbanAdministration: 10, fireCoverage: 22, publicAccess: 4, maintenanceCapacity: -2 },
     upkeepResources: { treasury: -1 }, upkeepAugustan: { fireCoverage: 2, maintenanceCapacity: -1 },
     burdenLabel: 'Pay, patrols, buckets, hooks, ladders, stations, water access, and command review recur every year.',
+  },
+}
+
+export const IMPERIAL_CAPITAL_PROJECTS = {
+  castraPraetoria: {
+    id: 'castraPraetoria', name: 'Castra Praetoria', seasons: 3, unlockTurn: 62,
+    cost: { stone: 1, timber: 1 }, evidence: 'Evidence-led plan with generalized service interiors',
+    summary: 'A concentrated guard camp improves rapid response and succession security while giving one armed corps a permanent position beside the capital.',
+    completionMetrics: { readiness: 4, order: 2 },
+    completionImperial: { guardInfluence: 12, armyRecognition: 5, imperialAuthority: 5, publicAccess: -3 },
+    upkeepResources: { treasury: -1, grain: -1 }, upkeepImperial: { guardInfluence: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Pay, grain, discipline, command appointments, and political access make guard concentration a continuing risk.',
+  },
+  aquaClaudia: {
+    id: 'aquaClaudia', name: 'Aqua Claudia and Anio Novus', seasons: 4, unlockTurn: 64,
+    cost: { stone: 1, treasury: 1 }, evidence: 'Evidence-led infrastructure synthesis',
+    summary: 'High-capacity water lines and their iconic arcades increase supply only when sources, channels, distribution, inspections, and repairs remain funded.',
+    completionMetrics: { water: 10, sanitation: 5 },
+    completionImperial: { publicProvision: 13, fireResilience: 8, maintenanceCapacity: 4, publicAccess: 4 },
+    upkeepResources: { treasury: -2 }, upkeepImperial: { maintenanceCapacity: -1 },
+    burdenLabel: 'Long conduits, source rights, arcade repair, and district distribution require permanent crews and accounts.',
+  },
+  claudianPortus: {
+    id: 'claudianPortus', name: 'Claudian Portus and Imperial Horrea', seasons: 4, unlockTurn: 64,
+    cost: { stone: 1, timber: 1, treasury: 1 }, evidence: 'Evidence-led harbor system with bounded warehouse abstraction',
+    summary: 'The outer harbor, lighthouse, canals, transfer craft, and guarded stores improve grain reliability without erasing storms, silting, contracts, or Tiber bottlenecks.',
+    completionMetrics: { food: 8, trade: 7 },
+    completionImperial: { harborSupply: 17, publicProvision: 10, provincialTrust: 3, maintenanceCapacity: -2 },
+    upkeepResources: { treasury: -2 }, upkeepImperial: { harborSupply: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Dredging, warehouses, contracts, transfer craft, roads, and grain inspection consume recurring funds.',
+  },
+  domusAurea: {
+    id: 'domusAurea', name: 'Domus Aurea Emergency Palace', seasons: 3, unlockTurn: 66,
+    cost: { stone: 1, timber: 1 }, evidence: 'Evidence-led precinct with reconstruction uncertainty above surviving fabric',
+    summary: 'A palace-park across fire-cleared land can coordinate the household and court, but it displaces streets, dwellings, public access, and future rebuilding choices.',
+    completionMetrics: { auspices: 3, order: -2 },
+    completionImperial: { imperialAuthority: 9, palaceConcentration: 18, successionConfidence: 3, publicAccess: -13, senateCompact: -5 },
+    upkeepResources: { treasury: -2 }, upkeepImperial: { palaceConcentration: 2, maintenanceCapacity: -1 },
+    burdenLabel: 'Water, gardens, guards, service corridors, finishes, and occupied urban land remain a visible charge.',
+  },
+  flavianAmphitheatre: {
+    id: 'flavianAmphitheatre', name: 'Flavian Amphitheatre', seasons: 4, unlockTurn: 67, openingTurn: 69, operatingTurn: 70,
+    cost: { stone: 1, timber: 1, treasury: 1 }, prerequisite: 'flavian-public-conversion', evidence: 'Evidence-led intact Flavian reconstruction',
+    summary: 'An intact elliptical amphitheater reclaims Nero\'s former lake for public spectacle through foundations, arcades, seating, arena service, crowd routes, water, and continuing operation.',
+    completionMetrics: { order: 7, trade: 4 },
+    completionImperial: { publicAccess: 15, publicProvision: 4, palaceConcentration: -10, imperialAuthority: 6, maintenanceCapacity: -4 },
+    upkeepResources: { treasury: -2, grain: -1 }, upkeepImperial: { publicAccess: 1, maintenanceCapacity: -2 },
+    burdenLabel: 'Crowd routes, seating, awnings, arena crews, animals, sanitation, fountains, and substructures require a permanent operating establishment.',
+  },
+  templePeace: {
+    id: 'templePeace', name: 'Temple of Peace Complex', seasons: 3, unlockTurn: 68,
+    cost: { stone: 1 }, evidence: 'Evidence-led forum-like precinct with cautious functional interpretation',
+    summary: 'Porticoes, gardens, water, display, records, and sacred space turn victory into an accessible claim of restored order rather than one isolated temple.',
+    completionMetrics: { auspices: 4, order: 4 },
+    completionImperial: { publicAccess: 8, senateCompact: 4, provincialTrust: 3, maintenanceCapacity: -2 },
+    upkeepResources: { treasury: -1 }, upkeepImperial: { maintenanceCapacity: -1 },
+    burdenLabel: 'Gardens, water, collections, records, ritual, and public access continue after dedication.',
+  },
+  archTitus: {
+    id: 'archTitus', name: 'Arch of Titus', seasons: 2, unlockTurn: 69,
+    cost: { stone: 1 }, evidence: 'Evidence-led single-bay honorific arch',
+    summary: 'A compact single-bay arch fixes victory and dynastic succession on the ceremonial route but contributes memory rather than water, grain, or housing.',
+    completionMetrics: { auspices: 4 },
+    completionImperial: { successionConfidence: 6, imperialAuthority: 4, palaceConcentration: 3 },
+    upkeepResources: { treasury: -1 }, upkeepImperial: {},
+    burdenLabel: 'Reliefs, route clearance, ceremony, and dynastic commemoration create costs without direct provision.',
+  },
+  domitianicPalace: {
+    id: 'domitianicPalace', name: 'Domitianic Palace Administration', seasons: 4, unlockTurn: 69,
+    cost: { stone: 1, treasury: 1 }, evidence: 'Evidence-led plan with reconstructed upper architecture',
+    summary: 'Linked public halls, offices, courts, terraces, service routes, and private quarters make the Palatine an administrative machine while separating authority from the city below.',
+    completionMetrics: { order: 4, trade: 2 },
+    completionImperial: { imperialAuthority: 10, successionConfidence: 4, palaceConcentration: 14, senateCompact: -5, maintenanceCapacity: -3 },
+    upkeepResources: { treasury: -2 }, upkeepImperial: { palaceConcentration: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Audiences, archives, guards, kitchens, water, heating, staff, ceremony, and repairs enlarge the permanent court.',
   },
 }
 
@@ -832,6 +914,99 @@ COUNCILS.push(
 
 COUNCILS.push(
   {
+    turn: 62, id: 'tiberian-transfer', title: 'The Augustan Transfer', speaker: 'Tiberius, consuls, senators, praetorian officers, provincial commanders, and the imperial household',
+    prompt: 'Augustus is dead. Oaths, commands, tribunician power, household authority, and senatorial procedure must move without opening a military contest.',
+    context: 'Tacitus, Suetonius, Velleius Paterculus, and Cassius Dio describe the transfer with different purposes and distances from events. The game treats hesitation, acclamation, and legal renewal as overlapping instruments rather than one constitutional ceremony.',
+    options: [
+      { id: 'recorded-renewal', label: 'Renew each power through recorded institutions', detail: 'Use Senate decrees, army oaths, provincial instructions, and public accounts to make the exceptional package legible.', impacts: { resources: { treasury: -2 }, metrics: { order: 4 }, imperial: { successionConfidence: 12, senateCompact: 9, armyRecognition: 7, guardInfluence: -2, imperialAuthority: 3 }, flags: { imperialTransfer: 'recorded-renewal' } } },
+      { id: 'guarded-acclamation', label: 'Secure household and guard acclamation first', detail: 'Prevent a vacuum through the heir, guards, and commanders, accepting a precedent in which armed recognition comes before civic renewal.', impacts: { resources: { treasury: 2, grain: 1 }, metrics: { order: 5, readiness: 4 }, imperial: { successionConfidence: 10, imperialAuthority: 9, guardInfluence: 10, armyRecognition: 8, senateCompact: -3 }, flags: { imperialTransfer: 'guarded-acclamation' } } },
+      { id: 'consular-interim', label: 'Let consuls conduct a bounded interim', detail: 'Keep ordinary offices visibly active while powers are assigned, risking delay among guards and provincial armies.', impacts: { resources: { treasury: -3 }, metrics: { order: 1, readiness: -2 }, imperial: { senateCompact: 12, successionConfidence: 6, imperialAuthority: -4, guardInfluence: 3, armyRecognition: -2, publicAccess: 3 }, flags: { imperialTransfer: 'consular-interim' } } },
+    ],
+  },
+  {
+    turn: 63, id: 'guard-and-administration', title: 'Guard, Senate, and Administration', speaker: 'Tiberius, consuls, senators, praetorian prefects, urban officers, petitioners, and provincial governors',
+    prompt: 'A permanent imperial administration can be restrained, centralized, or routed through the guard and household. Which offices carry routine government?',
+    context: 'The concentration of the Praetorian cohorts and Sejanus\' rise belong to a longer problem: an armed corps near Rome, access to the princeps, and administrative delegation could reinforce one another without replacing every senatorial office.',
+    options: [
+      { id: 'mixed-offices', label: 'Divide routine business among recorded offices', detail: 'Preserve senatorial, equestrian, and urban jurisdictions with audits and dated delegations.', impacts: { resources: { treasury: -3 }, metrics: { order: 3, trade: 2 }, imperial: { senateCompact: 10, maintenanceCapacity: 6, imperialAuthority: 3, guardInfluence: -4, publicAccess: 5 }, flags: { tiberianAdministration: 'mixed-offices' } } },
+      { id: 'prefectural-center', label: 'Build a disciplined prefectural center', detail: 'Use specialized prefects for security, grain, and the city while publishing their jurisdictions and accounts.', impacts: { resources: { treasury: -2 }, metrics: { order: 5, readiness: 2 }, imperial: { imperialAuthority: 7, publicProvision: 5, fireResilience: 3, guardInfluence: 4, senateCompact: 2 }, flags: { tiberianAdministration: 'prefectural-center' } } },
+      { id: 'household-gatekeeping', label: 'Let household and guard control access', detail: 'Move petitions and appointments quickly through trusted intermediaries, at the cost of Senate compact and succession safety.', impacts: { resources: { treasury: 3 }, metrics: { order: 2 }, imperial: { imperialAuthority: 10, guardInfluence: 12, palaceConcentration: 8, senateCompact: -7, successionConfidence: -3 }, flags: { tiberianAdministration: 'household-gatekeeping' } } },
+    ],
+  },
+  {
+    turn: 64, id: 'claudian-provision', title: 'Claudian Water and Harbor Provision', speaker: 'Claudius, senators, water commissioners, harbor engineers, grain officers, contractors, and provincial shippers',
+    prompt: 'The capital has outgrown its old water and maritime supply. How should aqueducts, harbor, warehouses, and contracts be governed?',
+    context: 'Aqua Claudia and Anio Novus entered service in AD 52. Claudius\' harbor at Portus addressed sea access and grain transfer, but construction did not remove weather, silting, contracting, storage, and Tiber transport from the problem.',
+    options: [
+      { id: 'integrated-provision-board', label: 'Join water, harbor, and grain under audited boards', detail: 'Fund sources, quays, warehouses, distribution, and inspection as linked public systems.', impacts: { resources: { treasury: -6, stone: 3, timber: 2 }, metrics: { water: 5, food: 4, trade: 3 }, imperial: { publicProvision: 12, harborSupply: 10, maintenanceCapacity: 8, senateCompact: 4, imperialAuthority: 3 }, flags: { claudianProvision: 'integrated-board' } } },
+      { id: 'imperial-contracts', label: 'Drive the works through imperial contracts', detail: 'Accelerate construction under palace credit and specialist contractors while accepting concentration and future claims.', impacts: { resources: { treasury: -2, stone: 4, timber: 3 }, metrics: { water: 6, trade: 5 }, imperial: { publicProvision: 9, harborSupply: 8, imperialAuthority: 7, palaceConcentration: 6, maintenanceCapacity: 1 }, flags: { claudianProvision: 'imperial-contracts' } } },
+      { id: 'water-first', label: 'Finish urban water before the outer harbor', detail: 'Protect fire and household supply now while leaving the grain fleet dependent on older transfer routes.', impacts: { resources: { treasury: -4, stone: 4 }, metrics: { water: 8, sanitation: 4 }, imperial: { fireResilience: 9, publicProvision: 7, harborSupply: -4, maintenanceCapacity: 5 }, flags: { claudianProvision: 'water-first' } } },
+    ],
+  },
+  {
+    turn: 65, id: 'neronian-court', title: 'Nero, Court, and Public Credit', speaker: 'Nero, senators, household advisers, guard officers, grain officials, performers, creditors, and provincial envoys',
+    prompt: 'A young succession joins court favor, public display, military recognition, and ordinary provision. What limits the palace before crisis decides the question?',
+    context: 'Ancient accounts of Nero are hostile, theatrical, and indispensable. The game separates court expenditure and palace access from grain, water, fire, Senate cooperation, and provincial government rather than treating personality as a complete explanation.',
+    options: [
+      { id: 'published-court-budget', label: 'Publish court accounts and preserve civic jurisdictions', detail: 'Fund ceremony but keep grain, water, justice, and appointments under reviewable offices.', impacts: { resources: { treasury: -3 }, metrics: { order: 3 }, imperial: { senateCompact: 8, publicProvision: 6, palaceConcentration: -5, provincialTrust: 4, imperialAuthority: 2 }, flags: { neronianCourt: 'published-budget' } } },
+      { id: 'popular-spectacle', label: 'Trade court credit for public spectacle', detail: 'Use games and distributions to build direct public standing while deferring maintenance and senatorial bargaining.', impacts: { resources: { treasury: -4, grain: -2 }, metrics: { order: 5, auspices: 3 }, imperial: { publicAccess: 8, imperialAuthority: 5, palaceConcentration: 4, maintenanceCapacity: -5, senateCompact: -2 }, flags: { neronianCourt: 'popular-spectacle' } } },
+      { id: 'palace-command', label: 'Concentrate appointments and credit in the palace', detail: 'Strengthen immediate coordination and household loyalty while narrowing access and widening succession risk.', impacts: { resources: { treasury: 4 }, metrics: { order: 1 }, imperial: { imperialAuthority: 10, palaceConcentration: 12, guardInfluence: 5, senateCompact: -8, publicAccess: -6, successionConfidence: -4 }, flags: { neronianCourt: 'palace-command' } } },
+    ],
+  },
+  {
+    turn: 66, id: 'fire-ad64', title: 'The Fire of AD 64', speaker: 'Nero, consuls, vigiles, water officers, displaced households, property holders, builders, and grain officials',
+    prompt: 'Fire has destroyed dense quarters and opened contested land. Who receives shelter, who controls clearance, and what rules govern rebuilding?',
+    context: 'Tacitus supplies the most influential narrative of the fire and relief. The scale, cause, rumors, and imperial response remain disputed; destruction, displacement, emergency shelter, new building rules, and land pressure are the secure operating problem.',
+    options: [
+      { id: 'public-rebuild-code', label: 'Shelter first and rebuild under public street rules', detail: 'Fund relief, wider routes, firebreaks, water access, height controls, and appeal before permanent clearance.', impacts: { resources: { treasury: -7, grain: -4, timber: -2 }, metrics: { shelter: 7, sanitation: 4, order: 3 }, imperial: { fireResilience: 17, publicAccess: 10, publicProvision: 8, palaceConcentration: -5, maintenanceCapacity: 5 }, flags: { fireSettlement: 'public-rebuild', flavianConversionSite: true } } },
+      { id: 'mixed-clearance', label: 'Divide clearance among public routes and bounded palace ground', detail: 'Reserve strategic corridors and limited official space while compensating claims through recorded hearings.', impacts: { resources: { treasury: -4, grain: -2 }, metrics: { shelter: 3, order: 2 }, imperial: { fireResilience: 10, publicAccess: 3, palaceConcentration: 6, senateCompact: 4, maintenanceCapacity: 2 }, flags: { fireSettlement: 'mixed-clearance', flavianConversionSite: true } } },
+      { id: 'domus-aurea-land', label: 'Use the cleared center for the Domus Aurea', detail: 'Create a controlled palace landscape and emergency command center, displacing public routes and attaching reconstruction to the ruler.', impacts: { resources: { treasury: -2, stone: 3, timber: 2 }, metrics: { shelter: -5, order: -3 }, imperial: { imperialAuthority: 9, palaceConcentration: 18, publicAccess: -14, fireResilience: 3, senateCompact: -5 }, flags: { fireSettlement: 'palace-land', flavianConversionSite: true } } },
+    ],
+  },
+  {
+    turn: 67, id: 'four-emperors', title: 'The Four Emperors', speaker: 'Senators, praetorians, urban officers, treasury officials, and envoys from the Rhine, Danube, East, and Italian armies',
+    prompt: 'The Four Emperors have shown that armies can nominate rulers and march on Rome. What settlement can join military recognition, Senate action, treasury repair, and public land?',
+    context: 'AD 69 demonstrated that succession was imperial and military, not merely Roman and dynastic. Tacitus, Suetonius, Josephus, inscriptions, and coinage preserve different parts of the struggle and Flavian settlement.',
+    options: [
+      { id: 'flavian-public-conversion', label: 'Recognize Vespasian and return Neronian land to public use', detail: 'Join army recognition to Senate decree, fiscal repair, and conversion of the lake precinct into a public amphitheater.', impacts: { resources: { treasury: 5, stone: 3, timber: 2 }, metrics: { order: 6, readiness: 4 }, imperial: { armyRecognition: 13, successionConfidence: 9, senateCompact: 6, palaceConcentration: -10, publicAccess: 8, maintenanceCapacity: 3 }, flags: { flavianSettlement: 'public-conversion' } } },
+      { id: 'flavian-fiscal-first', label: 'Repair treasury and armies before monumental conversion', detail: 'Secure pay, taxes, and provincial command first, preserving the lake site for later public decision.', impacts: { resources: { treasury: 9, grain: 3 }, metrics: { readiness: 6, order: 3 }, imperial: { armyRecognition: 15, provincialTrust: 5, maintenanceCapacity: 8, publicAccess: 2, palaceConcentration: -4 }, flags: { flavianSettlement: 'fiscal-first' } } },
+      { id: 'military-acclamation', label: 'Let victorious armies define the settlement', detail: 'Reward commanders and secure force quickly, accepting guard and army brokerage as the practical constitution.', impacts: { resources: { treasury: 5, grain: -2 }, metrics: { readiness: 9, order: 1 }, imperial: { armyRecognition: 18, imperialAuthority: 8, guardInfluence: 8, senateCompact: -8, successionConfidence: 3, provincialTrust: -4 }, flags: { flavianSettlement: 'military-acclamation' } } },
+    ],
+  },
+  {
+    turn: 68, id: 'flavian-peace', title: 'Flavian Peace and Public Credit', speaker: 'Vespasian, Titus, senators, treasury officers, builders, provincial envoys, and neighborhood delegates',
+    prompt: 'War receipts and restored credit can support provision, debt retirement, public conversion, or a broad monumental claim. Which burden comes first?',
+    context: 'Vespasian\'s settlement combined fiscal repair, dynastic presentation, public construction, provincial administration, and victory commemoration. The Temple of Peace was dedicated in AD 75; its operating complex exceeded one temple cella.',
+    options: [
+      { id: 'service-and-conversion', label: 'Fund provision and the public conversion together', detail: 'Pair grain, water, and fire accounts with the amphitheater and Temple of Peace, limiting the number of simultaneous projects.', impacts: { resources: { treasury: -3, stone: 3, timber: 2 }, metrics: { food: 4, water: 3, order: 4 }, imperial: { publicProvision: 10, publicAccess: 9, maintenanceCapacity: 5, palaceConcentration: -5 }, flags: { flavianProgram: 'service-conversion' } } },
+      { id: 'monuments-from-victory', label: 'Drive a victory-funded monumental program', detail: 'Turn spoils and dynastic credit into rapid construction while accepting maintenance and provincial suspicion.', impacts: { resources: { treasury: 3, stone: 5 }, metrics: { auspices: 6, order: 3 }, imperial: { imperialAuthority: 8, publicAccess: 6, maintenanceCapacity: -7, provincialTrust: -4, palaceConcentration: 3 }, flags: { flavianProgram: 'victory-monuments' } } },
+      { id: 'treasury-and-provinces', label: 'Retire claims and stabilize provincial obligations', detail: 'Restore credit and predictable dues before finishing spectacle, gaining resilience with less immediate display.', impacts: { resources: { treasury: 8 }, metrics: { trade: 4 }, imperial: { provincialTrust: 10, maintenanceCapacity: 9, publicProvision: 5, publicAccess: -2, imperialAuthority: 2 }, flags: { flavianProgram: 'fiscal-provinces' } } },
+    ],
+  },
+  {
+    turn: 69, id: 'amphitheatre-opens', title: 'The Flavian Amphitheatre Opens', speaker: 'Titus, senators, arena officials, engineers, vigiles, neighborhood delegates, performers, and grain officers',
+    prompt: 'The amphitheater can open in AD 80 as a public conversion of the former lake. What operating rule keeps the dedication from becoming an unfunded shell?',
+    context: 'The Flavian Amphitheatre opened under Titus in AD 80. Its crowd circulation, arena surface, awnings, fountains, latrines, staffing, and wooden underground machinery were operating systems; Domitian later added durable masonry substructures.',
+    options: [
+      { id: 'funded-public-operation', label: 'Open with funded crowd and service systems', detail: 'Pay for routes, water, sanitation, staffing, awnings, arena machinery, and inspection before expanding the calendar.', impacts: { resources: { treasury: -6, grain: -3 }, metrics: { order: 6, sanitation: 5, trade: 3 }, imperial: { publicAccess: 13, fireResilience: 5, maintenanceCapacity: 8, publicProvision: 4, palaceConcentration: -4 }, flags: { amphitheatreRule: 'funded-operation' } } },
+      { id: 'hundred-days', label: 'Use an exceptional opening festival', detail: 'Maximize public and dynastic credit now while deferring part of the permanent service account.', impacts: { resources: { treasury: -5, grain: -5 }, metrics: { order: 8, auspices: 6 }, imperial: { publicAccess: 12, imperialAuthority: 8, successionConfidence: 5, maintenanceCapacity: -6 }, flags: { amphitheatreRule: 'festival-opening' } } },
+      { id: 'limited-calendar', label: 'Open on a limited inspected calendar', detail: 'Protect maintenance and neighborhood access through fewer events, accepting less immediate acclaim.', impacts: { resources: { treasury: -3, grain: -1 }, metrics: { order: 3, sanitation: 4 }, imperial: { publicAccess: 7, maintenanceCapacity: 11, fireResilience: 4, imperialAuthority: 2 }, flags: { amphitheatreRule: 'limited-calendar' } } },
+    ],
+  },
+  {
+    turn: 70, id: 'domitianic-judgment', title: 'The Palace and Succession at AD 96', speaker: 'Domitian\'s household, senators, praetorians, urban officers, provincial commanders, palace staff, and prospective successors',
+    prompt: 'Rome is visually magnificent and administratively immense, but palace concentration and an unresolved succession can turn capacity into crisis. What must survive the ruler?',
+    context: 'Domitian\'s assassination in AD 96 ended the Flavian dynasty. The palace, administration, army, Senate, treasury, and public works endured in unequal condition; the game judges their operating relationship rather than treating grandeur or murder as a complete verdict.',
+    options: [
+      { id: 'recorded-adoption', label: 'Bind adoption to Senate and army recognition', detail: 'Name a successor through recorded adoption, secure commands, preserve staff, and publish the transfer of powers.', impacts: { resources: { treasury: -3 }, metrics: { order: 6, readiness: 3 }, imperial: { successionConfidence: 16, senateCompact: 9, armyRecognition: 8, guardInfluence: -3, imperialAuthority: 2 }, flags: { imperialSuccession96: 'recorded-adoption' } } },
+      { id: 'palace-continuity', label: 'Let palace administration carry the transfer', detail: 'Preserve specialists and central routines through the household and prefects, accepting narrow political access.', impacts: { resources: { treasury: 2 }, metrics: { order: 4 }, imperial: { successionConfidence: 10, imperialAuthority: 9, palaceConcentration: 10, maintenanceCapacity: 5, senateCompact: -5 }, flags: { imperialSuccession96: 'palace-continuity' } } },
+      { id: 'senatorial-restoration-96', label: 'Reassert Senate choice under guarded terms', detail: 'Choose a respected senator and negotiate army oaths, restoring civic standing while risking delay and guard bargaining.', impacts: { resources: { treasury: -4, grain: -1 }, metrics: { order: 2, readiness: -2 }, imperial: { successionConfidence: 9, senateCompact: 14, imperialAuthority: -5, armyRecognition: 2, guardInfluence: 4, publicAccess: 4 }, flags: { imperialSuccession96: 'senatorial-choice' } } },
+    ],
+  },
+)
+
+COUNCILS.push(
+  {
     turn: 55, id: 'principate-operating-rule', title: 'The Principate in Practice', speaker: 'Augustus, Agrippa, consuls, senators, equestrian administrators, provincial envoys, and grain officers',
     prompt: 'The settlement has names and honors; now it needs an operating rule. Where should command, petitions, finance, and ordinary magistracy meet?',
     context: 'The arrangements associated with 27 and 23 BC were successive adjustments, not one finished constitution. Augustus accumulated powers while consuls, Senate, courts, cities, and provincial commands continued to operate.',
@@ -1149,6 +1324,15 @@ export const OBJECTIVES = [
   { from: 59, to: 59, text: 'Make monumental memory serve courts and civic access as well as the ruling household.' },
   { from: 60, to: 60, text: 'Build fire response as an operating service with command, equipment, routes, and recurring cost.' },
   { from: 61, to: 61, text: 'Test whether authority, services, provinces, and succession can survive the founder.' },
+  { from: 62, to: 62, text: 'Transfer authority without allowing guard recognition to become the whole constitution.' },
+  { from: 63, to: 63, text: 'Place guard, Senate, household, and urban administration within one legible operating order.' },
+  { from: 64, to: 64, text: 'Expand water and harbor capacity without hiding contracts, maintenance, or provincial supply.' },
+  { from: 65, to: 65, text: 'Make court spending and public credit visible before popularity becomes a substitute for accounts.' },
+  { from: 66, to: 66, text: 'Rebuild after the fire without surrendering the city to either private claims or palace land.' },
+  { from: 67, to: 67, text: 'Restore recognized rule after civil war and decide what becomes public again.' },
+  { from: 68, to: 68, text: 'Turn victory into provision, public access, and maintainable works rather than display alone.' },
+  { from: 69, to: 69, text: 'Open the Flavian Amphitheatre while funding crowd routes, safety, service, and future substructures.' },
+  { from: 70, to: 70, text: 'Judge what survives the palace and ruler at the succession of AD 96.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

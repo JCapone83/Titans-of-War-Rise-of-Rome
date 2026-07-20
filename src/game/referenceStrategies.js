@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
-import { continueToAugustanCity, continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
+import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -643,4 +643,51 @@ export function runAllAugustanCityStrategies() {
     }
     return { strategy, state, outcome: calculateOutcome(state), augustanScore: calculateAugustanCityScore(state), skipped, ledger }
   })
+}
+
+export const IMPERIAL_CAPITAL_STRATEGIES = [
+  {
+    id: 'public-flavian-capital', name: 'Public Flavian Capital', thesis: 'Use recorded transfer, public rebuilding, and the former Neronian lake to create an operating public amphitheater.',
+    councils: { 62: 'recorded-renewal', 63: 'mixed-offices', 64: 'integrated-provision-board', 65: 'published-court-budget', 66: 'public-rebuild-code', 67: 'flavian-public-conversion', 68: 'service-and-conversion', 69: 'funded-public-operation', 70: 'recorded-adoption' },
+    projectPriorities: { 67: 'flavianAmphitheatre', 68: 'flavianAmphitheatre', 69: 'flavianAmphitheatre', 70: 'flavianAmphitheatre' },
+  },
+  {
+    id: 'provision-first-capital', name: 'Provision-First Capital', thesis: 'Make water, harbor, grain, maintenance, and provincial trust the foundation of first-century scale.',
+    councils: { 62: 'recorded-renewal', 63: 'prefectural-center', 64: 'integrated-provision-board', 65: 'published-court-budget', 66: 'mixed-clearance', 67: 'flavian-fiscal-first', 68: 'treasury-and-provinces', 69: 'limited-calendar', 70: 'recorded-adoption' },
+    projectPriorities: { 64: 'aquaClaudia', 65: 'aquaClaudia', 66: 'aquaClaudia', 67: 'aquaClaudia', 68: 'claudianPortus', 69: 'claudianPortus', 70: 'claudianPortus' },
+  },
+  {
+    id: 'palace-administrative-capital', name: 'Palace-Administrative Capital', thesis: 'Concentrate guard, court, and palace administration while using records, provision, and fire rules to keep the settlement operable.',
+    councils: { 62: 'recorded-renewal', 63: 'mixed-offices', 64: 'integrated-provision-board', 65: 'published-court-budget', 66: 'public-rebuild-code', 67: 'military-acclamation', 68: 'treasury-and-provinces', 69: 'limited-calendar', 70: 'palace-continuity' },
+    projectPriorities: { 62: 'castraPraetoria', 63: 'castraPraetoria', 64: 'castraPraetoria', 66: 'domusAurea', 67: 'domusAurea', 68: 'domusAurea', 69: 'domitianicPalace', 70: 'domitianicPalace' },
+  },
+]
+
+export function simulateImperialCapitalStrategy(strategy, baseState) {
+  let state = enterImperialCapital(continueToImperialCapital(baseState))
+  const skipped = []
+  const ledger = []
+  while (state.outcome !== 'imperial-capital-complete') {
+    const optionId = strategy.councils[state.turn]
+    if (state.council && !state.councilResolved) {
+      if (!optionId) skipped.push({ turn: state.turn, reason: 'No Imperial Capital council choice declared.' })
+      else state = resolveCouncil(state, optionId)
+    }
+    const projectId = strategy.projectPriorities[state.turn]
+    if (projectId && actionRemaining(state)) {
+      const work = workImperialProject(state, projectId)
+      if (work.error) skipped.push({ turn: state.turn, projectId, reason: work.error })
+      else state = work.state
+    }
+    ledger.push({ turn: state.turn, imperialCapital: { ...state.imperialCapital, projects: structuredClone(state.imperialCapital.projects ?? {}) }, resources: { ...state.resources } })
+    const result = advanceTurn(state)
+    if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+    state = result.state
+  }
+  return { strategy, state, outcome: calculateOutcome(state), imperialScore: calculateImperialCapitalScore(state), skipped, ledger }
+}
+
+export function runAllImperialCapitalStrategies() {
+  const bases = runAllAugustanCityStrategies()
+  return IMPERIAL_CAPITAL_STRATEGIES.map((strategy, index) => simulateImperialCapitalStrategy(strategy, bases[index].state))
 }

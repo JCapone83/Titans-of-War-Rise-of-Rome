@@ -21,6 +21,13 @@ export function OutcomeOverlay({ outcome, onExport, onRestart, onContinue, conti
             {outcome.capitalLegacy.systems.map((system) => <span key={system.id}><strong>{system.score}</strong><small>{system.name}</small><i>{system.status}</i></span>)}
           </div>
         </section>}
+        {outcome.imperialCapitalLegacy && <section className="capital-legacy imperial-capital-legacy" aria-labelledby="imperial-capital-legacy-title">
+          <div><p className="eyebrow">AD 96 capital legacy</p><h3 id="imperial-capital-legacy-title">{outcome.imperialCapitalLegacy.operatingForm}</h3></div>
+          <p>{outcome.imperialCapitalLegacy.completed} imperial works operating · {outcome.imperialCapitalLegacy.active} still under construction</p>
+          <div className="capital-legacy-systems">
+            {outcome.imperialCapitalLegacy.systems.map((system) => <span key={system.id}><strong>{system.score}</strong><small>{system.name}</small><i>{system.status}</i></span>)}
+          </div>
+        </section>}
         <div className="outcome-actions">
           <button className="primary-button" onClick={onExport}><Download /> Export chronicle</button>
           {onContinue && <button className="secondary-button" onClick={onContinue}><RotateCcw /> {continueLabel}</button>}

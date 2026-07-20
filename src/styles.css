@@ -281,6 +281,24 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
   .regional-map { height: 680px; min-height: 680px; }.regional-node { width: 78px; min-height: 56px; grid-template-columns: 18px 1fr; gap: 0 4px; padding: 5px; }.regional-node svg { width: 17px; }.regional-node strong { font-size: 10px; }.regional-node small { font-size: 7px; }.regional-node.node-rome { left: 43% !important; top: 48% !important; }.regional-node.node-tibur { left: 73% !important; top: 34% !important; }.regional-node.node-tusculum { left: 65% !important; top: 59% !important; }.regional-node.node-praeneste { left: 85% !important; top: 49% !important; }.regional-node.node-satricum { left: 72% !important; top: 75% !important; }.regional-node.node-antium { left: 42% !important; top: 82% !important; }.regional-node.node-capua { left: 76% !important; top: 94% !important; }.regional-inspector { display: block; }.regional-inspector > div { border-right: 0; border-bottom: 1px solid var(--line); }.regional-legend { display: none; }.surface-switch button { flex: 1; }
 }
 
+.imperial-capital-panel { border-top: 2px solid #b76046; }
+.imperial-measures .risk-measure { border-color: #8b4037; background: #211817; }
+.imperial-measures .risk-measure strong { color: #e78a73; }
+.imperial-system-grid .capital-system { min-width: 0; }
+.imperial-works { border-top: 2px solid #d3a84b; }
+.imperial-project-stage { min-height: 72px; display: flex; flex-direction: column; justify-content: flex-end; gap: 5px; padding: 12px; border: 1px solid #4a4638; background: linear-gradient(180deg, #26251f 0%, #161714 100%); }
+.imperial-project-stage span { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.imperial-project-stage strong { color: var(--gold); font-size: 13px; }
+.imperial-project-stage[data-stage="foundations"] { box-shadow: inset 0 -4px #80684a; }
+.imperial-project-stage[data-stage="structure"] { box-shadow: inset 0 -4px #b58d45; }
+.imperial-project-stage[data-stage="operating"] { box-shadow: inset 0 -4px #5f956f; }
+.project-burden { display: block; min-height: 42px; margin-top: 8px; color: #c7bca1; line-height: 1.4; }
+
+@media (max-width: 720px) {
+  .imperial-system-grid { grid-template-columns: 1fr; }
+  .imperial-project-stage { min-height: 62px; }
+}
+
 @media (max-width: 430px) {
   .brand-mark { display: none; }.top-actions .icon-button:nth-child(3), .top-actions .icon-button:nth-child(4) { display: none; }
   .campaign-strip strong { font-size: 14px; }.city-map { height: 470px; min-height: 470px; }.district { width: 118px; transform: translate(-50%, -50%) scale(.7); }.district-label { bottom: -11px; }

@@ -1,5 +1,5 @@
 import { getCouncil } from './data.js'
-import { createAugustanState, createCivilSettlementState, createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
+import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
 import { calculateOutcome } from './outcomes.js'
 
 export function freezeCoreJudgment(state) {
@@ -265,6 +265,43 @@ export function enterAugustanCity(state) {
     nextWorksBonus: 0,
     selectedBuildingId: null,
     council: getCouncil(55),
+    councilResolved: false,
+  }
+}
+
+export function continueToImperialCapital(state) {
+  if (state.turn !== 61 || state.outcome !== 'augustan-city-complete' || state.imperialCapitalTransition) return state
+  return { ...state, imperialCapitalTransition: true }
+}
+
+export function enterImperialCapital(state) {
+  if (!state.imperialCapitalTransition || state.turn !== 61 || state.outcome !== 'augustan-city-complete') return state
+  const bridgeExists = (state.chronologyBridges ?? []).some((bridge) => bridge.id === 'augustan-to-imperial-capital')
+  const bridge = {
+    id: 'augustan-to-imperial-capital',
+    fromYear: -14,
+    toYear: -14,
+    mediterraneanChanges: {},
+    notes: [
+      'The death of Augustus is both the Act X judgment and the opening transfer of Act XI; no elapsed interval erases inherited projects, offices, debts, or precedents.',
+      'The new ledger separates imperial authority, Senate cooperation, guard and army recognition, provision, fire, palace land, provincial trust, maintenance, public access, and succession.',
+      'The imperial tax base opens a larger operating treasury, but inherited works and every new capital project continue to draw recurring maintenance.',
+    ],
+  }
+  return {
+    ...state,
+    version: 15,
+    turn: 62,
+    era: 11,
+    outcome: null,
+    imperialCapitalTransition: false,
+    imperialCapital: state.imperialCapital ?? createImperialCapitalState(state.augustanCity),
+    resources: { ...state.resources, treasury: state.resources.treasury + 32, stone: state.resources.stone + 3, timber: state.resources.timber + 2 },
+    chronologyBridges: bridgeExists ? state.chronologyBridges : [...(state.chronologyBridges ?? []), bridge],
+    actionsUsed: 0,
+    nextWorksBonus: 0,
+    selectedBuildingId: null,
+    council: getCouncil(62),
     councilResolved: false,
   }
 }

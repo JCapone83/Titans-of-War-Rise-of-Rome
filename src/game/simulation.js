@@ -1,5 +1,5 @@
-import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, formatYear, getCouncil, getDistrict, getFamily, getTier } from './data.js'
-import { createAugustanState, createCivilSettlementState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState } from './initialState.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, IMPERIAL_CAPITAL_PROJECTS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, formatYear, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
@@ -130,6 +130,14 @@ export const updateCivilSettlement = (settlement, changes = {}) => {
 export const updateAugustanCity = (augustan, changes = {}) => {
   if (!augustan) return augustan
   return Object.fromEntries(Object.entries(augustan).map(([key, value]) => [
+    key,
+    typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
+  ]))
+}
+
+export const updateImperialCapital = (imperial, changes = {}) => {
+  if (!imperial) return imperial
+  return Object.fromEntries(Object.entries(imperial).map(([key, value]) => [
     key,
     typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
   ]))
@@ -699,6 +707,56 @@ export function workAugustanProject(state, projectId) {
   }
 }
 
+export function imperialProjectAvailability(state, projectId) {
+  const blocked = (reason) => ({ available: false, ok: false, reason })
+  if (!state.imperialCapital || state.era < 11) return blocked('Imperial Capital public works are not yet available.')
+  const definition = IMPERIAL_CAPITAL_PROJECTS[projectId]
+  const project = state.imperialCapital.projects?.[projectId]
+  if (!definition || !project) return blocked('Choose a valid imperial work.')
+  if (state.turn < definition.unlockTurn) return blocked(`Available in ${formatYear(TURN_YEARS[definition.unlockTurn - 1])}.`)
+  if (project.completed) return blocked(`${definition.name} is operating.`)
+  if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this turn.`)
+  if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this turn.')
+  if (definition.prerequisite === 'flavian-public-conversion' && state.flags?.flavianSettlement !== 'public-conversion') {
+    return blocked('The AD 69 settlement must return the former Neronian lake site to public use first.')
+  }
+  const affordability = affordabilityFailure(state, definition.cost)
+  if (affordability) return blocked(affordability)
+  return { available: true, ok: true, definition, project }
+}
+
+export function workImperialProject(state, projectId) {
+  const availability = imperialProjectAvailability(state, projectId)
+  if (!availability.ok) return { state, error: availability.reason }
+  const { definition, project } = availability
+  const progress = project.progress + 1
+  const completed = progress >= project.requiredSeasons
+  const nextProject = {
+    ...project,
+    progress,
+    completed,
+    lastWorkedTurn: state.turn,
+    ...(projectId === 'flavianAmphitheatre' ? { opened: progress >= 3, domitianicLayer: completed } : {}),
+  }
+  let imperialCapital = { ...state.imperialCapital, projects: { ...state.imperialCapital.projects, [projectId]: nextProject } }
+  let metrics = state.metrics
+  if (completed) {
+    metrics = addMap(metrics, definition.completionMetrics)
+    imperialCapital = updateImperialCapital(imperialCapital, definition.completionImperial)
+  }
+  return {
+    state: {
+      ...state,
+      resources: addResources(state.resources, reverseChanges(definition.cost)),
+      metrics,
+      imperialCapital,
+      actionsUsed: (state.actionsUsed ?? 0) + 1,
+      actionLog: appendAction(state, { type: 'imperial-capital-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
+    },
+    message: completed ? `${definition.name} is operating; its service and burden enter the Imperial Capital ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} stages.`,
+  }
+}
+
 function reducePopulation(population, amount) {
   const total = Math.max(100, population.total - amount)
   const factor = total / population.total
@@ -1070,8 +1128,11 @@ export function resolveCouncil(state, optionId) {
   const nextAugustanCity = state.augustanCity
     ? updateAugustanCity({ ...createAugustanState(state.civilSettlement), ...state.augustanCity }, impacts.augustan)
     : state.augustanCity
+  const nextImperialCapital = state.imperialCapital
+    ? updateImperialCapital({ ...createImperialCapitalState(state.augustanCity), ...state.imperialCapital }, impacts.imperial)
+    : state.imperialCapital
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
-  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, flags: nextFlags }
+  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, flags: nextFlags }
   return {
     ...state,
     resources: addResources(state.resources, impacts.resources),
@@ -1088,6 +1149,7 @@ export function resolveCouncil(state, optionId) {
     republicStrain: nextRepublicStrain,
     civilSettlement: nextCivilSettlement,
     augustanCity: nextAugustanCity,
+    imperialCapital: nextImperialCapital,
     nextWorksBonus,
     actionsMax: Math.max(state.actionsUsed ?? 0, workforceSummary(capacityState).constructionCapacity),
     councilResolved: true,
@@ -1761,6 +1823,85 @@ export function augustanCapitalSystems(state) {
   ]
 }
 
+export function imperialCapitalForecast(state) {
+  if (!state.imperialCapital) return null
+  const i = { ...createImperialCapitalState(state.augustanCity ?? {}), ...state.imperialCapital }
+  const works = i.projects ?? {}
+  const completedWorks = Object.values(works).filter((project) => project.completed)
+  const burdens = completedWorks.reduce((result, project) => {
+    const definition = IMPERIAL_CAPITAL_PROJECTS[project.id]
+    return {
+      resourceDelta: mergeChanges(result.resourceDelta, definition?.upkeepResources),
+      metricDelta: mergeChanges(result.metricDelta, definition?.upkeepMetrics),
+      imperialChanges: mergeChanges(result.imperialChanges, definition?.upkeepImperial),
+    }
+  }, { resourceDelta: {}, metricDelta: {}, imperialChanges: {} })
+  const recognitionGap = Math.max(0, 105 - i.armyRecognition - i.successionConfidence + i.guardInfluence * 0.35)
+  const provisionGap = Math.max(0, 125 - i.publicProvision - i.harborSupply + Math.max(0, 50 - i.maintenanceCapacity) * 0.4)
+  const palaceGap = Math.max(0, i.palaceConcentration + i.imperialAuthority - i.senateCompact - i.publicAccess)
+  const fireCrisis = state.turn === 66
+  const changes = {
+    imperialAuthority: 0,
+    senateCompact: palaceGap >= 45 ? -2 : 0,
+    guardInfluence: i.successionConfidence < 45 ? 1 : 0,
+    armyRecognition: state.turn === 67 && i.armyRecognition < 55 ? -4 : 0,
+    successionConfidence: state.turn >= 65 ? (recognitionGap >= 45 ? -2 : -1) : 0,
+    publicProvision: provisionGap >= 50 ? -2 : 0,
+    fireResilience: fireCrisis ? (i.fireResilience >= 55 ? -3 : -9) : 0,
+    harborSupply: i.maintenanceCapacity < 40 ? -1 : 0,
+    palaceConcentration: i.publicAccess < 40 ? 1 : 0,
+    provincialTrust: i.imperialAuthority > 70 && i.senateCompact < 40 ? -1 : 0,
+    maintenanceCapacity: completedWorks.length >= 3 ? -1 : 0,
+    publicAccess: i.palaceConcentration >= 65 ? -2 : 0,
+    ...burdens.imperialChanges,
+  }
+  const projected = {
+    ...Object.fromEntries(Object.entries(i)
+      .filter(([key]) => key !== 'projects')
+      .map(([key, value]) => [key, clamp(value + (changes[key] ?? 0))])),
+    projects: structuredClone(works),
+  }
+  return {
+    ...projected,
+    changes,
+    projected,
+    resourceDelta: mergeChanges({ treasury: 12 }, i.publicProvision < 45 ? { grain: -1 } : {}, burdens.resourceDelta),
+    metricDelta: {
+      order: (recognitionGap >= 55 ? -2 : 0) + (palaceGap >= 55 ? -2 : 0),
+      food: provisionGap >= 55 ? -2 : 0,
+      sanitation: fireCrisis && i.fireResilience < 50 ? -6 : 0,
+      shelter: fireCrisis && i.fireResilience < 45 ? -5 : 0,
+      ...burdens.metricDelta,
+    },
+    publicWorks: {
+      completed: completedWorks.map((project) => project.id),
+      resourceDelta: burdens.resourceDelta,
+      metricDelta: burdens.metricDelta,
+      imperialChanges: burdens.imperialChanges,
+    },
+    recognitionGap,
+    provisionGap,
+    palaceGap,
+    notes: [
+      'Imperial-scale revenues enter the capital ledger before inherited and new maintenance obligations are paid.',
+      recognitionGap >= 45 ? 'Succession still depends heavily on guard or army brokerage.' : 'Army, Senate, household, and designated succession remain mutually legible.',
+      provisionGap >= 50 ? 'Capital demand is outrunning grain, harbor, and maintenance capacity.' : 'Harbor supply and public provision still support the city behind its monuments.',
+      palaceGap >= 45 ? 'Palace and imperial authority are displacing Senate compact and public access.' : 'Central administration remains connected to a public city and operating civic institutions.',
+    ],
+  }
+}
+
+export function imperialCapitalSystems(state) {
+  if (!state?.imperialCapital || state.era < 11) return []
+  const i = state.imperialCapital
+  return [
+    capitalSystem('authority-transfer', 'Authority transfer', i.successionConfidence * 0.35 + i.armyRecognition * 0.25 + i.senateCompact * 0.25 + (100 - i.guardInfluence) * 0.15, ['Succession', 'Army recognition', 'Senate compact', 'Guard restraint'], ['castraPraetoria', 'archTitus', 'domitianicPalace']),
+    capitalSystem('capital-provision', 'Capital provision', i.publicProvision * 0.35 + i.harborSupply * 0.3 + i.maintenanceCapacity * 0.2 + i.provincialTrust * 0.15, ['Public provision', 'Harbor supply', 'Maintenance', 'Provincial trust'], ['aquaClaudia', 'claudianPortus', 'templePeace']),
+    capitalSystem('urban-safety', 'Urban safety', i.fireResilience * 0.45 + i.publicProvision * 0.2 + i.maintenanceCapacity * 0.2 + i.publicAccess * 0.15, ['Fire resilience', 'Provision', 'Maintenance', 'Open routes'], ['aquaClaudia', 'flavianAmphitheatre']),
+    capitalSystem('public-city-palace', 'Public city versus palace', i.publicAccess * 0.35 + i.senateCompact * 0.25 + (100 - i.palaceConcentration) * 0.25 + i.publicProvision * 0.15, ['Public access', 'Senate compact', 'Limited palace land', 'Provision'], ['domusAurea', 'flavianAmphitheatre', 'templePeace', 'domitianicPalace']),
+  ]
+}
+
 export function forecastSeason(state) {
   const production = sumBuildingMaps(state, 'production')
   const upkeep = reverseChanges(sumBuildingMaps(state, 'upkeep'))
@@ -1775,8 +1916,9 @@ export function forecastSeason(state) {
   const republicStrain = republicStrainForecast(state)
   const civilSettlement = civilSettlementForecast(state)
   const augustanCity = augustanCityForecast(state)
+  const imperialCapital = imperialCapitalForecast(state)
   return {
-    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta, republicStrain?.resourceDelta, civilSettlement?.resourceDelta, augustanCity?.resourceDelta),
+    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta, republicStrain?.resourceDelta, civilSettlement?.resourceDelta, augustanCity?.resourceDelta, imperialCapital?.resourceDelta),
     pressures: civicPressures(state),
     actionsRemaining: actionRemaining(state),
     population: projectPopulation(state),
@@ -1792,6 +1934,7 @@ export function forecastSeason(state) {
     republicStrain,
     civilSettlement,
     augustanCity,
+    imperialCapital,
   }
 }
 
@@ -1966,6 +2109,23 @@ function timedEvent(state) {
       districtLossRates: {},
     }
   }
+  if (state.turn === 66 && state.imperialCapital) {
+    const resilience = state.imperialCapital.fireResilience ?? 35
+    const prepared = resilience >= 55 || state.flags?.fireSettlement === 'public-rebuild'
+    return {
+      title: 'The Great Fire Tests the Capital',
+      text: prepared
+        ? 'Water points, open routes, relief, and supervised clearance keep a vast disaster from becoming an unrestricted transfer of land and authority.'
+        : 'Flames outrun narrow routes and uneven water access. Displacement and emergency clearance expose the political value of burned ground.',
+      metrics: prepared ? { shelter: -3, sanitation: -4, order: -2 } : { shelter: -10, sanitation: -10, order: -7, food: -3 },
+      resources: prepared ? { timber: -2, treasury: -3, grain: -2 } : { timber: -4, treasury: -5, grain: -4 },
+      damageDistricts: ['forum', 'palatine', 'tiber', 'aventine'],
+      districtDamage: prepared ? { forum: 8, palatine: 7, tiber: 6, aventine: 5 } : { forum: 20, palatine: 18, tiber: 15, aventine: 14 },
+      districtLossRates: prepared ? { forum: 0.002, palatine: 0.002, tiber: 0.002, aventine: 0.001 } : { forum: 0.006, palatine: 0.005, tiber: 0.004, aventine: 0.004 },
+      resolvedRisk: resilience,
+      riskLabel: 'AD 64 fire resilience',
+    }
+  }
   return null
 }
 
@@ -2032,7 +2192,7 @@ export function advanceTurn(state) {
   const pressures = forecast.pressures
   const event = timedEvent(state)
   const resourceDelta = mergeChanges(forecast.resourceDelta, event?.resources)
-  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta, forecast.republicStrain?.metricDelta, forecast.civilSettlement?.metricDelta, forecast.augustanCity?.metricDelta)
+  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta, forecast.republicStrain?.metricDelta, forecast.civilSettlement?.metricDelta, forecast.augustanCity?.metricDelta, forecast.imperialCapital?.metricDelta)
   const nextResources = addResources(state.resources, resourceDelta)
   let nextMetrics = addMap(state.metrics, metricDelta)
   const shortages = Object.entries(nextResources).filter(([key, value]) => value === 0 && ['grain', 'timber', 'treasury'].includes(key))
@@ -2072,6 +2232,7 @@ export function advanceTurn(state) {
   const nextRepublicStrain = forecast.republicStrain ? forecast.republicStrain.projected : state.republicStrain
   const nextCivilSettlement = forecast.civilSettlement ? forecast.civilSettlement.projected : state.civilSettlement
   const nextAugustanCity = forecast.augustanCity ? forecast.augustanCity.projected : state.augustanCity
+  const nextImperialCapital = forecast.imperialCapital ? forecast.imperialCapital.projected : state.imperialCapital
   report.republicChanges = mergeChanges(forecast.republic?.changes, warRepublicChanges)
   report.warChanges = forecast.war?.changes ?? null
   report.reconstructionChanges = forecast.reconstruction?.changes ?? null
@@ -2094,8 +2255,10 @@ export function advanceTurn(state) {
   if (forecast.civilSettlement) report.notes.push(...forecast.civilSettlement.notes)
   report.augustanCityChanges = forecast.augustanCity?.changes ?? null
   if (forecast.augustanCity) report.notes.push(...forecast.augustanCity.notes)
+  report.imperialCapitalChanges = forecast.imperialCapital?.changes ?? null
+  if (forecast.imperialCapital) report.notes.push(...forecast.imperialCapital.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, reports: [...state.reports, report] }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, reports: [...state.reports, report] }
   if (forecast.mediterranean?.publicWorks) {
     shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
     report.publicWorks = forecast.mediterranean.publicWorks
@@ -2104,12 +2267,14 @@ export function advanceTurn(state) {
   if (forecast.republicStrain?.publicWorks) report.republicStrainPublicWorks = forecast.republicStrain.publicWorks
   if (forecast.civilSettlement?.publicWorks) report.civilSettlementPublicWorks = forecast.civilSettlement.publicWorks
   if (forecast.augustanCity?.publicWorks) report.augustanCityPublicWorks = forecast.augustanCity.publicWorks
+  if (forecast.imperialCapital?.publicWorks) report.imperialCapitalPublicWorks = forecast.imperialCapital.publicWorks
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
   if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
   if (state.turn === 41) return { state: { ...state, ...shared, outcome: 'metropolitan-complete' }, report }
   if (state.turn === 48) return { state: { ...state, ...shared, outcome: 'republic-strain-complete' }, report }
   if (state.turn === 54) return { state: { ...state, ...shared, outcome: 'civil-settlement-complete' }, report }
   if (state.turn === 61) return { state: { ...state, ...shared, outcome: 'augustan-city-complete' }, report }
+  if (state.turn === 70) return { state: { ...state, ...shared, outcome: 'imperial-capital-complete' }, report }
   if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }

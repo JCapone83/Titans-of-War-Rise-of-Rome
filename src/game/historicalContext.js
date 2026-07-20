@@ -274,6 +274,51 @@ export const HISTORICAL_NOTES = [
     text: 'Tiberius succeeded through family position, accumulated powers, military standing, provincial command, oaths, and senatorial action. The transfer worked, but it exposed how much of the principate existed in a package attached to a person.',
     evidence: 'Res Gestae 14; Velleius Paterculus 2.123-124; Tacitus, Annals 1; Suetonius, Augustus and Tiberius; Cassius Dio 56-57; fasti, oaths, and command evidence. Tacitus and Dio organize the transition through later political judgments.',
   },
+  {
+    id: 'imperial-transfer-ad14', title: 'Transfer Required More Than Inheritance', category: 'Near-contemporary and later narrative', turns: [62],
+    text: 'Tiberius received no single crown. Household position, powers already held, Senate action, provincial command, army oaths, and control of the capital all contributed to an effective transfer.',
+    evidence: 'Velleius Paterculus 2.123-124; Tacitus, Annals 1; Suetonius, Tiberius; Cassius Dio 57; fasti and oath evidence.',
+  },
+  {
+    id: 'praetorian-concentration', title: 'The Guard Became a Capital Institution', category: 'Later narrative + administrative evidence', turns: [63],
+    text: 'Concentrating Praetorian cohorts near Rome improved command and security while making access, pay, appointments, and succession matters of permanent political consequence.',
+    evidence: 'Tacitus, Annals 4; Suetonius, Tiberius; Cassius Dio 57-58; inscriptions and archaeological evidence for Castra Praetoria.',
+  },
+  {
+    id: 'claudian-provision-systems', title: 'Water and Harbor Were Operating Systems', category: 'Material and administrative evidence', turns: [64],
+    text: 'Aqua Claudia, Anio Novus, Portus, warehouses, and grain administration enlarged capacity through sources, channels, quays, contracts, transfer routes, and maintenance rather than one act of dedication.',
+    evidence: 'Frontinus, Aqueducts 13-15; Suetonius, Claudius 20; Cassius Dio 60; surviving aqueduct and Portus fabric.',
+  },
+  {
+    id: 'neronian-court-credit', title: 'Court Credit and Public Provision Were Distinct', category: 'Partisan narratives + material evidence', turns: [65],
+    text: 'Ancient authors made Nero a moral and theatrical subject. The simulation therefore keeps court display, palace access, grain, water, military recognition, provincial command, and Senate cooperation as separate measures.',
+    evidence: 'Tacitus, Annals 13-16; Suetonius, Nero; Cassius Dio 61-63; inscriptions, coinage, and building evidence.',
+  },
+  {
+    id: 'great-fire-ad64', title: 'The Fire of AD 64 Was Also a Land-Use Crisis', category: 'Near-contemporary narrative + archaeology', turns: [66],
+    text: 'The Fire of AD 64 destroyed dense districts, displaced residents, required relief and clearance, and enabled new building rules and disputed control of central land. Cause and blame remain less secure than those operating consequences.',
+    evidence: 'Tacitus, Annals 15.38-44; Suetonius, Nero 38; Cassius Dio 62; archaeology and the surviving Domus Aurea complex.',
+  },
+  {
+    id: 'civil-war-ad69', title: 'AD 69 Made Army Recognition Explicit', category: 'Near-contemporary history + inscriptions and coinage', turns: [67],
+    text: 'The Four Emperors showed that provincial armies could nominate rulers and carry the decision toward Rome. Senate recognition, guard action, treasury, pay, and public order still determined whether victory became government.',
+    evidence: 'Tacitus, Histories 1-4; Suetonius, Galba through Vespasian; Josephus, Jewish War 4; coins and inscriptions.',
+  },
+  {
+    id: 'flavian-public-conversion', title: 'Flavian Building Converted Imperial Space', category: 'Archaeology + literary evidence', turns: [68],
+    text: 'The Temple of Peace and amphitheater program joined victory, dynasty, public access, display, service, and fiscal repair. Returning Neronian land to public use was a political claim as well as a construction decision.',
+    evidence: 'Josephus, Jewish War 7; Pliny, Natural History 36; Suetonius, Vespasian and Titus; archaeology of the Temple of Peace and amphitheater valley.',
+  },
+  {
+    id: 'flavian-amphitheatre-ad80', title: 'The Flavian Amphitheatre Opened in AD 80', category: 'Eyewitness poetry + archaeology', turns: [69],
+    text: 'Titus opened the Flavian Amphitheatre in AD 80. Crowd routes, awnings, water, sanitation, arena machinery, staffing, and an event calendar made the intact structure operate; Domitian later replaced and enlarged underground elements in masonry.',
+    evidence: 'Martial, On the Spectacles; Suetonius, Titus 7; Cassius Dio 66; archaeology of the Flavian Amphitheatre and its later hypogeum.',
+  },
+  {
+    id: 'domitian-ad96', title: 'AD 96 Tested Palace Administration Without Its Ruler', category: 'Narrative + palace and administrative evidence', turns: [70],
+    text: 'Domitian\'s death ended the Flavian dynasty, but the Palatine palace, public works, offices, armies, and provincial system did not disappear. Their unequal ability to transfer authority forms the act judgment.',
+    evidence: 'Suetonius, Domitian; Cassius Dio 67-68; Pliny, Panegyricus; palace archaeology, inscriptions, and administrative evidence.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

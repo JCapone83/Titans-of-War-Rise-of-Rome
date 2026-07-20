@@ -2,13 +2,13 @@
 
 Build Rome before Rome is inevitable.
 
-**Birth of Rome** is a local-first historical city-building strategy game. Its deterministic campaign follows Rome from separate hill settlements in 753 BC through kingship, republic, Italian and Mediterranean expansion, civil war, the operating settlement of 27 BC, and the first succession in AD 14. The player must place works according to terrain, divide households among farming, construction, and levy service, preserve public records and political channels, and convert victory into institutions without exhausting the city or its allies.
+**Birth of Rome** is a local-first historical city-building strategy game. Its deterministic campaign follows Rome from separate hill settlements in 753 BC through kingship, republic, Italian and Mediterranean expansion, civil war, the Augustan settlement, and the imperial capital at AD 96. The player must place works according to terrain, divide households among farming, construction, and levy service, preserve public records and political channels, and convert victory into institutions without exhausting the city, Italy, or the provinces.
 
 No AI model, account, remote service, or internet connection is required after installation.
 
 ## Current Campaign
 
-This `0.1.0` campaign contains 61 deterministic turns and 56 political councils. The 264 BC core judgment and every later act are explicit opt-in continuations, so a completed earlier campaign is never silently rewritten.
+This `0.1.0` campaign contains 70 deterministic turns and 65 political councils. The 264 BC core judgment and every later act are explicit opt-in continuations, so a completed earlier campaign is never silently rewritten.
 
 - **Hill Settlements, 753-650 BC**
 - **City of Kings, 650-509 BC**
@@ -21,6 +21,7 @@ This `0.1.0` campaign contains 61 deterministic turns and 56 political councils.
 - **Republic Under Strain, 121-49 BC**
 - **Civil War and Settlement, 49-27 BC**
 - **The Augustan City, 27 BC-AD 14**
+- **Imperial Capital, AD 14-96**
 - Six districts with terrain rules and limited plots
 - A household population model with district occupancy, births, arrivals, departures, illness, and crisis losses
 - Visible population composition: households, workers, levy-eligible people, craftsmen, and dependents
@@ -58,7 +59,11 @@ This `0.1.0` campaign contains 61 deterministic turns and 56 political councils.
 - An Augustan Capital View that places unlocked landmarks schematically on the city surface and distinguishes reserved sites, foundations, structural shells, and operating works
 - Four derived capital systems—civic government, public provision, urban safety, and succession and memory—with an AD 14 capital legacy summary
 - Three viable Augustan operating forms: an administrative principate, a civic compact, and a household-centered principate
-- Local save/restore through schema version 14, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
+- Nine imperial councils from the Augustan transfer through the AD 64 fire, the Four Emperors, the AD 80 opening of the Flavian Amphitheatre, and the AD 96 succession judgment
+- Eight staged imperial projects, including the Aqua Claudia, Claudian harbor works, Domus Aurea, Flavian Amphitheatre, Temple of Peace, Arch of Titus, and Domitianic palace
+- Four imperial operating systems separating authority transfer, capital provision, urban safety, and the public city from palace concentration
+- Three viable imperial-capital strategies: public Flavian conversion, provision-first capital, and palace-administrative concentration
+- Local save/restore through schema version 15, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
 
 ## Play Locally
 
@@ -84,7 +89,7 @@ After 509 BC, office structure matters directly. Paired annual magistrates cap t
 
 The **Season Forecast** exposes known production, upkeep, structural penalties, and population change before the player ends a turn. It explains expected births, arrivals, departures, and illness without revealing floods or enemy action in advance. The district inspector records condition and permits damaged works to be repaired, upgraded in place, or cleared for limited salvage.
 
-Run `npm run balance` to execute the published reference strategies from the hill settlements through AD 14. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act IX](docs/ACT_IX_BALANCE_REPORT.md), [Act X](docs/ACT_X_BALANCE_REPORT.md), and the [Augustan capital integration](docs/ACT_X_CAPITAL_INTEGRATION_REPORT.md).
+Run `npm run balance` to execute the published reference strategies from the hill settlements through AD 96. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act IX](docs/ACT_IX_BALANCE_REPORT.md), [Act X](docs/ACT_X_BALANCE_REPORT.md), the [Augustan capital integration](docs/ACT_X_CAPITAL_INTEGRATION_REPORT.md), and [Act XI](docs/ACT_XI_BALANCE_REPORT.md).
 
 The campaign retains five city grades and adds separate grades for each later operating system:
 
@@ -100,6 +105,7 @@ The campaign retains five city grades and adds separate grades for each later op
 - Republic Under Strain
 - Civil War and Settlement
 - The Augustan City
+- Imperial Capital
 
 Historical continuity measures how closely the city reproduces major developments associated with early Rome. It is not a moral grade, and alternate development remains valid play.
 
@@ -108,6 +114,7 @@ Historical continuity measures how closely the city reproduces major development
 The historical panel labels claims as **Roman tradition**, **archaeology**, **historical inference**, or **complexity**. Later Roman narratives are not treated as modern eyewitness reports, and archaeological uncertainty is not hidden. Strategic choices model plausible incentives where exact events cannot be recovered.
 
 See [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) for the campaign architecture.
+The AD 117 endpoint is reserved for Act XII. It will cover the Trajanic capital and the empire at maximum territorial extent. The familiar domed Pantheon belongs to Hadrian's rebuilding after AD 117 and is therefore not represented as a completed Trajanic work.
 The rendering pipeline and first asset batch are defined in [docs/ART_DIRECTION_AND_ASSET_SPEC.md](docs/ART_DIRECTION_AND_ASSET_SPEC.md); one approved Palatine Huts master should lock the camera and lighting before the rest are produced.
 
 ## License

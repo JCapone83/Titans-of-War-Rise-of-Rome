@@ -1,6 +1,6 @@
 import { TURN_YEARS, formatYear } from './data.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { augustanCapitalSystems, regionalForecast, workforceSummary } from './simulation.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
+import { augustanCapitalSystems, imperialCapitalSystems, regionalForecast, workforceSummary } from './simulation.js'
 
 const section = (title, lines) => [`## ${title}`, ...lines, ''].join('\n')
 const projectLines = (projects, unit = 'seasons', complete = 'complete') => Object.values(projects ?? {}).map((project) => `- ${project.id}: ${project.completed ? complete : `${project.progress}/${project.requiredSeasons} ${unit}`}`)
@@ -17,6 +17,8 @@ export function campaignMarkdown(state) {
   const civilScore = calculateCivilSettlementScore(state)
   const augustanScore = calculateAugustanCityScore(state)
   const capitalSystems = augustanCapitalSystems(state)
+  const imperialScore = calculateImperialCapitalScore(state)
+  const imperialSystems = imperialCapitalSystems(state)
   const output = [
     '# Titans of War: Birth of Rome',
     '',
@@ -175,6 +177,26 @@ export function campaignMarkdown(state) {
     `- Landmark works: ${augustanScore.completed} operating; ${augustanScore.active} active`,
     '### Augustan Public Works',
     ...projectLines(state.augustanCity.projects, 'stages', 'operating'),
+  ]))
+  if (state.imperialCapital) output.push(section('Imperial Capital', [
+    `- Augustan transfer: ${state.flags?.imperialTransfer ?? 'unsettled'}`,
+    `- Tiberian administration: ${state.flags?.tiberianAdministration ?? 'unsettled'}`,
+    `- Claudian provision: ${state.flags?.claudianProvision ?? 'unsettled'}`,
+    `- Neronian court: ${state.flags?.neronianCourt ?? 'unsettled'}`,
+    `- AD 64 fire settlement: ${state.flags?.fireSettlement ?? 'unsettled'}`,
+    `- AD 69 Flavian settlement: ${state.flags?.flavianSettlement ?? 'unsettled'}`,
+    `- Flavian program: ${state.flags?.flavianProgram ?? 'unsettled'}`,
+    `- AD 80 amphitheater rule: ${state.flags?.amphitheatreRule ?? 'unsettled'}`,
+    `- AD 96 succession: ${state.flags?.imperialSuccession96 ?? 'unsettled'}`,
+    `- Operating form: **${imperialScore.operatingForm}**`,
+    ...ledgerLines(state.imperialCapital),
+    `- Imperial Capital score: ${imperialScore.grade} (${imperialScore.score})`,
+    '### Imperial Operating Systems',
+    ...imperialSystems.map((system) => `- ${system.name}: ${system.score}/100 (${system.status})`),
+    `- Landmark works: ${imperialScore.completed} operating; ${imperialScore.active} active`,
+    '### Imperial Public Works',
+    ...projectLines(state.imperialCapital.projects, 'stages', 'operating'),
+    '- Judgment date: AD 96',
   ]))
 
   output.push(section('Council Record', state.choiceLog.length ? state.choiceLog.map((entry) => `- Turn ${entry.turn} (${formatYear(TURN_YEARS[entry.turn - 1])}): **${entry.council}** - ${entry.option}`) : ['- No councils recorded.']))

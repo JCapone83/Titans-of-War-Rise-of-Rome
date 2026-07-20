@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createAugustanProjects, createAugustanState, createCivilSettlementState, createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
-import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, formatYear, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
+import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
+import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from '../src/game/simulation.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
-import { continueToAugustanCity, continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
@@ -347,7 +347,7 @@ test('version three saves remove legacy labor and gain workforce and projects', 
   delete old.workforceAllocation
   delete old.projects
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal('labor' in migrated.resources, false)
   assert.equal(Object.values(migrated.workforceAllocation).reduce((sum, value) => sum + value, 0), 100)
   assert.deepEqual(migrated.projects, [])
@@ -359,7 +359,7 @@ test('version one saves migrate to the current population state', () => {
   delete old.actionsMax
   delete old.actionLog
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.actionsMax, 2)
   assert.deepEqual(migrated.actionLog, [])
   assert.equal(migrated.population.total, 1030)
@@ -369,7 +369,7 @@ test('version two saves retain mechanics while gaining population', () => {
   const old = { ...createInitialState(), version: 2, actionsUsed: 1, actionLog: [{ type: 'build' }] }
   delete old.population
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.actionsUsed, 1)
   assert.equal(migrated.actionLog.length, 1)
   assert.equal(migrated.population.districts.palatine, 450)
@@ -560,7 +560,7 @@ test('three Act III reference strategies complete cleanly at C or better', () =>
 
 test('a completed version four campaign migrates to a resumable republic transition', () => {
   const migrated = migrateState({ ...createInitialState(), version: 4, turn: 10, era: 1, outcome: 'complete' })
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.outcome, 'acts-complete')
   assert.equal(migrated.republicTransition, true)
   assert.equal(enterEarlyRepublic(migrated).turn, 11)
@@ -609,7 +609,7 @@ test('Tier IV works remain locked until reconstruction', () => {
 test('a version five save completed at turn sixteen opens reconstruction', () => {
   const saved = { ...createInitialState(), version: 5, era: 2, turn: 16, republic: createRepublicState(), war: createWarState(), outcome: 'complete' }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.outcome, 'act-three-complete')
   assert.equal(migrated.reconstructionTransition, true)
 })
@@ -716,7 +716,7 @@ test('version seven regional completion migrates to the Italian transition', () 
     italianTransition: undefined,
   }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.outcome, 'regional-complete')
   assert.equal(migrated.italianTransition, true)
   assert.equal(migrated.turn, 23)
@@ -916,7 +916,7 @@ test('turn thirty-two opens a visible bridge without exposing the final outcome'
 test('version nine Mediterranean endpoint migrates to the Hannibalic bridge', () => {
   const old = { ...mediterraneanOpeningEndpoint(), version: 9, outcome: 'mediterranean-complete', hannibalicTransition: undefined }
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.turn, 32)
   assert.equal(migrated.outcome, 'mediterranean-opening-complete')
   assert.equal(migrated.hannibalicTransition, true)
@@ -1129,7 +1129,7 @@ test('completed late-Republic works add visible recurring burdens', () => {
 test('version 11 late-Republic saves migrate missing ledgers and projects', () => {
   const saved = { ...createInitialState(), version: 11, era: 8, turn: 45, republicStrain: { archiveIntegrity: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.republicStrain.archiveIntegrity, 63)
   assert.deepEqual(Object.keys(migrated.republicStrain.projects), Object.keys(REPUBLIC_STRAIN_PROJECTS))
 })
@@ -1211,7 +1211,7 @@ test('completed civil-settlement works expose visible recurring burdens', () => 
 test('version 12 civil-settlement saves migrate missing ledgers and projects', () => {
   const saved = { ...createInitialState(), version: 12, era: 9, turn: 51, civilSettlement: { archiveContinuity: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.civilSettlement.archiveContinuity, 63)
   assert.deepEqual(Object.keys(migrated.civilSettlement.projects), Object.keys(CIVIL_SETTLEMENT_PROJECTS))
 })
@@ -1293,8 +1293,8 @@ test('Act X starts only through the explicit Civil Settlement continuation', () 
 })
 
 test('Act X chronology crosses from BC to AD without double suffixes', () => {
-  assert.equal(TURN_YEARS.length, 61)
-  assert.deepEqual(TURN_YEARS.slice(-7), [23, 19, 13, 9, 2, -6, -14])
+  assert.equal(TURN_YEARS.length, 70)
+  assert.deepEqual(TURN_YEARS.slice(54, 61), [23, 19, 13, 9, 2, -6, -14])
   assert.equal(formatYear(23), '23 BC')
   assert.equal(formatYear(-6), 'AD 6')
   assert.equal(formatYear(-14), 'AD 14')
@@ -1328,10 +1328,10 @@ test('Augustan work consumes shared capacity and enters the forecast', () => {
   assert.ok(augustanCityForecast(worked.state).projected)
 })
 
-test('v13 Augustan saves migrate to v14 without losing succession state', () => {
+test('v13 Augustan saves migrate to v15 without losing succession state', () => {
   const saved = { ...createInitialState(), version: 13, era: 10, turn: 57, augustanCity: { successionConfidence: 63 } }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 14)
+  assert.equal(migrated.version, 15)
   assert.equal(migrated.augustanCity.successionConfidence, 63)
   assert.deepEqual(Object.keys(migrated.augustanCity.projects), Object.keys(createAugustanProjects()))
 })
@@ -1382,7 +1382,7 @@ test('Augustan capital systems are bounded and respond to their operating measur
   assert.equal(improved.find((system) => system.id === 'civic-government').score, systems.find((system) => system.id === 'civic-government').score)
 })
 
-test('AD 14 capital legacy reaches the outcome and chronicle without adding Act XI', () => {
+test('AD 14 capital legacy remains complete before entering Act XI', () => {
   const result = runAllAugustanCityStrategies()[0]
   const outcome = calculateOutcome(result.state)
   assert.equal(result.state.turn, 61)
@@ -1390,11 +1390,120 @@ test('AD 14 capital legacy reaches the outcome and chronicle without adding Act 
   assert.equal(outcome.capitalLegacy.operatingForm, result.augustanScore.operatingForm)
   assert.equal(outcome.capitalLegacy.completed, result.augustanScore.completed)
   assert.match(campaignMarkdown(result.state), /Capital Operating Systems[\s\S]+Urban safety[\s\S]+Landmark works:/)
-  assert.equal(TURN_YEARS.length, 61)
+  assert.equal(TURN_YEARS.length, 70)
 })
 
 test('Augustan capital keeps the pre-Hadrianic Pantheon guardrail', () => {
   const pantheon = AUGUSTAN_PROJECT_ART.agrippanPantheon
   assert.match(pantheon.alt, /disputed Augustan temple precinct/)
   assert.doesNotMatch(`${pantheon.alt} ${AUGUSTAN_PROJECT_SITES.agrippanPantheon.name}`, /coffer|oculus|domed rotunda/i)
+})
+
+test('Act XI starts only through the explicit AD 14 continuation', () => {
+  const base = runAllAugustanCityStrategies()[0].state
+  const blocked = enterImperialCapital(base)
+  assert.equal(blocked, base)
+  const pending = continueToImperialCapital(base)
+  assert.equal(pending.imperialCapitalTransition, true)
+  const entered = enterImperialCapital(pending)
+  assert.equal(entered.version, 15)
+  assert.equal(entered.turn, 62)
+  assert.equal(entered.era, 11)
+  assert.equal(entered.council.id, getCouncil(62).id)
+  assert.deepEqual(Object.keys(entered.imperialCapital.projects).sort(), Object.keys(IMPERIAL_CAPITAL_PROJECTS).sort())
+})
+
+test('Act XI chronology covers nine councils from AD 14 through AD 96', () => {
+  assert.equal(TURN_YEARS.length, 70)
+  assert.deepEqual(TURN_YEARS.slice(-9), [-14, -23, -41, -54, -64, -69, -75, -80, -96])
+  for (let turn = 62; turn <= 70; turn += 1) {
+    assert.equal(getCouncil(turn).options.length, 3)
+    assert.ok(getObjective(turn).length > 20)
+    assert.ok(notesForTurn(turn).length)
+    assert.match(formatYear(TURN_YEARS[turn - 1]), /^AD /)
+  }
+})
+
+test('v14 Augustan saves migrate to v15 before the Imperial Capital transition', () => {
+  const saved = { ...createInitialState(), version: 14, turn: 61, era: 10, outcome: 'augustan-city-complete', augustanCity: createAugustanState() }
+  const migrated = migrateState(saved)
+  assert.equal(migrated.version, 15)
+  assert.equal(migrated.imperialCapital, null)
+  assert.equal(migrated.augustanCity.projects.agrippanPantheon.id, 'agrippanPantheon')
+})
+
+test('Act XI projects carry dates, evidence, stages, and recurring burdens', () => {
+  assert.equal(Object.keys(IMPERIAL_CAPITAL_PROJECTS).length, 8)
+  for (const definition of Object.values(IMPERIAL_CAPITAL_PROJECTS)) {
+    assert.ok(definition.unlockTurn >= 62 && definition.unlockTurn <= 70)
+    assert.ok(definition.seasons >= 2 && definition.seasons <= 5)
+    assert.ok(definition.evidence.length >= 20)
+    assert.ok(definition.burdenLabel.length >= 40)
+  }
+  assert.equal(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.openingTurn, 69)
+  assert.equal(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.operatingTurn, 70)
+})
+
+test('Flavian Amphitheatre requires public conversion, opens in AD 80, and gains the Domitianic layer by AD 96', () => {
+  let state = {
+    ...createInitialState(), era: 11, turn: 67, resources: { grain: 30, timber: 30, stone: 30, bronze: 5, treasury: 30 },
+    imperialCapital: createImperialCapitalState(), council: getCouncil(67), councilResolved: false, actionsUsed: 0, actionsMax: 2,
+  }
+  assert.equal(imperialProjectAvailability(state, 'flavianAmphitheatre').available, false)
+  state = resolveCouncil(state, 'flavian-public-conversion')
+  for (const turn of [67, 68, 69, 70]) {
+    state = { ...state, turn, actionsUsed: 0, actionsMax: 2, council: getCouncil(turn), councilResolved: true }
+    const result = workImperialProject(state, 'flavianAmphitheatre')
+    assert.equal(result.error, undefined)
+    state = result.state
+    if (turn === 69) assert.equal(state.imperialCapital.projects.flavianAmphitheatre.opened, true)
+  }
+  const amphitheatre = state.imperialCapital.projects.flavianAmphitheatre
+  assert.equal(amphitheatre.completed, true)
+  assert.equal(amphitheatre.domitianicLayer, true)
+})
+
+test('Imperial operating systems are bounded and penalize guard and palace concentration', () => {
+  const strong = { ...createInitialState(), era: 11, turn: 70, imperialCapital: { ...createImperialCapitalState(), senateCompact: 80, successionConfidence: 80, armyRecognition: 75, guardInfluence: 20, publicAccess: 78, palaceConcentration: 20, publicProvision: 76, harborSupply: 74, fireResilience: 72, maintenanceCapacity: 75, provincialTrust: 70 } }
+  const brittle = { ...strong, imperialCapital: { ...strong.imperialCapital, guardInfluence: 85, palaceConcentration: 88, senateCompact: 35, publicAccess: 30 } }
+  const strongSystems = imperialCapitalSystems(strong)
+  const brittleSystems = imperialCapitalSystems(brittle)
+  assert.equal(strongSystems.length, 4)
+  assert.ok(strongSystems.every((system) => system.score >= 0 && system.score <= 100))
+  assert.ok(strongSystems.find((system) => system.id === 'authority-transfer').score > brittleSystems.find((system) => system.id === 'authority-transfer').score)
+  assert.ok(strongSystems.find((system) => system.id === 'public-city-palace').score > brittleSystems.find((system) => system.id === 'public-city-palace').score)
+  assert.ok(imperialCapitalForecast(brittle).palaceGap > imperialCapitalForecast(strong).palaceGap)
+})
+
+test('The AD 64 fire imposes material damage without ending the campaign', () => {
+  const state = {
+    ...createInitialState(), era: 11, turn: 66, imperialCapital: { ...createImperialCapitalState(), fireResilience: 30 },
+    council: getCouncil(66), councilResolved: true, outcome: null,
+  }
+  const result = advanceTurn(state)
+  assert.equal(result.error, undefined)
+  assert.equal(result.report.riskLabel, 'AD 64 fire resilience')
+  assert.ok(result.report.metricDelta.shelter < 0)
+  assert.equal(result.state.turn, 67)
+  assert.equal(result.state.outcome, null)
+})
+
+test('three Act XI strategies reach AD 96 with distinct viable capital settlements', () => {
+  const results = runAllImperialCapitalStrategies()
+  assert.equal(results.length, 3)
+  assert.ok(results.every((result) => result.state.turn === 70 && result.state.outcome === 'imperial-capital-complete'))
+  assert.ok(results.every((result) => result.imperialScore.score >= 60 && result.skipped.length === 0))
+  assert.equal(new Set(results.map((result) => result.imperialScore.operatingForm)).size, 3)
+})
+
+test('AD 96 outcome and chronicle expose Imperial Operating Systems without a Hadrianic Pantheon', () => {
+  const result = runAllImperialCapitalStrategies()[0]
+  const outcome = calculateOutcome(result.state)
+  const markdown = campaignMarkdown(result.state)
+  assert.equal(outcome.imperialCapitalLegacy.systems.length, 4)
+  assert.match(outcome.summary, /AD 96/)
+  assert.match(markdown, /## Imperial Capital/)
+  assert.match(markdown, /### Imperial Operating Systems/)
+  assert.doesNotMatch(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.summary, /ruin|medieval/i)
+  assert.doesNotMatch(JSON.stringify(IMPERIAL_CAPITAL_PROJECTS), /coffered dome|oculus/i)
 })
