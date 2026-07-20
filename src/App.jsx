@@ -13,6 +13,7 @@ import { ReconstructionPanel } from './components/ReconstructionPanel.jsx'
 import { RegionalInspector } from './components/RegionalInspector.jsx'
 import { RegionalMap } from './components/RegionalMap.jsx'
 import { RoadsToItalyPanel } from './components/RoadsToItalyPanel.jsx'
+import { SoundtrackControl } from './components/SoundtrackControl.jsx'
 import { OutcomeOverlay } from './components/OutcomeOverlay.jsx'
 import { MediterraneanPanel } from './components/MediterraneanPanel.jsx'
 import { MediterraneanWorksPanel } from './components/MediterraneanWorksPanel.jsx'
@@ -54,6 +55,7 @@ function restoreState() {
 export default function App() {
   const [state, setState] = useState(restoreState)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [soundtrackOpen, setSoundtrackOpen] = useState(false)
   const [walkthroughOpen, setWalkthroughOpen] = useState(() => !localStorage.getItem('birth-of-rome-walkthrough-seen'))
   const [report, setReport] = useState(null)
   const [message, setMessage] = useState('')
@@ -67,6 +69,7 @@ export default function App() {
     const handleKey = (event) => {
       if (event.key === 'Escape') {
         setHistoryOpen(false)
+        setSoundtrackOpen(false)
         setWalkthroughOpen(false)
       }
     }
@@ -148,12 +151,15 @@ export default function App() {
         turn={state.turn}
         year={TURN_YEARS[state.turn - 1]}
         historyOpen={historyOpen}
+        musicOpen={soundtrackOpen}
         onOpenHistory={() => setHistoryOpen(true)}
+        onToggleMusic={() => setSoundtrackOpen((current) => !current)}
         onOpenWalkthrough={() => setWalkthroughOpen(true)}
         onSave={save}
         onExport={exportCampaign}
         onRestart={restart}
       />
+      <SoundtrackControl open={soundtrackOpen} turn={state.turn} onClose={() => setSoundtrackOpen(false)} />
       <main className="game-layout">
         <CivicRail state={state} onAllocate={(lane, delta) => setState(allocateWorkforce(state, lane, delta))} />
         <div className="game-center">

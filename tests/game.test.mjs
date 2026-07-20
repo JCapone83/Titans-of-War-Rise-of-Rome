@@ -6,12 +6,63 @@ import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augusta
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runAllTrajanicCapitalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { parseStoredMuted, parseStoredVolume, soundtrackTrackIdForTurn, soundtrackTracks } from '../src/game/soundtrack.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToTrajanicCapital, enterTrajanicCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, TRAJANIC_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, artForTrajanicProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
+
+test('soundtrack catalog contains six self-hosted verified recordings', () => {
+  const hashes = {
+    'bach-goldberg-aria.mp3': 'f0b319eece23b4ccc2e969e1329f96b9f96027e794d073c7adf606dc26463f08',
+    'handel-water-music-sarabande.mp3': 'd95226714dfd71bbe2398866d38591ba6c737c317e6a5385deb06a84a67ead4a',
+    'holst-mars.mp3': '395a71de2daaf5cbd67b5f4f63a72090d2466968727a55abd69a0626b4aa0bb0',
+    'holst-venus.mp3': 'cceac999c61560ee867b88f45ec1e51c3b1f76b88a698b49b960ea3bd6453f63',
+    'respighi-pines-appian-way.mp3': '7133f3638d1df461e225bd08e0ff66d7b2a91979a6a06c0f6c80f3153378b71a',
+    'sousa-gladiator.mp3': '184a48b9fd9bc4e42ee0f145246da66b7455fbd860f43c9c639a136e9ea70f70',
+  }
+  assert.equal(soundtrackTracks.length, 6)
+  assert.equal(new Set(soundtrackTracks.map((track) => track.id)).size, 6)
+  for (const track of soundtrackTracks) {
+    assert.match(track.src, /^\.\/audio\/[a-z0-9-]+\.mp3$/)
+    assert.match(track.source, /^https:\/\//)
+    assert.ok(track.license.length >= 15)
+    const filename = track.src.split('/').at(-1)
+    const path = resolve('public/audio', filename)
+    assert.ok(existsSync(path), `${filename} must be self-hosted`)
+    assert.equal(createHash('sha256').update(readFileSync(path)).digest('hex'), hashes[filename])
+  }
+})
+
+test('soundtrack recommendations follow the campaign eras', () => {
+  assert.equal(soundtrackTrackIdForTurn(1), 'bach-aria')
+  assert.equal(soundtrackTrackIdForTurn(10), 'bach-aria')
+  assert.equal(soundtrackTrackIdForTurn(11), 'handel-sarabande')
+  assert.equal(soundtrackTrackIdForTurn(17), 'holst-venus')
+  assert.equal(soundtrackTrackIdForTurn(24), 'respighi-appian-way')
+  assert.equal(soundtrackTrackIdForTurn(30), 'holst-mars')
+  assert.equal(soundtrackTrackIdForTurn(37), 'sousa-gladiator')
+  assert.equal(soundtrackTrackIdForTurn(42), 'holst-mars')
+  assert.equal(soundtrackTrackIdForTurn(55), 'holst-venus')
+  assert.equal(soundtrackTrackIdForTurn(62), 'sousa-gladiator')
+  assert.equal(soundtrackTrackIdForTurn(71), 'respighi-appian-way')
+  assert.equal(soundtrackTrackIdForTurn(76), 'respighi-appian-way')
+})
+
+test('soundtrack storage parsers reject invalid values', () => {
+  assert.equal(parseStoredVolume(null), 0.24)
+  assert.equal(parseStoredVolume('0.55'), 0.55)
+  assert.equal(parseStoredVolume('-1'), 0.24)
+  assert.equal(parseStoredVolume('1.1'), 0.24)
+  assert.equal(parseStoredVolume('loud'), 0.24)
+  assert.equal(parseStoredMuted('true'), true)
+  assert.equal(parseStoredMuted('false'), false)
+  assert.equal(parseStoredMuted('1'), false)
+  assert.equal(parseStoredMuted(null), false)
+})
 
 test('initial campaign begins at the Palatine council', () => {
   const state = createInitialState()

@@ -95,4 +95,56 @@ The Baths of Trajan asset was refined on July 20, 2026 to make its palaestra and
 
 The prior Act XI Aqua Claudia, Claudian Portus, and Flavian Amphitheatre assets were used only as original-project style and continuity references. The original Titans of Constantinople AD 532 map was consulted only for the long Hippodrome track's compositional geometry when directing the Circus Maximus asset; no Byzantine building, wall, church, palace, or source pixel was copied into the Roman reconstruction. Each Act XII render was produced anew, converted to transparent RGBA, and visually reviewed against the project's AD 117 boundary. Detailed reconstruction limits and rejection criteria are recorded in `docs/ACT_XII_VISUAL_PRODUCTION_REPORT.md`.
 
+## Soundtrack recordings
+
+The soundtrack is opt-in and self-hosted. The program does not contact the source sites during playback. The SHA-256 values below freeze the exact files reviewed for distribution.
+
+### Johann Sebastian Bach - Goldberg Variations: Aria
+
+- File: `public/audio/bach-goldberg-aria.mp3`
+- Performer: Kimiko Ishizaka
+- Source: [Free Music Archive](https://freemusicarchive.org/music/Kimiko_Ishizaka/The_Open_Goldberg_Variations/KIMIKO_ISHIZAKA_-_Goldberg_Variations_BWV_988_-_01_-_Aria__44k-24b/)
+- Rights: CC0 1.0 Universal recording; composition in the public domain.
+- SHA-256: `f0b319eece23b4ccc2e969e1329f96b9f96027e794d073c7adf606dc26463f08`
+
+### George Frideric Handel - Water Music: Sarabande
+
+- File: `public/audio/handel-water-music-sarabande.mp3`
+- Performer: United States Marine Band, Marine Chamber Orchestra
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Handel's_Water_Music_-_16._Sarabande_-_Chamber_Orchestra_-_United_States_Marine_Band.opus)
+- Rights: Public-domain U.S. federal work; composition in the public domain.
+- SHA-256: `d95226714dfd71bbe2398866d38591ba6c737c317e6a5385deb06a84a67ead4a`
+
+### Gustav Holst - Mars, the Bringer of War
+
+- File: `public/audio/holst-mars.mp3`
+- Performer: United States Air Force Heritage of America Band
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Holst-_mars.ogg)
+- Rights: Public-domain U.S. federal work; composition is public domain in the United States.
+- SHA-256: `395a71de2daaf5cbd67b5f4f63a72090d2466968727a55abd69a0626b4aa0bb0`
+
+### Gustav Holst - Venus, the Bringer of Peace
+
+- File: `public/audio/holst-venus.mp3`
+- Performer: United States Air Force Heritage of America Band
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Holst-_venus.ogg)
+- Rights: Public-domain U.S. federal work; composition is public domain in the United States.
+- SHA-256: `cceac999c61560ee867b88f45ec1e51c3b1f76b88a698b49b960ea3bd6453f63`
+
+### Ottorino Respighi - Pines of the Appian Way
+
+- File: `public/audio/respighi-pines-appian-way.mp3`
+- Performer: United States Marine Band
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Respighi_Pines_of_the_Appian_way.oga)
+- Rights: Public-domain U.S. federal work; composition is public domain in the United States.
+- SHA-256: `7133f3638d1df461e225bd08e0ff66d7b2a91979a6a06c0f6c80f3153378b71a`
+
+### John Philip Sousa - The Gladiator
+
+- File: `public/audio/sousa-gladiator.mp3`
+- Performer: United States Marine Band
+- Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sousa%27s_%22The_Gladiator%22_-_United_States_Marine_Band_(2016).ogg)
+- Rights: Public-domain U.S. federal work; the 1886 composition is in the public domain.
+- SHA-256: `184a48b9fd9bc4e42ee0f145246da66b7455fbd860f43c9c639a136e9ea70f70`
+
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

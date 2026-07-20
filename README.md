@@ -81,6 +81,12 @@ npm run build
 npm run preview
 ```
 
+## Soundtrack
+
+Birth of Rome includes an opt-in, self-hosted six-track classical soundtrack. Open the music control in the campaign header to see the recording recommended for the current era, select another recording, adjust volume, or mute playback. No music plays until the player presses Play, and every recording includes a direct source-and-rights link. All audio is served from the installed game; playback requires no account, model, API, or internet connection.
+
+The program moves from Bach and Handel through Holst, Respighi's *Pines of the Appian Way*, and Sousa's *The Gladiator* as Rome develops from hill settlements to the Trajanic capital. See [MEDIA_RIGHTS.md](MEDIA_RIGHTS.md) for performers, sources, rights status, and frozen file hashes.
+
 ## Strategy
 
 Construction is not a collection exercise. Labor is not a stored token: it comes from the people living in the city. Moving households to public works raises construction capacity but reduces farming or levy readiness. Every build, upgrade, repair, clearance, or project season consumes that capacity. Major works take several seasons, can be paused, and confer no finished-building benefit until completion. More housing without wells and drains creates crowding. Trade without order creates theft and volatility. Later buildings are unlocked by era, prerequisite, public credit, and institutional capacity rather than merely by waiting.
