@@ -293,6 +293,7 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .imperial-system-grid .capital-system { min-width: 0; }
 .imperial-works { border-top: 2px solid #d3a84b; }
 .imperial-project-stage { min-height: 72px; display: flex; flex-direction: column; justify-content: flex-end; gap: 5px; padding: 12px; border: 1px solid #4a4638; background: linear-gradient(180deg, #26251f 0%, #161714 100%); }
+.imperial-project-stage span, .imperial-project-stage strong { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .imperial-project-stage span { color: var(--muted); font-size: 9px; text-transform: uppercase; }
 .imperial-project-stage strong { color: var(--gold); font-size: 13px; }
 .imperial-project-stage[data-stage="foundations"] { box-shadow: inset 0 -4px #80684a; }
