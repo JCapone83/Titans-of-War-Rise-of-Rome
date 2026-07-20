@@ -1,5 +1,5 @@
 import { getCouncil } from './data.js'
-import { createMediterraneanState } from './initialState.js'
+import { createMediterraneanState, createMetropolitanState } from './initialState.js'
 import { calculateOutcome } from './outcomes.js'
 
 export function freezeCoreJudgment(state) {
@@ -124,6 +124,41 @@ export function enterHannibalicEmergency(state) {
     nextWorksBonus: 0,
     selectedBuildingId: null,
     council: getCouncil(33),
+    councilResolved: false,
+  }
+}
+
+export function continueToMetropolis(state) {
+  if (state.turn !== 36 || state.outcome !== 'mediterranean-complete' || state.metropolitanTransition) return state
+  return { ...state, metropolitanTransition: true }
+}
+
+export function enterMetropolis(state) {
+  if (!state.metropolitanTransition || state.turn !== 36 || state.outcome !== 'mediterranean-complete') return state
+  const bridgeExists = (state.chronologyBridges ?? []).some((bridge) => bridge.id === 'mediterranean-to-metropolis')
+  const bridge = {
+    id: 'mediterranean-to-metropolis',
+    fromYear: 201,
+    toYear: 200,
+    mediterraneanChanges: {},
+    notes: [
+      'The peace settlement becomes the opening account for eastern commands, urban migration, public contracts, and the growing load on the Forum.',
+      'No inherited work, obligation, judgment, or campaign record is removed at the transition.',
+    ],
+  }
+  return {
+    ...state,
+    version: 11,
+    turn: 37,
+    era: 7,
+    outcome: null,
+    metropolitanTransition: false,
+    metropolitan: state.metropolitan ?? createMetropolitanState(),
+    chronologyBridges: bridgeExists ? state.chronologyBridges : [...(state.chronologyBridges ?? []), bridge],
+    actionsUsed: 0,
+    nextWorksBonus: 0,
+    selectedBuildingId: null,
+    council: getCouncil(37),
     councilResolved: false,
   }
 }

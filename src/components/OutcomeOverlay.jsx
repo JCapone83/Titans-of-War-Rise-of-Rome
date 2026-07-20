@@ -1,6 +1,6 @@
 import { Download, RotateCcw } from 'lucide-react'
 
-export function OutcomeOverlay({ outcome, onExport, onRestart, onContinue }) {
+export function OutcomeOverlay({ outcome, onExport, onRestart, onContinue, continueLabel = 'Continue to the Mediterranean' }) {
   if (!outcome) return null
   return (
     <div className="overlay outcome-overlay">
@@ -16,7 +16,7 @@ export function OutcomeOverlay({ outcome, onExport, onRestart, onContinue }) {
         </div>
         <div className="outcome-actions">
           <button className="primary-button" onClick={onExport}><Download /> Export chronicle</button>
-          {onContinue && <button className="secondary-button" onClick={onContinue}><RotateCcw /> Continue to the Mediterranean</button>}
+          {onContinue && <button className="secondary-button" onClick={onContinue}><RotateCcw /> {continueLabel}</button>}
           <button className="secondary-button" onClick={onRestart}><RotateCcw /> Begin again</button>
         </div>
       </section>

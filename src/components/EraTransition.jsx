@@ -43,6 +43,13 @@ const CONTENT = {
     unlocks: ['Visible interwar changes', 'Emergency reserves', 'Veteran settlement pressure'],
     action: 'Advance to 218 BC',
   },
+  metropolitan: {
+    eyebrow: '201-200 BC - victory enters the city',
+    title: 'Conquest and Metropolis',
+    text: 'War settlements now send treasure, captives, contracts, commands, petitioners, and new households toward a city built for a smaller republic. Public capacity and patronal power will not grow at the same rate.',
+    unlocks: ['Metropolitan ledger', 'Forum capacity', 'Provincial command pressure'],
+    action: 'Enter the metropolis',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

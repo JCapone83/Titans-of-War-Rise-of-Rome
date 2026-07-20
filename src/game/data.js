@@ -48,9 +48,16 @@ export const ERAS = [
     turns: [30, 36],
     summary: 'Build maritime capacity, survive the Hannibalic emergency, and settle victory without exhausting the city or Italian compact.',
   },
+  {
+    id: 'conquest-metropolis',
+    name: 'Conquest and Metropolis',
+    span: '200-133 BC',
+    turns: [37, 41],
+    summary: 'Convert conquest into public capacity without allowing crowding, contracts, commands, or patrons to consume the republican city.',
+  },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167]
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -582,6 +589,39 @@ COUNCILS.push(
   },
 )
 
+COUNCILS.push(
+  {
+    turn: 37, id: 'triumph-or-capacity', title: 'Triumph or Capacity', speaker: 'Censors, senators, treasury officers, allied delegates, and returning commanders',
+    prompt: 'Eastern victory enlarges the treasury and the claims upon it. Which obligation should receive first call on the windfall?',
+    context: 'The wars of the early second century BC brought indemnities, booty, captives, artworks, commands, and public expectations into Rome. Ancient narratives describe triumphs and settlements more readily than the full accounts behind them.',
+    options: [
+      { id: 'retire-debt-and-water', label: 'Retire war obligations and survey water capacity', detail: 'Strengthen public credit and provision before authorizing display, accepting fewer immediate honors for commanders and patrons.', impacts: { resources: { treasury: 4, stone: 1 }, metrics: { water: 4, order: 2 }, metropolitan: { publicProvision: 12, contractingCapacity: 5, corruptionExposure: -5, patronageConcentration: -3, legalCaseLoad: 2 }, flags: { triumphPolicy: 'capacity-first' } } },
+      { id: 'bounded-triumphal-program', label: 'Authorize a bounded triumphal program', detail: 'Recognize victory and employ captured wealth under public accounts, while adding crowds, sponsorship claims, and future operating costs.', impacts: { resources: { treasury: 2, stone: 3 }, metrics: { auspices: 5, order: 2 }, metropolitan: { urbanMigration: 5, rentPressure: 4, patronageConcentration: 7, contractingCapacity: 4, corruptionExposure: 3 }, flags: { triumphPolicy: 'bounded-display' } } },
+      { id: 'distribute-gains-and-grain', label: 'Distribute gains and reinforce grain reserves', detail: 'Relieve households and market pressure now, accepting less capital for records, water, and permanent civic works.', impacts: { resources: { grain: 6, treasury: -1 }, metrics: { food: 6, trade: 2 }, metropolitan: { publicProvision: 8, rentPressure: -3, importedGrainDependence: 5, legalCaseLoad: 3, contractingCapacity: -2 }, flags: { triumphPolicy: 'distribution' } } },
+    ],
+  },
+  {
+    turn: 38, id: 'crowded-forum', title: 'The Crowded Forum', speaker: 'Censors, praetors, money handlers, advocates, merchants, and household representatives',
+    prompt: 'Legal business, contracts, petitions, exchange, and political attendance now press upon the same open center. How should public business be made legible?',
+    context: 'Second-century Rome added basilicas and other covered civic spaces around a Forum carrying legal, commercial, religious, and political functions. Exact sequences and plans remain unevenly preserved.',
+    options: [
+      { id: 'public-records-and-hearings', label: 'Expand public records and scheduled hearings', detail: 'Use magistrates and clerks to spread business across time and supervised places, reducing confusion at a recurring treasury cost.', impacts: { resources: { treasury: -5 }, metrics: { order: 5, trade: 2 }, metropolitan: { legalCaseLoad: -11, provincialPetitionBacklog: -7, contractingCapacity: 6, corruptionExposure: -5, publicProvision: 4 }, flags: { forumPolicy: 'public-capacity' } } },
+      { id: 'licensed-patronal-halls', label: 'License patronal halls under public rules', detail: 'Acquire covered capacity quickly from leading houses, while allowing names, clients, and access to accumulate around sponsors.', impacts: { resources: { treasury: -2, stone: -2 }, metrics: { trade: 5 }, metropolitan: { legalCaseLoad: -7, patronageConcentration: 12, contractingCapacity: 8, corruptionExposure: 5, rentPressure: 3 }, flags: { forumPolicy: 'patronal-capacity' } } },
+      { id: 'disperse-market-and-petitions', label: 'Disperse markets and petitions beyond the Forum', detail: 'Protect the central square from overload by assigning functions elsewhere, accepting slower coordination and resistance from established interests.', impacts: { resources: { treasury: -3 }, metrics: { sanitation: 3, trade: 1 }, metropolitan: { rentPressure: -5, legalCaseLoad: -5, provincialPetitionBacklog: 3, patronageConcentration: -5, publicProvision: 5 }, flags: { forumPolicy: 'dispersed-business' } } },
+    ],
+  },
+  {
+    turn: 39, id: 'pydna-spoils-command', title: 'Pydna, Spoils, and Provincial Command', speaker: 'Senators, censors, commanders, contractors, Italian delegates, and petitioners from overseas communities',
+    prompt: 'Victory in Macedon expands treasure, captives, commands, and petitions faster than the Republic expands its capacity to inspect them. What rule should govern the settlement?',
+    context: 'Polybius witnessed the political world around the Macedonian settlement; Livy and Plutarch preserve later narratives of commanders and triumph. They illuminate incentives and memory, but do not supply a complete administrative archive.',
+    options: [
+      { id: 'audited-commands', label: 'Close commands under audited public accounts', detail: 'Require inventories, hearings, and bounded mandates before men and money are reassigned, accepting slower distribution of gains.', impacts: { resources: { treasury: 4 }, metrics: { order: 4 }, metropolitan: { provincialPetitionBacklog: -10, corruptionExposure: -10, legalCaseLoad: 7, contractingCapacity: 5, patronageConcentration: -5, citizenAbsence: -4 }, flags: { pydnaSettlement: 'audited-commands' } } },
+      { id: 'contracted-settlement', label: 'Contract collection under fixed schedules', detail: 'Use public contractors to turn the settlement into predictable receipts, while creating inspection burdens and concentrated commercial influence.', impacts: { resources: { treasury: 9 }, metrics: { trade: 5 }, metropolitan: { contractingCapacity: 12, corruptionExposure: 9, provincialPetitionBacklog: 5, patronageConcentration: 6, importedGrainDependence: 4 }, flags: { pydnaSettlement: 'contracted-receipts' } } },
+      { id: 'commander-discretion', label: 'Leave distribution to the victorious command', detail: 'Reward soldiers and settle claims rapidly through military authority, reducing immediate absence while strengthening personal obligations.', impacts: { resources: { treasury: 5, grain: 3 }, metrics: { readiness: 5, order: -2 }, metropolitan: { citizenAbsence: -9, patronageConcentration: 13, corruptionExposure: 6, enslavedLaborInflow: 9, freedHouseholdIntegration: 2, rentPressure: 5 }, flags: { pydnaSettlement: 'commander-discretion' } } },
+    ],
+  },
+)
+
 export const OBJECTIVES = [
   { from: 1, to: 2, text: 'Shelter the first households and secure water.' },
   { from: 3, to: 4, text: 'Open exchange without leaving the river undefended.' },
@@ -614,6 +654,9 @@ export const OBJECTIVES = [
   { from: 34, to: 34, text: 'Rebuild command after catastrophe while recording what replacement armies cost.' },
   { from: 35, to: 35, text: 'Distinguish loyal service, defection, punishment, and recovery across the Italian compact.' },
   { from: 36, to: 36, text: 'Settle war credit, allied exhaustion, and returning veterans before victory becomes a new burden.' },
+  { from: 37, to: 37, text: 'Decide whether conquest first serves public capacity, display, or immediate distribution.' },
+  { from: 38, to: 38, text: 'Keep law, exchange, petitions, and political attendance legible in a crowded Forum.' },
+  { from: 39, to: 39, text: 'Settle commands and spoils without allowing victory to outrun public accounts.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

@@ -128,8 +128,23 @@ export const createMediterraneanState = () => ({
   projects: createMediterraneanProjects(),
 })
 
+export const createMetropolitanState = () => ({
+  urbanMigration: 18,
+  rentPressure: 20,
+  legalCaseLoad: 24,
+  patronageConcentration: 22,
+  contractingCapacity: 32,
+  corruptionExposure: 18,
+  enslavedLaborInflow: 8,
+  freedHouseholdIntegration: 12,
+  citizenAbsence: 16,
+  provincialPetitionBacklog: 14,
+  importedGrainDependence: 18,
+  publicProvision: 42,
+})
+
 export const createInitialState = () => ({
-  version: 10,
+  version: 11,
   turn: 1,
   era: 0,
   resources: { grain: 12, timber: 12, stone: 4, bronze: 2, treasury: 7 },
@@ -158,12 +173,14 @@ export const createInitialState = () => ({
   italianTransition: false,
   mediterraneanTransition: false,
   hannibalicTransition: false,
+  metropolitanTransition: false,
   republic: null,
   war: null,
   reconstruction: null,
   regional: null,
   italian: null,
   mediterranean: null,
+  metropolitan: null,
   coreJudgment: null,
   chronologyBridges: [],
   outcome: null,
@@ -172,11 +189,11 @@ export const createInitialState = () => ({
 })
 
 export function migrateState(saved) {
-  if (!saved || saved.turn < 1 || saved.turn > 36) return null
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(saved.version)) return null
+  if (!saved || saved.turn < 1 || saved.turn > 39) return null
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(saved.version)) return null
   const population = saved.population ?? createInitialPopulation()
   const workforceAllocation = saved.workforceAllocation ?? createInitialWorkforceAllocation()
-  if ([5, 6, 7, 8, 9, 10].includes(saved.version)) {
+  if ([5, 6, 7, 8, 9, 10, 11].includes(saved.version)) {
     const completedOldRepublic = saved.era >= 2 && saved.turn === 13 && saved.outcome === 'complete'
     const completedOldActThree = saved.era === 2 && saved.turn === 16 && saved.outcome === 'complete'
     const completedOldActFour = saved.era === 3 && saved.turn === 20 && saved.outcome === 'complete'
@@ -184,7 +201,7 @@ export function migrateState(saved) {
     const completedMediterraneanOpening = saved.version === 9 && saved.turn === 32 && saved.outcome === 'mediterranean-complete'
     return {
       ...saved,
-      version: 10,
+      version: 11,
       outcome: completedOldRepublic ? null : completedOldActThree ? 'act-three-complete' : completedOldActFour ? 'act-four-complete' : completedOldRegional ? 'regional-complete' : completedMediterraneanOpening ? 'mediterranean-opening-complete' : saved.outcome,
       resources: withoutLegacyLabor(saved.resources),
       population,
@@ -203,15 +220,17 @@ export function migrateState(saved) {
       mediterranean: saved.era >= 6 ? { ...createMediterraneanState(), ...(saved.mediterranean ?? {}), projects: { ...createMediterraneanProjects(), ...(saved.mediterranean?.projects ?? {}) } } : null,
       mediterraneanTransition: saved.mediterraneanTransition ?? false,
       hannibalicTransition: completedMediterraneanOpening ? true : saved.hannibalicTransition ?? false,
+      metropolitanTransition: saved.metropolitanTransition ?? false,
       coreJudgment: saved.coreJudgment ?? null,
       chronologyBridges: saved.chronologyBridges ?? [],
+      metropolitan: saved.era >= 7 ? { ...createMetropolitanState(), ...(saved.metropolitan ?? {}) } : null,
       actionsMax: Math.max(saved.actionsUsed ?? 0, migratedWorksCapacity(population, workforceAllocation, saved.nextWorksBonus ?? 0, saved.republic, saved.flags?.magistrateMode)),
     }
   }
   const completedRoyalCampaign = saved.version === 4 && saved.turn === 10 && saved.outcome
   return {
     ...saved,
-    version: 10,
+    version: 11,
     resources: withoutLegacyLabor(saved.resources),
     selectedBuildingId: saved.selectedBuildingId ?? null,
     actionsUsed: saved.actionsUsed ?? 0,
@@ -227,12 +246,14 @@ export function migrateState(saved) {
     italianTransition: false,
     mediterraneanTransition: false,
     hannibalicTransition: false,
+    metropolitanTransition: false,
     republic: null,
     war: null,
     reconstruction: null,
     regional: null,
     italian: null,
     mediterranean: null,
+    metropolitan: null,
     coreJudgment: null,
     chronologyBridges: [],
     outcome: completedRoyalCampaign ? 'acts-complete' : saved.outcome ?? null,

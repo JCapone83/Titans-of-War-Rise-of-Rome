@@ -1,5 +1,5 @@
 import { createInitialState } from './initialState.js'
-import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from './continuation.js'
+import { continueToMediterranean, continueToMetropolis, enterHannibalicEmergency, enterMediterranean, enterMetropolis } from './continuation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
 import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject } from './simulation.js'
 
@@ -430,6 +430,33 @@ export function runAllMediterraneanStrategies() {
         else state = work.state
       }
       ledger.push({ turn: state.turn, mediterranean: { ...state.mediterranean }, projects: structuredClone(state.mediterranean.projects ?? {}), bridges: structuredClone(state.chronologyBridges ?? []) })
+      const result = advanceTurn(state)
+      if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+      state = result.state
+    }
+    return { strategy, state, outcome: calculateOutcome(state), skipped, ledger }
+  })
+}
+
+export const METROPOLITAN_OPENING_STRATEGIES = [
+  { id: 'distributed-public-capacity', name: 'Distributed Public Capacity', councils: { 37: 'retire-debt-and-water', 38: 'public-records-and-hearings', 39: 'audited-commands' } },
+  { id: 'patronal-metropolitan-growth', name: 'Patronal Metropolitan Growth', councils: { 37: 'bounded-triumphal-program', 38: 'licensed-patronal-halls', 39: 'contracted-settlement' } },
+  { id: 'provision-first-restraint', name: 'Provision-first Restraint', councils: { 37: 'distribute-gains-and-grain', 38: 'disperse-market-and-petitions', 39: 'commander-discretion' } },
+]
+
+export function runAllMetropolitanOpeningStrategies() {
+  const bases = runAllMediterraneanStrategies()
+  return METROPOLITAN_OPENING_STRATEGIES.map((strategy, index) => {
+    let state = enterMetropolis(continueToMetropolis(bases[index].state))
+    const skipped = []
+    const ledger = []
+    while (state.outcome !== 'metropolitan-opening-complete') {
+      const optionId = strategy.councils[state.turn]
+      if (state.council && !state.councilResolved) {
+        if (!optionId) skipped.push({ turn: state.turn, reason: 'No metropolitan council choice declared.' })
+        else state = resolveCouncil(state, optionId)
+      }
+      ledger.push({ turn: state.turn, metropolitan: { ...state.metropolitan }, bridges: structuredClone(state.chronologyBridges ?? []) })
       const result = advanceTurn(state)
       if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
       state = result.state

@@ -1,5 +1,5 @@
 import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
-import { createItalianState, createMediterraneanState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
+import { createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
@@ -98,6 +98,14 @@ const updateItalian = (italian, changes = {}) => {
 const updateMediterranean = (mediterranean, changes = {}) => {
   if (!mediterranean) return mediterranean
   return Object.fromEntries(Object.entries(mediterranean).map(([key, value]) => [
+    key,
+    typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
+  ]))
+}
+
+export const updateMetropolitan = (metropolitan, changes = {}) => {
+  if (!metropolitan) return metropolitan
+  return Object.fromEntries(Object.entries(metropolitan).map(([key, value]) => [
     key,
     typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
   ]))
@@ -857,8 +865,11 @@ export function resolveCouncil(state, optionId) {
   const nextMediterranean = state.mediterranean
     ? updateMediterranean({ ...createMediterraneanState(), ...state.mediterranean }, impacts.mediterranean)
     : state.mediterranean
+  const nextMetropolitan = state.metropolitan
+    ? updateMetropolitan({ ...createMetropolitanState(), ...state.metropolitan }, impacts.metropolitan)
+    : state.metropolitan
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
-  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, flags: nextFlags }
+  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, flags: nextFlags }
   return {
     ...state,
     resources: addResources(state.resources, impacts.resources),
@@ -871,6 +882,7 @@ export function resolveCouncil(state, optionId) {
     regional: nextRegional,
     italian: nextItalian,
     mediterranean: nextMediterranean,
+    metropolitan: nextMetropolitan,
     nextWorksBonus,
     actionsMax: Math.max(state.actionsUsed ?? 0, workforceSummary(capacityState).constructionCapacity),
     councilResolved: true,
@@ -1492,13 +1504,14 @@ export function advanceTurn(state) {
   report.mediterraneanChanges = forecast.mediterranean?.changes ?? null
   if (forecast.mediterranean) report.notes.push(...forecast.mediterranean.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, reports: [...state.reports, report] }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: state.metropolitan, reports: [...state.reports, report] }
   if (forecast.mediterranean?.publicWorks) {
     shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
     report.publicWorks = forecast.mediterranean.publicWorks
   }
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
   if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
+  if (state.turn === 39) return { state: { ...state, ...shared, outcome: 'metropolitan-opening-complete' }, report }
   if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }

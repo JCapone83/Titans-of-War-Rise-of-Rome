@@ -154,6 +154,16 @@ export const HISTORICAL_NOTES = [
     text: 'The peace of 201 BC confirmed Roman predominance in the western Mediterranean, but soldiers, allied communities, creditors, contractors, and damaged households still carried claims. Indemnity and victory enlarged future choices without settling how Rome should use them.',
     evidence: 'Polybius 15.18-19; Livy 30.37-45. The treaty framework is better secured than later stories about every negotiation or the precise distribution of returning veterans.',
   },
+  {
+    id: 'metropolitan-expansion', title: 'Conquest Enters the City', category: 'Ancient narrative + institutional inference', turns: [37, 38],
+    text: 'War indemnities, booty, captives, contractors, commanders, litigants, and petitioners enlarged Rome at different rates. The second-century city answered with covered civic halls, records, markets, water, and patronage, but no single measure turned a citizen Forum into a finished imperial capital.',
+    evidence: 'Polybius 18 and 21 for settlements and political observation; Livy books 33-39 for triumphs, commands, censorship, and urban measures. Surviving narratives describe exemplary decisions more fully than ordinary accounts, rents, or administrative routines.',
+  },
+  {
+    id: 'pydna-and-spoils', title: 'Pydna, Command, and the Uses of Spoils', category: 'Near-contemporary narrative + later biography', turns: [39],
+    text: 'The Macedonian settlement brought treasure, captives, claims, and prestige to Rome while extending the reach of commanders and public contractors. Enslaved captives, freed households, citizen soldiers, Italian allies, and provincial petitioners held different legal positions and cannot be treated as one interchangeable labor body.',
+    evidence: 'Polybius 29-30 and fragments; Livy books 44-45; Plutarch, Aemilius Paulus. Polybius is closest to the political world described, while triumphal detail, speeches, totals, and later character judgments require comparison rather than literal transcription.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

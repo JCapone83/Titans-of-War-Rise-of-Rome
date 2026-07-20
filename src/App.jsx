@@ -16,13 +16,14 @@ import { RoadsToItalyPanel } from './components/RoadsToItalyPanel.jsx'
 import { OutcomeOverlay } from './components/OutcomeOverlay.jsx'
 import { MediterraneanPanel } from './components/MediterraneanPanel.jsx'
 import { MediterraneanWorksPanel } from './components/MediterraneanWorksPanel.jsx'
+import { MetropolitanPanel } from './components/MetropolitanPanel.jsx'
 import { TopBar } from './components/TopBar.jsx'
 import { TurnReport } from './components/TurnReport.jsx'
 import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
 import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState, migrateState } from './game/initialState.js'
-import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from './game/continuation.js'
+import { continueToMediterranean, continueToMetropolis, enterHannibalicEmergency, enterMediterranean, enterMetropolis } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
 import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject } from './game/simulation.js'
 
@@ -49,7 +50,7 @@ export default function App() {
   const [surface, setSurface] = useState('city')
   const era = ERAS[state.era]
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
-  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition ? calculateOutcome(state) : null, [state])
+  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition && !state.metropolitanTransition ? calculateOutcome(state) : null, [state])
 
   useEffect(() => {
     const handleKey = (event) => {
@@ -172,6 +173,7 @@ export default function App() {
           <RoadsToItalyPanel state={state} onWork={(id) => applyRegionalAction(workItalianProject, id)} />
           <MediterraneanPanel state={state} />
           <MediterraneanWorksPanel state={state} onWork={(id) => applyRegionalAction(workMediterraneanProject, id)} />
+          <MetropolitanPanel state={state} />
           <DecisionCouncil
             council={state.council}
             resolved={state.councilResolved}
@@ -195,11 +197,11 @@ export default function App() {
       <WalkthroughOverlay open={walkthroughOpen} onClose={closeWalkthrough} />
       <TurnReport report={report} onClose={() => setReport(null)} />
       <EraTransition
-        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition || state.hannibalicTransition) && !report}
-        kind={state.hannibalicTransition ? 'hannibalic' : state.mediterraneanTransition ? 'mediterranean' : state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
-        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.hannibalicTransition ? enterHannibalicEmergency(state) : state.mediterraneanTransition ? enterMediterranean(state) : state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
+        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition || state.hannibalicTransition || state.metropolitanTransition) && !report}
+        kind={state.metropolitanTransition ? 'metropolitan' : state.hannibalicTransition ? 'hannibalic' : state.mediterraneanTransition ? 'mediterranean' : state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
+        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.metropolitanTransition ? enterMetropolis(state) : state.hannibalicTransition ? enterHannibalicEmergency(state) : state.mediterraneanTransition ? enterMediterranean(state) : state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
       />
-      <OutcomeOverlay outcome={report ? null : outcome} onExport={exportCampaign} onRestart={restart} onContinue={state.turn === 29 && state.outcome === 'complete' ? () => setState(continueToMediterranean(state)) : null} />
+      <OutcomeOverlay outcome={report ? null : outcome} onExport={exportCampaign} onRestart={restart} continueLabel={state.turn === 36 ? 'Continue to Conquest and Metropolis' : 'Continue to the Mediterranean'} onContinue={state.turn === 29 && state.outcome === 'complete' ? () => setState(continueToMediterranean(state)) : state.turn === 36 && state.outcome === 'mediterranean-complete' ? () => setState(continueToMetropolis(state)) : null} />
     </div>
   )
 }
