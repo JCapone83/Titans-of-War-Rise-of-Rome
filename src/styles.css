@@ -209,9 +209,13 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .mediterranean-works-panel { border-bottom: 1px solid var(--line); background: #1d1e1a; padding: 16px 20px; }.mediterranean-works-panel h2 { margin: 0; font-size: 19px; }.works-intro { color: var(--muted); font-size: 10px; line-height: 1.45; }.public-works-list { display: grid; gap: 6px; }.public-work { padding: 9px; border: 1px solid var(--line); background: #292a25; }.public-work.complete { border-color: #8da46f; }.public-work > div { display: flex; justify-content: space-between; gap: 8px; }.public-work strong { font-size: 11px; }.public-work span { color: var(--gold); font-size: 9px; white-space: nowrap; }.public-work p { margin: 5px 0; color: var(--muted); font-size: 9px; line-height: 1.35; }.public-work button { width: 100%; padding: 6px; border: 1px solid var(--line); background: #191a17; color: var(--paper); font-size: 9px; cursor: pointer; }.public-work button:disabled { color: #77786f; cursor: not-allowed; }
 
 .civil-settlement-works .public-works-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.imperial-works { container-type: inline-size; }
 .imperial-works .public-works-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
 .imperial-works .public-work { min-width: 0; }
+.imperial-works .public-work-heading > strong { min-width: 0; overflow-wrap: anywhere; }
+.imperial-works .public-work-heading > span { flex: 0 1 auto; min-width: 0; white-space: normal; text-align: right; overflow-wrap: anywhere; }
 .imperial-works .civil-project-art { aspect-ratio: 3 / 2; }
+@container (max-width: 420px) { .imperial-works .public-works-list { grid-template-columns: 1fr; } }
 .imperial-project-stage { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
 .imperial-project-stage span, .imperial-project-stage strong { font-size: 9px; }
 .imperial-project-stage strong { color: var(--gold); }
