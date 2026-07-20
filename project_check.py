@@ -228,11 +228,21 @@ def main() -> None:
     require("src/components/ImperialWorksPanel.jsx", "artForImperialProject")
     require("src/components/ImperialWorksPanel.jsx", "civil-project-art")
     require("src/game/projectArt.js", "IMPERIAL_PROJECT_ART")
+    require("src/game/projectArt.js", "castra-praetoria-v1.png")
     require("src/game/projectArt.js", "aqua-claudia-v1.png")
     require("src/game/projectArt.js", "claudian-portus-v1.png")
+    require("src/game/projectArt.js", "domus-aurea-v1.png")
     require("src/game/projectArt.js", "flavian-amphitheatre-v1.png")
+    require("src/game/projectArt.js", "temple-peace-v1.png")
+    require("src/game/projectArt.js", "arch-titus-v1.png")
     require("src/game/projectArt.js", "domitianic-palace-v1.png")
     require("src/game/projectArt.js", "artForImperialProject")
+    for asset in [
+        "castra-praetoria-v1.png", "aqua-claudia-v1.png", "claudian-portus-v1.png",
+        "domus-aurea-v1.png", "flavian-amphitheatre-v1.png", "temple-peace-v1.png",
+        "arch-titus-v1.png", "domitianic-palace-v1.png",
+    ]:
+        require_rgba_png(f"public/images/projects/{asset}")
     require("src/game/referenceStrategies.js", "IMPERIAL_CAPITAL_STRATEGIES")
     require("scripts/run-balance.mjs", "Act XI Imperial Capital strategies")
     require("docs/ACT_XI_IMPLEMENTATION_REPORT.md", "AD 14-96")

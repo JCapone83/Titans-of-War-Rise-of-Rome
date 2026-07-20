@@ -1444,14 +1444,18 @@ test('Act XI projects carry dates, evidence, stages, and recurring burdens', () 
   assert.equal(IMPERIAL_CAPITAL_PROJECTS.flavianAmphitheatre.operatingTurn, 70)
 })
 
-test('first Imperial Capital visual batch maps only its approved project art', () => {
-  assert.deepEqual(Object.keys(IMPERIAL_PROJECT_ART).sort(), ['aquaClaudia', 'claudianPortus', 'domitianicPalace', 'flavianAmphitheatre'])
+test('complete Imperial Capital visual set maps all eight project artworks', () => {
   const expected = {
+    castraPraetoria: '/images/projects/castra-praetoria-v1.png',
     aquaClaudia: '/images/projects/aqua-claudia-v1.png',
     claudianPortus: '/images/projects/claudian-portus-v1.png',
+    domusAurea: '/images/projects/domus-aurea-v1.png',
     flavianAmphitheatre: '/images/projects/flavian-amphitheatre-v1.png',
+    templePeace: '/images/projects/temple-peace-v1.png',
+    archTitus: '/images/projects/arch-titus-v1.png',
     domitianicPalace: '/images/projects/domitianic-palace-v1.png',
   }
+  assert.deepEqual(Object.keys(IMPERIAL_PROJECT_ART).sort(), Object.keys(expected).sort())
   for (const [id, src] of Object.entries(expected)) {
     const art = IMPERIAL_PROJECT_ART[id]
     assert.equal(art.src, src)
@@ -1459,7 +1463,7 @@ test('first Imperial Capital visual batch maps only its approved project art', (
     assert.ok(art.evidence.length >= 25)
     assert.equal(artForImperialProject(id), art)
   }
-  for (const id of ['castraPraetoria', 'domusAurea', 'templePeace', 'archTitus', 'unknown']) assert.equal(artForImperialProject(id), null)
+  assert.equal(artForImperialProject('unknown'), null)
 })
 
 test('Flavian Amphitheatre requires public conversion, opens in AD 80, and gains the Domitianic layer by AD 96', () => {

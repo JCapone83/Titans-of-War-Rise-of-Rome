@@ -67,13 +67,17 @@ The Agrippan Pantheon asset deliberately excludes the standing Hadrianic rotunda
 
 ## Act XI project art
 
-The following four transparent PNG assets were produced with the built-in OpenAI image-generation tool under project-authored historical art direction on July 20, 2026. They are historically informed game reconstructions rather than archaeological evidence:
+The completed Act XI project-art set contains eight transparent PNG assets produced with the built-in OpenAI image-generation tool under project-authored historical art direction on July 20, 2026. They are historically informed game reconstructions rather than archaeological evidence:
 
+- `public/images/projects/castra-praetoria-v1.png` — Evidence-led plan with generalized service interiors
 - `public/images/projects/aqua-claudia-v1.png` — Evidence-led infrastructure synthesis
 - `public/images/projects/claudian-portus-v1.png` — Evidence-led harbor system with bounded warehouse abstraction
+- `public/images/projects/domus-aurea-v1.png` — Evidence-led precinct with reconstruction uncertainty above surviving fabric
 - `public/images/projects/flavian-amphitheatre-v1.png` — Evidence-led intact Flavian reconstruction
+- `public/images/projects/temple-peace-v1.png` — Evidence-led forum-like precinct with cautious functional interpretation
+- `public/images/projects/arch-titus-v1.png` — Evidence-led single-bay honorific arch
 - `public/images/projects/domitianic-palace-v1.png` — Evidence-led plan with reconstructed upper architecture
 
-The assets use transparent RGBA PNG presentation and remain byte-identical to the approved production batch. Their evidence-status labels describe the reconstruction treatment used in the game and do not claim archaeological certainty. Final illustrated reconstructions for the remaining Act XI projects remain behind a separate visual-production gate.
+The assets use transparent RGBA PNG presentation and remain byte-identical to their approved production batches. Their evidence-status labels describe the reconstruction treatment used in the game and do not claim archaeological certainty. The Act XI project-art gate is complete; later revisions still require separate historical, provenance, alpha, and browser review.
 
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

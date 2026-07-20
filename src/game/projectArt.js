@@ -22,6 +22,11 @@ export const CIVIL_SETTLEMENT_PROJECT_ART = {
 }
 
 export const IMPERIAL_PROJECT_ART = {
+  castraPraetoria: {
+    src: '/images/projects/castra-praetoria-v1.png',
+    alt: 'Isometric reconstruction of the early Castra Praetoria with low perimeter, barrack grid, headquarters, stores, and training ground.',
+    evidence: 'Evidence-led plan with generalized service interiors',
+  },
   aquaClaudia: {
     src: '/images/projects/aqua-claudia-v1.png',
     alt: 'Isometric reconstruction of Aqua Claudia and Anio Novus with two enclosed conduits and monumental arcades.',
@@ -32,10 +37,25 @@ export const IMPERIAL_PROJECT_ART = {
     alt: 'Isometric reconstruction of Claudian Portus and Imperial Horrea with harbor works, canals, and guarded stores.',
     evidence: 'Evidence-led harbor system with bounded warehouse abstraction',
   },
+  domusAurea: {
+    src: '/images/projects/domus-aurea-v1.png',
+    alt: 'Isometric reconstruction of the Domus Aurea as a connected palace-park with pavilions, gardens, waterworks, lake, and displaced streets.',
+    evidence: 'Evidence-led precinct with reconstruction uncertainty above surviving fabric',
+  },
   flavianAmphitheatre: {
     src: '/images/projects/flavian-amphitheatre-v1.png',
     alt: 'Isometric reconstruction of the intact Flavian Amphitheatre with arcades, arena, seating, and crowd routes.',
     evidence: 'Evidence-led intact Flavian reconstruction',
+  },
+  templePeace: {
+    src: '/images/projects/temple-peace-v1.png',
+    alt: 'Isometric reconstruction of the Temple of Peace as a rectangular porticoed complex with planted courts, pools, displays, and sacred hall.',
+    evidence: 'Evidence-led forum-like precinct with cautious functional interpretation',
+  },
+  archTitus: {
+    src: '/images/projects/arch-titus-v1.png',
+    alt: 'Isometric reconstruction of the intact single-bay Arch of Titus with composite columns, attic, inner reliefs, and triumphal route.',
+    evidence: 'Evidence-led single-bay honorific arch',
   },
   domitianicPalace: {
     src: '/images/projects/domitianic-palace-v1.png',
