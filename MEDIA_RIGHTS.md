@@ -172,3 +172,13 @@ The image is interface background art rather than archaeological evidence. It mu
 - SHA-256: `ae620a3716a3dbb8dce026317e0155a865e94ad1de085004d1e2217eb32c3515`
 
 This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. Buildings remain separate project-authored assets layered by the game.
+
+### Tiber Bank and Aventine terrain
+
+- File: `public/images/scenes/tiber-aventine-terrain-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Rights basis: Original game artwork produced for this project; no source photograph is embedded or redistributed.
+- Historical scope: An interpretive natural-terrain view of a ford, riverbank clearings, and lower Aventine terraces before dense urban construction. The clearings and paths are composed for strategy play rather than claimed as a surveyed eighth-century BC plan.
+- SHA-256: `0428d6c337a967e1a5490ccdf0a09aaa89cde7a874c60d9496e740371d5e4d49`
+
+This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. It was generated using only project-authored direction and the existing Palatine-Capitoline terrain plate as a style and continuity reference.

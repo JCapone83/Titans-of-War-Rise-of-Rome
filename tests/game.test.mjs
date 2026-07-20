@@ -12,7 +12,7 @@ import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCa
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, TRAJANIC_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, artForTrajanicProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
-import { assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../src/game/romeScenes.js'
+import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../src/game/romeScenes.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
@@ -84,6 +84,30 @@ test('terrain scene road links connect occupied plots to district gates', () => 
     ],
   }, 'palatine-capitoline')
   assert.ok(improved.filter((link) => link.districtId === 'palatine').every((link) => link.improved))
+})
+
+test('hill terrain is the default and the Tiber scene fills its seven district plots deterministically', () => {
+  assert.equal(DEFAULT_SCENE_ID, 'palatine-capitoline')
+  assert.deepEqual(ROME_SCENES.map((scene) => scene.id), ['palatine-capitoline', 'tiber-aventine'])
+  assert.equal(sceneForId('unknown-scene').id, DEFAULT_SCENE_ID)
+
+  const state = createInitialState()
+  state.buildings = [
+    ...Array.from({ length: 4 }, (_, index) => ({ instanceId: `a-${index}`, districtId: 'aventine', buildingId: 'palatine-huts', name: 'Aventine Work', familyId: 'housing', tier: 1, condition: 100 })),
+    ...Array.from({ length: 3 }, (_, index) => ({ instanceId: `t-${index}`, districtId: 'tiber', buildingId: 'grain-pits', name: 'Tiber Work', familyId: 'grain', tier: 1, condition: 100 })),
+    { instanceId: 'forum-1', districtId: 'forum', buildingId: 'forum-market', name: 'Forum Market', familyId: 'market', tier: 1, condition: 100 },
+  ]
+
+  const scene = sceneForId('tiber-aventine')
+  const assignments = assignBuildingsToScene(state, scene.id)
+  assert.equal(scene.plots.length, 7)
+  assert.equal(assignments.length, 7)
+  assert.deepEqual(assignments.map(({ building }) => building.instanceId), ['t-0', 't-1', 't-2', 'a-0', 'a-1', 'a-2', 'a-3'])
+  assert.equal(new Set(assignments.map(({ plot }) => plot.id)).size, 7)
+  assert.equal(districtGate(scene, 'tiber').id, 'tiber-gate')
+  assert.equal(districtGate(scene, 'aventine').id, 'aventine-gate')
+  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'tiber-gate'), true)
+  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'aventine-gate'), true)
 })
 
 test('soundtrack catalog contains six self-hosted verified recordings', () => {

@@ -4,6 +4,9 @@ const PALATINE_CAPITOLINE = {
   id: 'palatine-capitoline',
   label: 'Hill terrain',
   shortLabel: 'Hills',
+  title: 'Palatine and Capitoline',
+  eyebrow: 'Build the hill communities plot by plot',
+  alt: 'Natural hill terraces above the Tiber prepared for settlement',
   background: '/images/scenes/palatine-capitoline-terrain-v1.webp',
   districts: ['palatine', 'capitoline'],
   gates: [
@@ -22,7 +25,33 @@ const PALATINE_CAPITOLINE = {
   ],
 }
 
-export const ROME_SCENES = [PALATINE_CAPITOLINE]
+const TIBER_AVENTINE = {
+  id: 'tiber-aventine',
+  label: 'Tiber crossing',
+  shortLabel: 'Tiber',
+  title: 'Tiber Bank and Aventine',
+  eyebrow: 'Bind the river landing to the southern hill',
+  alt: 'The Tiber ford, riverbank clearings, and lower Aventine terraces prepared for settlement',
+  background: '/images/scenes/tiber-aventine-terrain-v1.webp',
+  districts: ['tiber', 'aventine'],
+  gates: [
+    { id: 'tiber-gate', districtId: 'tiber', x: 34, y: 96, label: 'River road approach' },
+    { id: 'aventine-gate', districtId: 'aventine', x: 96, y: 7, label: 'Aventine approach' },
+  ],
+  plots: [
+    { id: 'tiber-1', districtId: 'tiber', x: 34, y: 82, scale: 0.75, depth: 82, roadParent: 'tiber-gate' },
+    { id: 'tiber-2', districtId: 'tiber', x: 51, y: 63, scale: 0.69, depth: 63, roadParent: 'tiber-1' },
+    { id: 'tiber-3', districtId: 'tiber', x: 56, y: 42, scale: 0.61, depth: 42, roadParent: 'tiber-2' },
+    { id: 'aventine-1', districtId: 'aventine', x: 73, y: 71, scale: 0.72, depth: 71, roadParent: 'aventine-2' },
+    { id: 'aventine-2', districtId: 'aventine', x: 83, y: 49, scale: 0.65, depth: 49, roadParent: 'aventine-3' },
+    { id: 'aventine-3', districtId: 'aventine', x: 72, y: 30, scale: 0.57, depth: 30, roadParent: 'aventine-4' },
+    { id: 'aventine-4', districtId: 'aventine', x: 88, y: 17, scale: 0.53, depth: 17, roadParent: 'aventine-gate' },
+  ],
+}
+
+export const DEFAULT_SCENE_ID = PALATINE_CAPITOLINE.id
+
+export const ROME_SCENES = [PALATINE_CAPITOLINE, TIBER_AVENTINE]
 
 export function sceneForId(sceneId) {
   return ROME_SCENES.find((scene) => scene.id === sceneId) ?? PALATINE_CAPITOLINE

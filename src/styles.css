@@ -465,7 +465,9 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
   .home-chronology strong { font-size: 8px; }
   .brand-mark { display: none; }.top-actions .desktop-action, .top-actions .mobile-optional { display: none; }
   .campaign-strip strong { font-size: 14px; }.city-map { height: 470px; min-height: 470px; }.district { width: 118px; transform: translate(-50%, -50%) scale(.7); }.district-label { bottom: -11px; }
-  .map-view-tools button { flex-basis: 116px; padding-inline: 7px; }.map-view-tools span { font-size: 8px; }
+  .map-view-tools { overflow-x: visible; }
+  .map-view-tools button { min-width: 0; flex: 1 1 0; padding-inline: 4px; }
+  .map-view-tools span { font-size: 8px; line-height: 1.15; white-space: normal; }
   .terrain-scene { height: 390px; min-height: 390px; }
   .terrain-scene-background { object-position: 51% center; }
   .scene-plot { width: 112px; height: 103px; }

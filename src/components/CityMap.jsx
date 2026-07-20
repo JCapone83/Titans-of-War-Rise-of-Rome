@@ -4,7 +4,7 @@ import { artForBuilding } from '../game/buildingArt.js'
 import { augustanCapitalLandmarks } from '../game/projectArt.js'
 import { DISTRICTS, DISTRICT_LINKS } from '../game/data.js'
 import { networkCoverage } from '../game/simulation.js'
-import { assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../game/romeScenes.js'
+import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../game/romeScenes.js'
 
 const MODES = [
   { id: 'terrain', label: 'Terrain', icon: MapIcon },
@@ -61,15 +61,15 @@ function SceneRoad({ link, emphasized }) {
   )
 }
 
-function TerrainScene({ state, mode, onSelectDistrict }) {
-  const scene = sceneForId('palatine-capitoline')
+function TerrainScene({ state, mode, onSelectDistrict, sceneId }) {
+  const scene = sceneForId(sceneId)
   const assignments = assignBuildingsToScene(state, scene.id)
   const assignmentByPlot = new Map(assignments.map((assignment) => [assignment.plot.id, assignment]))
   const roads = roadLinksForScene(state, scene.id)
 
   return (
     <div className={`terrain-scene map-mode-${mode}`} role="group" aria-label={`${scene.label}, ${mode} overlay`}>
-      <img className="terrain-scene-background" src={scene.background} alt="Natural hill terraces above the Tiber prepared for settlement" draggable="false" />
+      <img className="terrain-scene-background" src={scene.background} alt={scene.alt} draggable="false" />
       <div className="scene-road-layer" aria-hidden="true">
         {roads.map((link) => <SceneRoad key={link.id} link={link} emphasized={mode === 'roads'} />)}
       </div>
@@ -114,7 +114,8 @@ function TerrainScene({ state, mode, onSelectDistrict }) {
 
 export function CityMap({ state, onSelectDistrict }) {
   const [mode, setMode] = useState('terrain')
-  const [view, setView] = useState('overview')
+  const [view, setView] = useState(DEFAULT_SCENE_ID)
+  const activeScene = view === 'overview' ? null : sceneForId(view)
   const modes = view === 'overview' && state.era >= 10 ? [...MODES, CAPITAL_MODE] : MODES
   const landmarks = augustanCapitalLandmarks(state)
   const coverage = networkCoverage(state)
@@ -126,20 +127,23 @@ export function CityMap({ state, onSelectDistrict }) {
       : []
   const selectView = (nextView) => {
     setView(nextView)
-    if (nextView === 'hills' && mode === 'capital') setMode('terrain')
+    if (nextView !== 'overview' && mode === 'capital') setMode('terrain')
   }
 
   return (
     <section className="city-map-section" aria-labelledby="city-map-title">
       <div className="map-heading">
         <div>
-          <p className="eyebrow">{view === 'hills' ? 'Build the hill communities plot by plot' : state.era >= 10 ? 'From the seven hills to an Imperial capital' : 'The seven hills and the river road'}</p>
-          <h2 id="city-map-title">{view === 'hills' ? 'Palatine and Capitoline' : mode === 'capital' ? 'The Augustan Capital' : state.era >= 7 ? 'Rome' : 'The Settlement'}</h2>
+          <p className="eyebrow">{activeScene ? activeScene.eyebrow : state.era >= 10 ? 'From the seven hills to an Imperial capital' : 'The seven hills and the river road'}</p>
+          <h2 id="city-map-title">{activeScene ? activeScene.title : mode === 'capital' ? 'The Augustan Capital' : state.era >= 7 ? 'Rome' : 'The Settlement'}</h2>
         </div>
         <div className="map-control-stack">
           <div className="map-view-tools" role="group" aria-label="City map view">
             <button type="button" className={view === 'overview' ? 'active' : ''} onClick={() => selectView('overview')} aria-pressed={view === 'overview'} title="Strategic overview"><MapIcon /><span>Strategic overview</span></button>
-            <button type="button" className={view === 'hills' ? 'active' : ''} onClick={() => selectView('hills')} aria-pressed={view === 'hills'} title="Hill terrain"><Mountain /><span>Hill terrain</span></button>
+            {ROME_SCENES.map((scene) => {
+              const Icon = scene.id === DEFAULT_SCENE_ID ? Mountain : Waves
+              return <button type="button" key={scene.id} className={view === scene.id ? 'active' : ''} onClick={() => selectView(scene.id)} aria-pressed={view === scene.id} title={scene.label}><Icon /><span>{scene.shortLabel}</span></button>
+            })}
           </div>
           <div className="map-tools" role="group" aria-label="Map overlay">
             {modes.map((item) => {
@@ -149,7 +153,7 @@ export function CityMap({ state, onSelectDistrict }) {
           </div>
         </div>
       </div>
-      {view === 'hills' ? <TerrainScene state={state} mode={mode} onSelectDistrict={onSelectDistrict} /> : <div className={`city-map map-mode-${mode}`} role="group" aria-label={`District map showing ${mode}`}>
+      {activeScene ? <TerrainScene state={state} mode={mode} onSelectDistrict={onSelectDistrict} sceneId={activeScene.id} /> : <div className={`city-map map-mode-${mode}`} role="group" aria-label={`District map showing ${mode}`}>
         <div className="tiber-river" aria-hidden="true"><span>Tiber</span></div>
         <div className="forum-basin" aria-hidden="true" />
         <div className="salt-road road-a" aria-hidden="true" />

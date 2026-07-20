@@ -100,9 +100,9 @@ Use the Home control in the campaign toolbar to return to the home screen withou
 
 ## Playable Terrain
 
-The city map now includes a **Hill terrain** view for the Palatine and Capitoline alongside the complete **Strategic overview**. Buildings constructed in either hill district occupy stable clearings in the realistic terrain scene; selecting an open or occupied plot selects that district for the existing construction workflow. The overview remains the default and retains access to all six districts and every infrastructure overlay.
+The city map opens on the **Hill terrain** view for the Palatine and Capitoline, with a second **Tiber crossing** sector for the Tiber Bank and Aventine. Buildings constructed in those districts occupy stable clearings in their realistic terrain scenes; selecting an open or occupied plot selects that district for the existing construction workflow. The complete **Strategic overview** remains one click away and retains access to all six districts and every infrastructure overlay.
 
-Paths in the hill scene connect occupied plots to their district approach. They appear as compacted earth until existing district road service is improved through the same market and defensive works already used by the simulation. This terrain layer does not create a second currency, construction action, or save format.
+Paths in both playable terrain scenes connect occupied plots to their district approach. They appear as compacted earth until existing district road service is improved through the same market and defensive works already used by the simulation. These terrain layers do not create a second currency, construction action, or save format.
 
 ## Soundtrack
 
