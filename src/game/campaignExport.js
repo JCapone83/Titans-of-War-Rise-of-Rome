@@ -1,6 +1,7 @@
 import { TURN_YEARS, formatYear } from './data.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { augustanCapitalSystems, imperialCapitalSystems, regionalForecast, workforceSummary } from './simulation.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from './outcomes.js'
+import { HISTORICAL_NOTES } from './historicalContext.js'
+import { augustanCapitalSystems, imperialCapitalSystems, regionalForecast, trajanicCapitalSystems, workforceSummary } from './simulation.js'
 
 const section = (title, lines) => [`## ${title}`, ...lines, ''].join('\n')
 const projectLines = (projects, unit = 'seasons', complete = 'complete') => Object.values(projects ?? {}).map((project) => `- ${project.id}: ${project.completed ? complete : `${project.progress}/${project.requiredSeasons} ${unit}`}`)
@@ -19,6 +20,8 @@ export function campaignMarkdown(state) {
   const capitalSystems = augustanCapitalSystems(state)
   const imperialScore = calculateImperialCapitalScore(state)
   const imperialSystems = imperialCapitalSystems(state)
+  const trajanicScore = calculateTrajanicCapitalScore(state)
+  const trajanicSystems = trajanicCapitalSystems(state)
   const output = [
     '# Titans of War: Birth of Rome',
     '',
@@ -198,6 +201,33 @@ export function campaignMarkdown(state) {
     ...projectLines(state.imperialCapital.projects, 'stages', 'operating'),
     '- Judgment date: AD 96',
   ]))
+  if (state.trajanicCapital) output.push(section('Trajanic Capital', [
+    `- AD 96 succession: ${state.flags?.trajanicSuccession ?? 'unsettled'}`,
+    `- Dacian revenue settlement: ${state.flags?.dacianRevenue ?? 'unsettled'}`,
+    `- Quirinal program: ${state.flags?.quirinalProgram ?? 'unsettled'}`,
+    `- Domus Aurea conversion: ${state.flags?.domusAureaConversion ?? 'unsettled'}`,
+    `- Water and Portus program: ${state.flags?.waterPortusProgram ?? 'unsettled'}`,
+    `- AD 117 settlement: ${state.flags?.ad117Settlement ?? 'unsettled'}`,
+    `- Operating form: **${trajanicScore.operatingForm}**`,
+    ...ledgerLines(state.trajanicCapital),
+    `- Trajanic Capital score: ${trajanicScore.grade} (${trajanicScore.score})`,
+    '### Trajanic Operating Systems',
+    ...trajanicSystems.map((system) => `- ${system.name}: ${system.score}/100 (${system.status})`),
+    `- Landmark works: ${trajanicScore.completed} operating; ${trajanicScore.active} active`,
+    '### Trajanic Public Works',
+    ...projectLines(state.trajanicCapital.projects, 'stages', 'operating'),
+    '- Judgment date: AD 117',
+  ]))
+
+  const consultedIds = [...new Set(state.consultedNotes ?? [])]
+  const consultedNotes = consultedIds.map((id) => HISTORICAL_NOTES.find((note) => note.id === id)).filter(Boolean)
+  if (consultedNotes.length) output.push(section('Historical Knowledge Consulted', consultedNotes.flatMap((note) => [
+    `### ${note.title}`,
+    `- Evidence class: ${note.category}`,
+    note.text,
+    `- Sources and uncertainty: ${note.evidence}`,
+    '',
+  ])))
 
   output.push(section('Council Record', state.choiceLog.length ? state.choiceLog.map((entry) => `- Turn ${entry.turn} (${formatYear(TURN_YEARS[entry.turn - 1])}): **${entry.council}** - ${entry.option}`) : ['- No councils recorded.']))
   output.push(section('Works Established', state.buildings.length ? state.buildings.map((building) => `- ${building.name}, ${building.districtId} (turn ${building.builtTurn})`) : ['- No works established.']))

@@ -1,7 +1,7 @@
 import { BookOpen, Download, HelpCircle, RotateCcw, Save } from 'lucide-react'
 import { TURN_YEARS, formatYear } from '../game/data.js'
 
-export function TopBar({ era, turn, year, onOpenHistory, onOpenWalkthrough, onSave, onExport, onRestart }) {
+export function TopBar({ era, turn, year, historyOpen, onOpenHistory, onOpenWalkthrough, onSave, onExport, onRestart }) {
   return (
     <header className="topbar">
       <div className="brand-block">
@@ -17,7 +17,7 @@ export function TopBar({ era, turn, year, onOpenHistory, onOpenWalkthrough, onSa
         <small>Turn {turn} of {TURN_YEARS.length}</small>
       </div>
       <nav className="top-actions" aria-label="Campaign tools">
-        <button className="icon-button" onClick={onOpenHistory} title="Historical context" aria-label="Open historical context"><BookOpen /></button>
+        <button className="icon-button" onClick={onOpenHistory} title="Historical knowledge" aria-label="Open historical knowledge" aria-haspopup="dialog" aria-expanded={historyOpen}><BookOpen /></button>
         <button className="icon-button" onClick={onOpenWalkthrough} title="Walkthrough" aria-label="Open walkthrough"><HelpCircle /></button>
         <button className="icon-button" onClick={onSave} title="Save campaign" aria-label="Save campaign"><Save /></button>
         <button className="icon-button" onClick={onExport} title="Export chronicle" aria-label="Export chronicle"><Download /></button>

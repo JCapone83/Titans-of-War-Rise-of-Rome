@@ -1672,11 +1672,40 @@ test('four Act XII strategies reach AD 117 with distinct viable settlements', ()
   assert.equal(new Set(results.map((result) => result.trajanicScore.operatingForm)).size, 4)
 })
 
-test('AD 117 outcome exposes the Trajanic operating legacy', () => {
+test('AD 117 outcome exposes the Trajanic settlement', () => {
   const result = runAllTrajanicCapitalStrategies()[0]
   const outcome = calculateOutcome(result.state)
   assert.equal(outcome.grades['Trajanic Capital'].score, result.trajanicScore.score)
   assert.equal(outcome.trajanicCapitalLegacy.systems.length, 5)
   assert.equal(outcome.trajanicCapitalLegacy.operatingForm, result.trajanicScore.operatingForm)
   assert.match(outcome.summary, /AD 117/)
+})
+
+test('Act XII historical knowledge covers every Trajanic turn', () => {
+  const ids = new Set()
+  for (let turn = 71; turn <= 76; turn += 1) {
+    const notes = notesForTurn(turn)
+    assert.equal(notes.length, 1)
+    const [note] = notes
+    ids.add(note.id)
+    assert.ok(note.text.length >= 180)
+    assert.ok(note.evidence.length >= 100)
+    assert.doesNotMatch(`${note.title} ${note.text}`, /systemic racism|equity|marginalized|whiteness/i)
+  }
+  assert.equal(ids.size, 6)
+})
+
+test('Act XII chronicle records the Trajanic settlement and consulted knowledge', () => {
+  const result = runAllTrajanicCapitalStrategies()[0]
+  const withoutResearch = campaignMarkdown({ ...result.state, consultedNotes: [] })
+  assert.match(withoutResearch, /## Trajanic Capital[\s\S]+AD 117/)
+  assert.match(withoutResearch, /### Trajanic Operating Systems/)
+  assert.doesNotMatch(withoutResearch, /## Historical Knowledge Consulted/)
+
+  const withResearch = campaignMarkdown({ ...result.state, consultedNotes: ['nerva-adoption', 'aqua-traiana-portus', 'unknown-note', 'nerva-adoption'] })
+  assert.match(withResearch, /## Historical Knowledge Consulted/)
+  assert.match(withResearch, /Adoption Made Succession Publicly Legible/)
+  assert.match(withResearch, /Aqua Traiana and Portus Were Linked Supply Obligations/)
+  assert.doesNotMatch(withResearch, /unknown-note/)
+  assert.equal((withResearch.match(/Adoption Made Succession Publicly Legible/g) ?? []).length, 1)
 })

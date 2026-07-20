@@ -78,6 +78,13 @@ const CONTENT = {
     unlocks: ['Imperial operating ledger', 'Eight staged capital projects', 'Fire, army, palace, and succession crises'],
     action: 'Enter the Imperial Capital',
   },
+  trajanic: {
+    eyebrow: 'AD 96-117 - adoption, conquest, and inherited obligations',
+    title: 'Trajanic Capital',
+    text: 'Nerva and Trajan must make succession legible while frontier command, Dacian revenue, provincial trust, treasury resilience, grain, water, administration, and maintenance carry Rome toward AD 117. Territorial reach does not settle who pays for the capital or how its authority transfers.',
+    unlocks: ['Trajanic operating ledger', 'Six evidence-qualified capital works', 'AD 117 settlement'],
+    action: 'Enter the Trajanic Capital',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

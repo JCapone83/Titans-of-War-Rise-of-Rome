@@ -319,6 +319,36 @@ export const HISTORICAL_NOTES = [
     text: 'Domitian\'s death ended the Flavian dynasty, but the Palatine palace, public works, offices, armies, and provincial system did not disappear. Their unequal ability to transfer authority forms the act judgment.',
     evidence: 'Suetonius, Domitian; Cassius Dio 67-68; Pliny, Panegyricus; palace archaeology, inscriptions, and administrative evidence.',
   },
+  {
+    id: 'nerva-adoption', title: 'Adoption Made Succession Publicly Legible', category: 'Near-contemporary praise + later narrative + coins and inscriptions', turns: [71],
+    text: 'Nerva held the principate after Domitian without founding a secure household succession. The Praetorian crisis and the standing of the armies narrowed his freedom of action. His adoption of Trajan joined a recognized commander to the existing civil government, but adoption itself was not an automatic constitutional rule: Senate action, military obedience, offices, oaths, correspondence, and public record still had to make the transfer effective.',
+    evidence: 'Pliny, Panegyricus 5-8 and 89-94, read as public praise rather than a neutral minute; Cassius Dio 68.1-6 in later epitome; coin legends and inscriptions for Nerva and Trajan. The exact sequence and pressure behind the adoption remain partly reconstructed.',
+  },
+  {
+    id: 'dacian-ledger', title: 'Dacian Victory Enlarged Both Revenue and Obligation', category: 'Monumental narrative + coins + inscriptions + later history', turns: [72],
+    text: 'The Dacian wars brought victory, territory, captives, spoils, and access to valuable mining districts, but conquest did not turn into free income. Roads, forts, garrisons, pay, transport, veterans, provincial offices, and later defense entered the same account. Ancient celebration emphasizes decision and triumph; the surviving evidence is less complete about annual receipts, local bargaining, and the full cost of holding the new province.',
+    evidence: "Trajan's Column and its relief sequence; Cassius Dio 68.6-14 in later epitome; victory coinage, military diplomas, inscriptions, roads, forts, mining archaeology, and veteran evidence. The Column is official monumental testimony, not a complete campaign diary or treasury ledger.",
+  },
+  {
+    id: 'forum-trajan-complex', title: 'Trajan\'s Forum Was an Administrative and Commemorative Complex', category: 'Building inscription + archaeology + later description', turns: [73],
+    text: 'The forum program joined a vast court, the Basilica Ulpia, libraries, the Column, retaining structures, routes, ceremonies, records, and legal business. Excavation of the Quirinal shoulder was itself an engineering and property operation. The surviving plan establishes an integrated precinct more securely than every room assignment, construction phase, or later label attached to the complex.',
+    evidence: 'Column base inscription, CIL VI 960; surviving architecture and archaeological stratigraphy of the Forum of Trajan, Basilica Ulpia, libraries, and Column; Cassius Dio 68.16; later topographical notices. Internal uses and exact construction sequence remain debated.',
+  },
+  {
+    id: 'baths-trajan', title: 'The Baths Converted Palace Ground Into Public Service', category: 'Archaeology + brick stamps + later topography', turns: [74],
+    text: 'The Baths of Trajan rose over and around portions of Nero\'s Domus Aurea, converting an imperial precinct while also using its buried fabric. A bath complex was not only a grand facade: cisterns, water routes, furnaces, fuel, attendants, cleaning, storage, drainage, crowd movement, and repair made it a permanent establishment. The Sette Sale belongs to that service problem even where individual connections and phases remain uncertain.',
+    evidence: 'Surviving fabric, plan, brick stamps, substructures of the Domus Aurea, and the Sette Sale cistern complex; Cassius Dio 69.4 for later Trajanic building memory; later topographical evidence. Apollodorus attributions and detailed service phasing require caution.',
+  },
+  {
+    id: 'aqua-traiana-portus', title: 'Aqua Traiana and Portus Were Linked Supply Obligations', category: 'Inscriptions + hydraulic and harbor archaeology + administrative evidence', turns: [75],
+    text: 'Aqua Traiana gathered water through distributed sources and conduits rather than one monumental arcade. At Portus, Trajan\'s hexagonal inner basin supplemented the Claudian harbor instead of replacing every older element. Together these systems widened the capital\'s margin in water, grain, storage, transfer, and flood management, while source rights, dredging, warehouses, craft, roads, inspection, leaks, and repairs kept the gain conditional on continuing administration.',
+    evidence: 'Aqua Traiana inscriptions and hydraulic archaeology around Lake Bracciano; archaeological survey of Claudian and Trajanic Portus, including the hexagonal basin, canals, warehouses, roads, and flood works; imperial coinage and later administrative evidence. Exact annual throughput is uncertain.',
+  },
+  {
+    id: 'succession-ad117', title: 'AD 117 Left a Maximum Empire and an Uncertain Transfer', category: 'Later narrative + coins + inscriptions + administrative continuity', turns: [76],
+    text: 'Trajan died while the eastern settlement and the succession were still matters of immediate command. Hadrian was accepted, but ancient accounts disagree over the timing and manner of adoption and the part played by Plotina and the imperial household. Armies, Senate, governors, messengers, treasury, and established offices converted a disputed personal moment into government. Territorial extent therefore did not remove the need for a workable transfer or the cost of inherited frontiers and capital works.',
+    evidence: 'Cassius Dio 68.33 and 69.1-2 in later epitome; Historia Augusta, Hadrian 4, used cautiously because of its late and uneven character; coins, inscriptions, military diplomas, and the continuity of provincial commands. The precise deathbed sequence cannot be established with certainty.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

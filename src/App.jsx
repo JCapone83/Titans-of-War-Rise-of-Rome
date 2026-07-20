@@ -26,15 +26,17 @@ import { AugustanCityPanel } from './components/AugustanCityPanel.jsx'
 import { AugustanWorksPanel } from './components/AugustanWorksPanel.jsx'
 import { ImperialCapitalPanel } from './components/ImperialCapitalPanel.jsx'
 import { ImperialWorksPanel } from './components/ImperialWorksPanel.jsx'
+import { TrajanicCapitalPanel } from './components/TrajanicCapitalPanel.jsx'
+import { TrajanicWorksPanel } from './components/TrajanicWorksPanel.jsx'
 import { TopBar } from './components/TopBar.jsx'
 import { TurnReport } from './components/TurnReport.jsx'
 import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
 import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState, migrateState } from './game/initialState.js'
-import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './game/continuation.js'
+import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, continueToTrajanicCapital, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain, enterTrajanicCapital } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
-import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './game/simulation.js'
+import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from './game/simulation.js'
 
 const STORAGE_KEY = 'titans-of-war-birth-of-rome-v1'
 
@@ -59,7 +61,7 @@ export default function App() {
   const [surface, setSurface] = useState('city')
   const era = ERAS[state.era]
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
-  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition && !state.metropolitanTransition && !state.strainTransition && !state.settlementTransition && !state.augustanTransition ? calculateOutcome(state) : null, [state])
+  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition && !state.metropolitanTransition && !state.strainTransition && !state.settlementTransition && !state.augustanTransition && !state.imperialCapitalTransition && !state.trajanicCapitalTransition ? calculateOutcome(state) : null, [state])
 
   useEffect(() => {
     const handleKey = (event) => {
@@ -145,6 +147,7 @@ export default function App() {
         era={era}
         turn={state.turn}
         year={TURN_YEARS[state.turn - 1]}
+        historyOpen={historyOpen}
         onOpenHistory={() => setHistoryOpen(true)}
         onOpenWalkthrough={() => setWalkthroughOpen(true)}
         onSave={save}
@@ -160,7 +163,7 @@ export default function App() {
               <strong>{getObjective(state.turn)}</strong>
             </div>
             <div className="progress-track" aria-label={`Campaign progress: turn ${state.turn} of ${TURN_YEARS.length}`}><i style={{ width: `${state.turn / TURN_YEARS.length * 100}%` }} /></div>
-            <button className="context-button" onClick={() => setHistoryOpen(true)}><BookOpen /> Context <span>{state.consultedNotes.length}</span></button>
+            <button className="context-button" onClick={() => setHistoryOpen(true)} aria-haspopup="dialog" aria-expanded={historyOpen}><BookOpen /> Historical knowledge <span>{state.consultedNotes.length}</span></button>
           </section>
           {state.regional && <div className="surface-switch" role="group" aria-label="Planning view">
             <button type="button" className={surface === 'city' ? 'active' : ''} onClick={() => setSurface('city')} aria-pressed={surface === 'city'}><Building2 /> City</button>
@@ -192,16 +195,18 @@ export default function App() {
           {state.era === 9 && <CivilSettlementPanel state={state} />}
           {state.era === 10 && <AugustanCityPanel state={state} />}
           {state.era === 11 && <ImperialCapitalPanel state={state} />}
+          {state.era === 12 && <TrajanicCapitalPanel state={state} />}
           {state.era === 6 && <MediterraneanWorksPanel state={state} onWork={(id) => applyRegionalAction(workMediterraneanProject, id)} />}
           {state.era === 7 && <MetropolitanWorksPanel state={state} onWork={(id) => applyRegionalAction(workMetropolitanProject, id)} />}
           {state.era === 8 && <RepublicStrainWorksPanel state={state} onWork={(id) => applyRegionalAction(workRepublicStrainProject, id)} />}
           {state.era === 9 && <CivilSettlementWorksPanel state={state} onWork={(id) => applyRegionalAction(workCivilSettlementProject, id)} />}
           {state.era === 10 && <AugustanWorksPanel state={state} onWork={(id) => applyRegionalAction(workAugustanProject, id)} />}
           {state.era === 11 && <ImperialWorksPanel state={state} onWork={(id) => applyRegionalAction(workImperialProject, id)} />}
+          {state.era === 12 && <TrajanicWorksPanel state={state} onWork={(id) => applyRegionalAction(workTrajanicProject, id)} />}
           <section className="advance-section">
             <div>
               <p className="eyebrow">Next</p>
-              <strong>{state.turn === 70 ? 'Judge the imperial capital at AD 96' : state.turn === 61 ? 'Judge whether the Augustan system survives its founder' : state.turn === 54 ? 'Judge the operating settlement of 27 BC' : state.turn === 48 ? 'Judge the Republic at the civil-war threshold' : state.turn === 41 ? 'Judge the metropolitan Republic' : state.turn === 29 ? 'Judge the Italian system' : state.turn === 23 ? 'Recover from the Caudine Forks' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
+              <strong>{state.turn === 76 ? 'Judge the Trajanic capital at AD 117' : state.turn === 70 ? 'Judge the imperial capital at AD 96' : state.turn === 61 ? 'Judge whether the Augustan system survives its founder' : state.turn === 54 ? 'Judge the operating settlement of 27 BC' : state.turn === 48 ? 'Judge the Republic at the civil-war threshold' : state.turn === 41 ? 'Judge the metropolitan Republic' : state.turn === 29 ? 'Judge the Italian system' : state.turn === 23 ? 'Recover from the Caudine Forks' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
             </div>
             <button className="advance-button" onClick={endSeason} disabled={Boolean(state.council && !state.councilResolved)}>
               End season <ArrowRight />
@@ -215,11 +220,11 @@ export default function App() {
       <WalkthroughOverlay open={walkthroughOpen} onClose={closeWalkthrough} />
       <TurnReport report={report} onClose={() => setReport(null)} />
       <EraTransition
-        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition || state.hannibalicTransition || state.metropolitanTransition || state.strainTransition || state.settlementTransition || state.augustanTransition || state.imperialCapitalTransition) && !report}
-        kind={state.imperialCapitalTransition ? 'imperial' : state.augustanTransition ? 'augustan' : state.settlementTransition ? 'settlement' : state.strainTransition ? 'strain' : state.metropolitanTransition ? 'metropolitan' : state.hannibalicTransition ? 'hannibalic' : state.mediterraneanTransition ? 'mediterranean' : state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
-        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.imperialCapitalTransition ? enterImperialCapital(state) : state.augustanTransition ? enterAugustanCity(state) : state.settlementTransition ? enterCivilSettlement(state) : state.strainTransition ? enterRepublicUnderStrain(state) : state.metropolitanTransition ? enterMetropolis(state) : state.hannibalicTransition ? enterHannibalicEmergency(state) : state.mediterraneanTransition ? enterMediterranean(state) : state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
+        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition || state.hannibalicTransition || state.metropolitanTransition || state.strainTransition || state.settlementTransition || state.augustanTransition || state.imperialCapitalTransition || state.trajanicCapitalTransition) && !report}
+        kind={state.trajanicCapitalTransition ? 'trajanic' : state.imperialCapitalTransition ? 'imperial' : state.augustanTransition ? 'augustan' : state.settlementTransition ? 'settlement' : state.strainTransition ? 'strain' : state.metropolitanTransition ? 'metropolitan' : state.hannibalicTransition ? 'hannibalic' : state.mediterraneanTransition ? 'mediterranean' : state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
+        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.trajanicCapitalTransition ? enterTrajanicCapital(state) : state.imperialCapitalTransition ? enterImperialCapital(state) : state.augustanTransition ? enterAugustanCity(state) : state.settlementTransition ? enterCivilSettlement(state) : state.strainTransition ? enterRepublicUnderStrain(state) : state.metropolitanTransition ? enterMetropolis(state) : state.hannibalicTransition ? enterHannibalicEmergency(state) : state.mediterraneanTransition ? enterMediterranean(state) : state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
       />
-      <OutcomeOverlay outcome={report ? null : outcome} onExport={exportCampaign} onRestart={restart} continueLabel={state.turn === 61 ? 'Continue to Imperial Capital' : state.turn === 54 ? 'Continue to The Augustan City' : state.turn === 48 ? 'Continue to Civil War and Settlement' : state.turn === 41 ? 'Continue to Republic Under Strain' : state.turn === 36 ? 'Continue to Conquest and Metropolis' : 'Continue to the Mediterranean'} onContinue={state.turn === 29 && state.outcome === 'complete' ? () => setState(continueToMediterranean(state)) : state.turn === 36 && state.outcome === 'mediterranean-complete' ? () => setState(continueToMetropolis(state)) : state.turn === 41 && state.outcome === 'metropolitan-complete' ? () => setState(continueToRepublicUnderStrain(state)) : state.turn === 48 && state.outcome === 'republic-strain-complete' ? () => setState(continueToCivilSettlement(state)) : state.turn === 54 && state.outcome === 'civil-settlement-complete' ? () => setState(continueToAugustanCity(state)) : state.turn === 61 && state.outcome === 'augustan-city-complete' ? () => setState(continueToImperialCapital(state)) : null} />
+      <OutcomeOverlay outcome={report ? null : outcome} onExport={exportCampaign} onRestart={restart} continueLabel={state.turn === 70 ? 'Continue to Trajanic Capital' : state.turn === 61 ? 'Continue to Imperial Capital' : state.turn === 54 ? 'Continue to The Augustan City' : state.turn === 48 ? 'Continue to Civil War and Settlement' : state.turn === 41 ? 'Continue to Republic Under Strain' : state.turn === 36 ? 'Continue to Conquest and Metropolis' : 'Continue to the Mediterranean'} onContinue={state.turn === 29 && state.outcome === 'complete' ? () => setState(continueToMediterranean(state)) : state.turn === 36 && state.outcome === 'mediterranean-complete' ? () => setState(continueToMetropolis(state)) : state.turn === 41 && state.outcome === 'metropolitan-complete' ? () => setState(continueToRepublicUnderStrain(state)) : state.turn === 48 && state.outcome === 'republic-strain-complete' ? () => setState(continueToCivilSettlement(state)) : state.turn === 54 && state.outcome === 'civil-settlement-complete' ? () => setState(continueToAugustanCity(state)) : state.turn === 61 && state.outcome === 'augustan-city-complete' ? () => setState(continueToImperialCapital(state)) : state.turn === 70 && state.outcome === 'imperial-capital-complete' ? () => setState(continueToTrajanicCapital(state)) : null} />
     </div>
   )
 }
