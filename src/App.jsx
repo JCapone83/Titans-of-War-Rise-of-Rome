@@ -15,6 +15,7 @@ import { RegionalMap } from './components/RegionalMap.jsx'
 import { RoadsToItalyPanel } from './components/RoadsToItalyPanel.jsx'
 import { OutcomeOverlay } from './components/OutcomeOverlay.jsx'
 import { MediterraneanPanel } from './components/MediterraneanPanel.jsx'
+import { MediterraneanWorksPanel } from './components/MediterraneanWorksPanel.jsx'
 import { TopBar } from './components/TopBar.jsx'
 import { TurnReport } from './components/TurnReport.jsx'
 import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
@@ -23,7 +24,7 @@ import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState, migrateState } from './game/initialState.js'
 import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
-import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject } from './game/simulation.js'
+import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject } from './game/simulation.js'
 
 const STORAGE_KEY = 'titans-of-war-birth-of-rome-v1'
 
@@ -170,6 +171,7 @@ export default function App() {
           <ReconstructionPanel state={state} />
           <RoadsToItalyPanel state={state} onWork={(id) => applyRegionalAction(workItalianProject, id)} />
           <MediterraneanPanel state={state} />
+          <MediterraneanWorksPanel state={state} onWork={(id) => applyRegionalAction(workMediterraneanProject, id)} />
           <DecisionCouncil
             council={state.council}
             resolved={state.councilResolved}

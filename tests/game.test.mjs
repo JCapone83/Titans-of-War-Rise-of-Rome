@@ -1,8 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createInitialState, createItalianState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
-import { BUILDING_FAMILIES, TURN_YEARS, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
+import { createInitialState, createItalianState, createMediterraneanState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
+import { BUILDING_FAMILIES, MEDITERRANEAN_PROJECTS, TURN_YEARS, getCouncil } from '../src/game/data.js'
+import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject, workMediterraneanProject } from '../src/game/simulation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
@@ -965,6 +965,36 @@ test('Act VI completes at 201 BC with a separated chronicle', () => {
 
 test('historical context covers every Mediterranean turn', () => {
   for (const turn of [30, 31, 32, 33, 34, 35, 36]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)))
+})
+
+test('Act VI public works share capacity and enforce their prerequisites', () => {
+  const endpoint = runAllActFiveStrategies()[0].state
+  let state = enterMediterranean(continueToMediterranean(endpoint))
+  state = { ...state, actionsMax: 4, actionsUsed: 0, resources: { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 } }
+  assert.deepEqual(Object.keys(MEDITERRANEAN_PROJECTS).sort(), ['appianApproach', 'republicanCircus', 'republicanHorrea', 'tiberEmporium'])
+  assert.equal(mediterraneanProjectAvailability(state, 'republicanHorrea').available, false)
+  const worked = workMediterraneanProject(state, 'tiberEmporium').state
+  assert.equal(worked.actionsUsed, 1)
+  assert.equal(worked.mediterranean.projects.tiberEmporium.progress, 1)
+  assert.equal(mediterraneanProjectAvailability(worked, 'tiberEmporium').available, false)
+})
+
+test('Mediterranean projects migrate and survive councils and the interwar bridge', () => {
+  const legacy = { ...createInitialState(), version: 10, era: 6, turn: 30, mediterranean: { fleetCapacity: 20 } }
+  const migrated = migrateState(legacy)
+  assert.deepEqual(migrated.mediterranean.projects, createMediterraneanState().projects)
+  let state = enterMediterranean(continueToMediterranean(runAllActFiveStrategies()[0].state))
+  state = { ...state, resources: { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 } }
+  state = workMediterraneanProject(state, 'tiberEmporium').state
+  state = resolveCouncil(state, 'allied-hulls')
+  assert.equal(state.mediterranean.projects.tiberEmporium.progress, 1)
+  state = advanceTurn(state).state
+  for (const optionId of ['pilotage-exchange', 'local-compact']) {
+    state = resolveCouncil(state, optionId)
+    state = advanceTurn(state).state
+  }
+  state = enterHannibalicEmergency(state)
+  assert.equal(state.mediterranean.projects.tiberEmporium.progress, 1)
 })
 
 test('three continuation strategies finish without skips and expose distinct ledgers', () => {

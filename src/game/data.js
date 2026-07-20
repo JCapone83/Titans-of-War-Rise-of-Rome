@@ -65,6 +65,53 @@ export const ITALIAN_PROJECTS = {
   },
 }
 
+export const MEDITERRANEAN_PROJECTS = {
+  appianApproach: {
+    id: 'appianApproach', name: 'Via Appia and Porta Capena Approach', seasons: 2,
+    cost: { timber: 1, grain: 1 },
+    prerequisite: 'viaAppia',
+    summary: 'A controlled gate and transport corridor at the Porta Capena approach. It improves access while exposing the route to hostile movement and gate security burdens.',
+    completionMetrics: { trade: 5, readiness: 3 },
+    completionMediterranean: { emergencyReserve: 4 },
+    completionItalian: { hostileAccess: 5 },
+    upkeepResources: { treasury: -1 },
+    upkeepMetrics: { readiness: -1 },
+    burdenLabel: 'Gate guards, road crews, and hostile access require permanent attention.',
+  },
+  tiberEmporium: {
+    id: 'tiberEmporium', name: 'Tiber Landings and Emporium', seasons: 3,
+    cost: { timber: 1, grain: 1 },
+    summary: 'A bulk river transshipment zone exposed to flood, fire, theft, sanitation, and labor strain.',
+    completionMetrics: { trade: 8, food: 3 },
+    completionMediterranean: { importedGrainShare: 6, contractorExposure: 2 },
+    upkeepResources: { treasury: -1 },
+    upkeepMetrics: { sanitation: -1 },
+    upkeepMediterranean: { contractorExposure: 1 },
+    burdenLabel: 'Flood watch, fire patrols, labor control, and contract inspection recur each season.',
+  },
+  republicanHorrea: {
+    id: 'republicanHorrea', name: 'Republican Horrea', seasons: 3,
+    cost: { stone: 1, timber: 1, grain: 1 },
+    prerequisite: 'tiberEmporium',
+    summary: 'Guarded, ventilated courtyard storage tied to records, weights, and river transport.',
+    completionMetrics: { food: 6, order: 2 },
+    completionMediterranean: { importedGrainShare: 5, provincialTrust: 2 },
+    upkeepResources: { treasury: -1 },
+    upkeepMediterranean: { contractorExposure: 1 },
+    burdenLabel: 'Guards, ventilation, records, and measured release of stores require continuing expense.',
+  },
+  republicanCircus: {
+    id: 'republicanCircus', name: 'Republican Circus Grounds and Timber Seating', seasons: 3,
+    cost: { timber: 2, grain: 1 },
+    summary: 'A progressively formalized valley with timber seating, crowd routes, fire watch, and service burdens—not a later stone stadium.',
+    completionMetrics: { order: 6, auspices: 4, trade: 2 },
+    completionMediterranean: { provincialTrust: 2 },
+    upkeepResources: { treasury: -1, grain: -1 },
+    upkeepMetrics: { sanitation: -1 },
+    burdenLabel: 'Timber inspection, fire watch, crowd routes, and festival service consume stores and crews.',
+  },
+}
+
 export const RESOURCE_META = {
   grain: { label: 'Grain', color: '#d8aa42' },
   timber: { label: 'Timber', color: '#8c613d' },

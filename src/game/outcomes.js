@@ -29,6 +29,16 @@ export function calculateItalianScore(state) {
   return { score: bounded, grade: grade(bounded), endurance: Math.round(endurance), compact: Math.round(compact), pressure: Math.round(pressure), infrastructure: Math.round(infrastructure), stewardship: Math.round(stewardship) }
 }
 
+export function calculatePublicWorksScore(state) {
+  if (!state.mediterranean) return null
+  const projects = Object.values(state.mediterranean.projects ?? {})
+  const completed = projects.filter((project) => project.completed).length
+  const active = projects.filter((project) => !project.completed && project.progress > 0).length
+  const burden = Object.values(state.mediterranean.publicWorksBurden ?? {}).reduce((sum, value) => sum + Math.abs(value), 0)
+  const score = Math.max(0, Math.min(100, Math.round(45 + completed * 12 + active * 3 - burden * 0.5)))
+  return { score, grade: grade(score), completed, active, burden }
+}
+
 export function calculateMediterraneanScore(state) {
   if (!state.mediterranean) return null
   const m = state.mediterranean
@@ -78,7 +88,10 @@ export function calculateOutcome(state) {
   if (state.mediterranean && state.turn >= 30) {
     const m = state.mediterranean
     if (state.turn <= 32) scores['Mediterranean Opening'] = Math.max(0, Math.min(100, Math.round(40 + m.fleetCapacity * 0.25 + m.warCredit * 0.2 + m.provincialTrust * 0.2 + m.importedGrainShare * 0.15 - m.maritimeLosses * 0.2 - m.contractorExposure * 0.15 - m.alliedExhaustion * 0.12)))
-    else scores['Mediterranean Republic'] = calculateMediterraneanScore(state).score
+    else {
+      scores['Mediterranean Republic'] = calculateMediterraneanScore(state).score
+      scores['Physical Systems'] = calculatePublicWorksScore(state).score
+    }
   }
   const overall = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.keys(scores).length)
   let title = 'A City Still Becoming'

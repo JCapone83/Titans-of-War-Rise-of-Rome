@@ -21,6 +21,12 @@ The deterministic suite carries three distinct campaigns through all seven Act V
 
 Each doctrine must finish at turn 36 in 201 BC, resolve every council, cross exactly one chronology bridge, retain ten separate Mediterranean measures, and score at least 60 overall. `scripts/run-balance.mjs` prints final fleet capacity, emergency reserve, provincial trust, allied exhaustion, and veteran settlement pressure so a passing total cannot hide a collapsed component.
 
+## Republican Public works layer
+
+The four bounded city works share seasonal action capacity and explicit stores: Via Appia and Porta Capena Approach (2 seasons), Tiber Landings and Emporium (3), Republican Horrea (3), and Republican Circus Grounds and Timber Seating (3). The Appian approach requires the inherited Via Appia; the horrea require the Emporium. Completion adds immediate access, trade, grain, storage, civic, or ritual effects while `mediterraneanForecast` records recurring treasury, flood, fire, crowd, service, contractor, and hostile-access burdens. Aqua Appia remains the inherited Italian water project; no Republican Basilica or later monument is introduced.
+
+All three Mediterranean reference doctrines work distinct portfolios and retain the seven-council, no-skip, turn-36 endpoint. Public-works scoring supplements provincial trust, allied endurance, grain, emergency reserve, command duration, contractor exposure, and veteran settlement rather than replacing those ledgers.
+
 ## Scope boundary
 
 The act ends in 201 BC. It does not introduce the metropolitan crowding, basilicas, eastern conquest, Gracchan politics, civil wars, or imperial building systems reserved for later acts.

@@ -92,7 +92,10 @@ export function enterHannibalicEmergency(state) {
   if ((state.chronologyBridges ?? []).some((bridge) => bridge.id === 'first-punic-interwar')) return state
   const before = { ...createMediterraneanState(), ...state.mediterranean }
   const { changes, notes } = interwarChanges({ ...state, mediterranean: before })
-  const mediterranean = Object.fromEntries(Object.entries(before).map(([key, value]) => [key, bounded(value + (changes[key] ?? 0))]))
+  const mediterranean = Object.fromEntries(Object.entries(before).map(([key, value]) => [
+    key,
+    typeof value === 'number' ? bounded(value + (changes[key] ?? 0)) : structuredClone(value),
+  ]))
   const resourceDelta = {
     treasury: state.flags.sicilianSettlement === 'war-credit' ? 0 : 2,
     grain: before.importedGrainShare >= 10 ? 2 : 0,
@@ -102,7 +105,9 @@ export function enterHannibalicEmergency(state) {
     id: 'first-punic-interwar',
     fromYear: 241,
     toYear: 218,
-    mediterraneanChanges: Object.fromEntries(Object.keys(mediterranean).map((key) => [key, mediterranean[key] - before[key]])),
+    mediterraneanChanges: Object.fromEntries(Object.keys(mediterranean)
+      .filter((key) => typeof mediterranean[key] === 'number')
+      .map((key) => [key, mediterranean[key] - before[key]])),
     resourceDelta,
     notes,
   }

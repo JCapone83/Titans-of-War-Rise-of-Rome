@@ -1,4 +1,4 @@
-import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
 import { createItalianState, createMediterraneanState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
@@ -93,6 +93,14 @@ const updateRegional = (regional, changes = {}) => {
 const updateItalian = (italian, changes = {}) => {
   if (!italian) return italian
   return Object.fromEntries(Object.entries(italian).map(([key, value]) => [key, typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value]))
+}
+
+const updateMediterranean = (mediterranean, changes = {}) => {
+  if (!mediterranean) return mediterranean
+  return Object.fromEntries(Object.entries(mediterranean).map(([key, value]) => [
+    key,
+    typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
+  ]))
 }
 
 export function republicForecast(state) {
@@ -449,6 +457,44 @@ export function workItalianProject(state, projectId) {
       actionLog: appendAction(state, { type: 'italian-project', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
     },
     message: completed ? `${definition.name} completed after ${project.requiredSeasons} seasons of shared crews and materials.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} seasons.`,
+  }
+}
+
+export function mediterraneanProjectAvailability(state, projectId) {
+  const blocked = (reason) => ({ available: false, ok: false, reason })
+  if (!state.mediterranean || state.era < 6) return blocked('Republican public works are not yet available.')
+  const definition = MEDITERRANEAN_PROJECTS[projectId]
+  const project = state.mediterranean.projects?.[projectId]
+  if (!definition || !project) return blocked('Choose a valid Republican public work.')
+  if (project.completed) return blocked(`${definition.name} is complete.`)
+  if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this season.`)
+  if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this season.')
+  if (definition.prerequisite === 'viaAppia' && !state.italian?.projects?.viaAppia?.completed) return blocked('The inherited Via Appia must be complete first.')
+  if (definition.prerequisite === 'tiberEmporium' && !state.mediterranean.projects.tiberEmporium?.completed) return blocked('The Tiber Emporium must be complete first.')
+  const affordability = affordabilityFailure(state, definition.cost)
+  if (affordability) return blocked(affordability)
+  return { available: true, ok: true, definition, project }
+}
+
+export function workMediterraneanProject(state, projectId) {
+  const availability = mediterraneanProjectAvailability(state, projectId)
+  if (!availability.ok) return { state, error: availability.reason }
+  const { definition, project } = availability
+  const progress = project.progress + 1
+  const completed = progress >= project.requiredSeasons
+  const nextProject = { ...project, progress, completed, lastWorkedTurn: state.turn }
+  const projects = { ...state.mediterranean.projects, [projectId]: nextProject }
+  let mediterranean = { ...state.mediterranean, projects }
+  let metrics = state.metrics
+  let italian = state.italian
+  if (completed) {
+    metrics = addMap(metrics, definition.completionMetrics)
+    mediterranean = updateMediterranean(mediterranean, definition.completionMediterranean)
+    italian = updateItalian(italian, definition.completionItalian)
+  }
+  return {
+    state: { ...state, resources: addResources(state.resources, reverseChanges(definition.cost)), metrics, italian, mediterranean, actionsUsed: (state.actionsUsed ?? 0) + 1, actionLog: appendAction(state, { type: 'republican-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }) },
+    message: completed ? `${definition.name} completed; its access, service, and upkeep obligations now enter the city ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} seasons.`,
   }
 }
 
@@ -809,7 +855,7 @@ export function resolveCouncil(state, optionId) {
   const nextRegional = updateRegional(state.regional, impacts.regional)
   const nextItalian = updateItalian(state.italian, impacts.italian)
   const nextMediterranean = state.mediterranean
-    ? Object.fromEntries(Object.entries({ ...createMediterraneanState(), ...state.mediterranean }).map(([key, value]) => [key, clamp(value + (impacts.mediterranean?.[key] ?? 0))]))
+    ? updateMediterranean({ ...createMediterraneanState(), ...state.mediterranean }, impacts.mediterranean)
     : state.mediterranean
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
   const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, flags: nextFlags }
@@ -1054,6 +1100,16 @@ export function civicPressures(state) {
 export function mediterraneanForecast(state) {
   if (!state.mediterranean) return null
   const m = { ...createMediterraneanState(), ...state.mediterranean }
+  const works = m.projects ?? {}
+  const completedWorks = Object.values(works).filter((project) => project.completed)
+  const worksBurden = completedWorks.reduce((result, project) => {
+    const definition = MEDITERRANEAN_PROJECTS[project.id]
+    return {
+      resourceDelta: mergeChanges(result.resourceDelta, definition?.upkeepResources),
+      metricDelta: mergeChanges(result.metricDelta, definition?.upkeepMetrics),
+      mediterraneanChanges: mergeChanges(result.mediterraneanChanges, definition?.upkeepMediterranean),
+    }
+  }, { resourceDelta: {}, metricDelta: {}, mediterraneanChanges: {} })
   const changes = {
     fleetCapacity: m.fleetCapacity > 0 ? -1 : 0,
     maritimeLosses: state.turn === 30 ? 3 : state.turn === 31 ? 4 : state.turn === 32 ? 2 : 1,
@@ -1065,6 +1121,7 @@ export function mediterraneanForecast(state) {
     overseasCommandDuration: 1,
     emergencyReserve: 0,
     veteranSettlementPressure: state.turn >= 33 ? 1 : 0,
+    ...worksBurden.mediterraneanChanges,
   }
   const pressureNotes = []
   if (state.turn === 33) {
@@ -1094,19 +1151,27 @@ export function mediterraneanForecast(state) {
     changes.veteranSettlementPressure += 5
     pressureNotes.push('Demobilization converts military endurance into land, pay, and household claims that victory cannot cancel.')
   }
-  const projected = Object.fromEntries(Object.entries(m).map(([key, value]) => [key, clamp(value + changes[key])]))
+  const projected = { ...Object.fromEntries(Object.entries(m).filter(([key]) => key !== 'projects').map(([key, value]) => [key, clamp(value + (changes[key] ?? 0))])), projects: structuredClone(works) }
   return {
     ...projected,
     changes,
     projected,
-    resourceDelta: { treasury: state.turn >= 33 ? -2 : m.fleetCapacity >= 20 ? -2 : -1, grain: m.importedGrainShare >= 10 ? 1 : 0 },
+    resourceDelta: mergeChanges({ treasury: state.turn >= 33 ? -2 : m.fleetCapacity >= 20 ? -2 : -1, grain: m.importedGrainShare >= 10 ? 1 : 0 }, worksBurden.resourceDelta),
     metricDelta: {
       readiness: (m.fleetCapacity >= 18 ? 1 : m.fleetCapacity < 8 ? -1 : 0) + (state.turn === 33 && state.flags?.hannibalPosture === 'decision' ? -4 : 0),
       trade: m.importedGrainShare >= 10 ? 1 : 0,
       order: (m.contractorExposure >= 45 || m.alliedExhaustion >= 55 ? -2 : 0) + (state.turn === 33 && state.flags?.hannibalPosture === 'decision' ? -3 : 0),
+      ...worksBurden.metricDelta,
+    },
+    publicWorks: {
+      completed: completedWorks.map((project) => project.id),
+      resourceDelta: worksBurden.resourceDelta,
+      metricDelta: worksBurden.metricDelta,
+      mediterraneanChanges: worksBurden.mediterraneanChanges,
     },
     notes: [
       m.fleetCapacity < 10 ? 'Maritime capacity remains dependent on borrowed hulls and crews.' : 'The opening fleet is usable but institutionally young.',
+      completedWorks.length ? `Republican public works upkeep: ${completedWorks.map((project) => MEDITERRANEAN_PROJECTS[project.id]?.name).join(', ')} require recurring crews, guards, records, fire watch, flood response, or service.` : 'No Republican public work is yet complete; the city has not converted a bounded project into a permanent free bonus.',
       m.contractorExposure >= 40 ? 'Contracting now limits senatorial control over replacement and accounts.' : 'Maritime contracts remain bounded enough for public inspection.',
       ...pressureNotes,
     ],
@@ -1428,6 +1493,10 @@ export function advanceTurn(state) {
   if (forecast.mediterranean) report.notes.push(...forecast.mediterranean.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
   const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, reports: [...state.reports, report] }
+  if (forecast.mediterranean?.publicWorks) {
+    shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
+    report.publicWorks = forecast.mediterranean.publicWorks
+  }
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
   if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
   if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }

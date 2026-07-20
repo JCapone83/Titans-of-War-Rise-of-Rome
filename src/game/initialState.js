@@ -107,6 +107,13 @@ const migratedWorksCapacity = (population, allocation, bonus = 0, republic = nul
   return Math.min(2, base)
 }
 
+export const createMediterraneanProjects = () => ({
+  appianApproach: { id: 'appianApproach', progress: 0, requiredSeasons: 2, completed: false, lastWorkedTurn: null },
+  tiberEmporium: { id: 'tiberEmporium', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+  republicanHorrea: { id: 'republicanHorrea', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+  republicanCircus: { id: 'republicanCircus', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+})
+
 export const createMediterraneanState = () => ({
   fleetCapacity: 0,
   maritimeLosses: 0,
@@ -118,6 +125,7 @@ export const createMediterraneanState = () => ({
   overseasCommandDuration: 0,
   emergencyReserve: 50,
   veteranSettlementPressure: 0,
+  projects: createMediterraneanProjects(),
 })
 
 export const createInitialState = () => ({
@@ -192,7 +200,7 @@ export function migrateState(saved) {
       reconstruction: saved.reconstruction ?? (saved.era >= 3 ? createReconstructionState() : null),
       regional: saved.regional ?? (saved.era >= 4 ? createRegionalState(saved.flags?.latinSettlement) : null),
       italian: saved.italian ?? (saved.era >= 5 ? createItalianState(saved.regional, saved.flags?.caudineResponse) : null),
-      mediterranean: saved.era >= 6 ? { ...createMediterraneanState(), ...(saved.mediterranean ?? {}) } : null,
+      mediterranean: saved.era >= 6 ? { ...createMediterraneanState(), ...(saved.mediterranean ?? {}), projects: { ...createMediterraneanProjects(), ...(saved.mediterranean?.projects ?? {}) } } : null,
       mediterraneanTransition: saved.mediterraneanTransition ?? false,
       hannibalicTransition: completedMediterraneanOpening ? true : saved.hannibalicTransition ?? false,
       coreJudgment: saved.coreJudgment ?? null,

@@ -68,5 +68,6 @@ for (const result of mediterranean) {
   const m = result.state.mediterranean
   console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Mediterranean Republic ${grade.grade} (${grade.score}) | 201 BC`)
   console.log(`  Fleet ${m.fleetCapacity} | Reserve ${m.emergencyReserve} | Trust ${m.provincialTrust} | Allied exhaustion ${m.alliedExhaustion} | Veteran pressure ${m.veteranSettlementPressure}`)
+  console.log(`  Republican public works: ${Object.values(m.projects ?? {}).filter((project) => project.completed).map((project) => project.id).join(', ') || 'none'} | recurring burdens visible in mediterraneanForecast`)
 }
 if (mediterranean.some((result) => result.state.turn !== 36 || result.state.outcome !== 'mediterranean-complete' || result.outcome.overall < 60 || result.skipped.length)) process.exitCode = 1

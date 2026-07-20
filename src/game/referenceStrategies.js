@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
 import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from './continuation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject } from './simulation.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -409,9 +409,9 @@ export function runAllActFiveStrategies() {
 }
 
 export const MEDITERRANEAN_STRATEGIES = [
-  { id: 'distributed-endurance', name: 'Distributed Endurance', councils: { 30: 'allied-hulls', 31: 'pilotage-exchange', 32: 'war-credit', 33: 'shadow-and-contain', 34: 'protect-allied-cities', 35: 'differentiated-settlement', 36: 'restore-public-credit' } },
-  { id: 'state-mobilization', name: 'State Mobilization', councils: { 30: 'roman-keels', 31: 'drill-boarding', 32: 'local-compact', 33: 'seek-decision', 34: 'rebuild-the-legions', 35: 'exemplary-punishment', 36: 'veteran-land-settlement' } },
-  { id: 'bounded-command', name: 'Bounded Command', councils: { 30: 'limited-convoy', 31: 'safe-harbors', 32: 'short-command', 33: 'defend-the-compacts', 34: 'ransom-and-reconstitute', 35: 'shared-recovery', 36: 'victory-and-provision' } },
+  { id: 'distributed-endurance', name: 'Distributed Endurance', projectPriorities: { 30: 'tiberEmporium', 31: 'tiberEmporium', 32: 'tiberEmporium', 33: 'republicanHorrea', 34: 'republicanHorrea', 35: 'republicanHorrea' }, councils: { 30: 'allied-hulls', 31: 'pilotage-exchange', 32: 'war-credit', 33: 'shadow-and-contain', 34: 'protect-allied-cities', 35: 'differentiated-settlement', 36: 'restore-public-credit' } },
+  { id: 'state-mobilization', name: 'State Mobilization', projectPriorities: { 30: 'appianApproach', 31: 'appianApproach', 32: 'tiberEmporium', 33: 'tiberEmporium', 34: 'tiberEmporium' }, councils: { 30: 'roman-keels', 31: 'drill-boarding', 32: 'local-compact', 33: 'seek-decision', 34: 'rebuild-the-legions', 35: 'exemplary-punishment', 36: 'veteran-land-settlement' } },
+  { id: 'bounded-command', name: 'Bounded Command', projectPriorities: { 30: 'republicanCircus', 31: 'republicanCircus', 32: 'republicanCircus', 33: 'appianApproach', 34: 'appianApproach', 35: 'tiberEmporium' }, councils: { 30: 'limited-convoy', 31: 'safe-harbors', 32: 'short-command', 33: 'defend-the-compacts', 34: 'ransom-and-reconstitute', 35: 'shared-recovery', 36: 'victory-and-provision' } },
 ]
 
 export function runAllMediterraneanStrategies() {
@@ -423,7 +423,13 @@ export function runAllMediterraneanStrategies() {
     while (state.outcome !== 'mediterranean-complete') {
       if (state.hannibalicTransition) state = enterHannibalicEmergency(state)
       if (state.council && !state.councilResolved) state = resolveCouncil(state, strategy.councils[state.turn])
-      ledger.push({ turn: state.turn, mediterranean: { ...state.mediterranean }, bridges: structuredClone(state.chronologyBridges ?? []) })
+      const portfolioProject = strategy.projectPriorities?.[state.turn]
+      if (portfolioProject && actionRemaining(state)) {
+        const work = workMediterraneanProject(state, portfolioProject)
+        if (work.error) skipped.push({ turn: state.turn, projectId: portfolioProject, reason: work.error })
+        else state = work.state
+      }
+      ledger.push({ turn: state.turn, mediterranean: { ...state.mediterranean }, projects: structuredClone(state.mediterranean.projects ?? {}), bridges: structuredClone(state.chronologyBridges ?? []) })
       const result = advanceTurn(state)
       if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
       state = result.state
