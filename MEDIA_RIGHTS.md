@@ -49,4 +49,16 @@ The following four transparent PNG assets were produced with the built-in OpenAI
 
 The evidence-status labels describe the design treatment used for the game presentation and do not establish provenance or certainty for the generated imagery. The files are retained under the project repository and use the same project license and provenance conditions as the building art above.
 
+## Late-Republic and Augustan landmark art
+
+The following five transparent PNG assets were produced with the built-in OpenAI image-generation tool under project-authored direction on July 19, 2026. They are historically informed game reconstructions, not archaeological evidence:
+
+- `public/images/projects/theatre-of-pompey-v1.png` — Text-and-evidence synthesis
+- `public/images/projects/forum-of-augustus-v1.png` — Evidence-led reconstruction
+- `public/images/projects/mausoleum-of-augustus-v1.png` — Text-and-evidence synthesis with an explicitly hypothetical planted upper profile
+- `public/images/projects/theatre-of-marcellus-v1.png` — Evidence-led reconstruction
+- `public/images/projects/agrippan-pantheon-v1.png` — Uncertainty-labeled reconstruction hypothesis
+
+The Agrippan Pantheon asset deliberately excludes the standing Hadrianic rotunda, dome, and oculus. The Mausoleum cutaway is a game presentation device for its concentric burial structure and is not a claim that the monument stood open. These assets remain preproduction landmarks until their corresponding playable projects or historical-context surfaces pass separate implementation and historical-review gates.
+
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

@@ -23,4 +23,4 @@ The four assets were produced with the built-in OpenAI image-generation tool und
 
 ## Verification expectations
 
-`project_check.py` verifies the complete mapping, exact approved filenames, alpha-capable PNG headers, and construction-stage markers. Deterministic Node tests verify stage boundaries for three- and four-stage projects, mapping completeness, and the unchanged civil-settlement work behavior. The four approved PNG files must remain byte-for-byte unchanged.diff --git a/tests/game.test.mjs b/tests/game.test.mjs
+`project_check.py` verifies the complete mapping, exact approved filenames, alpha-capable PNG headers, and construction-stage markers. Deterministic Node tests verify stage boundaries for three- and four-stage projects, mapping completeness, and the unchanged civil-settlement work behavior. The four approved PNG files must remain byte-for-byte unchanged.
