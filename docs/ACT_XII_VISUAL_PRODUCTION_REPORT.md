@@ -40,13 +40,13 @@ The standing Hadrianic Pantheon is outside the campaign's chronology and is abse
 
 **Evidence status:** Evidence-led bath precinct and hydraulic synthesis.
 
-**Visual concept:** The baths read as a large symmetrical public establishment laid across the earlier Domus Aurea zone. Central bathing halls, palaestra courts, gardens, circulation ranges, furnace and fuel service, storage, drains, and staff access make dedication only the start of an operating burden. A separate but connected multi-chamber Sette Sale cistern block makes the water support visible instead of hiding it behind the facade.
+**Visual concept:** The baths read as a large symmetrical public establishment laid across the earlier Domus Aurea zone. The lower-left palaestra is a broad, dry exercise court where small figures practice wrestling, running, discus, halteres, and ball exercise under the surrounding colonnade. An open-air natatio and the central cold, warm, and hot bathing rooms keep water unmistakable without turning every court into a pool. Gardens, circulation ranges, furnace and fuel service, storage, drains, and staff access make dedication only the start of an operating burden. A separate but connected multi-chamber Sette Sale cistern block makes the water support visible instead of hiding it behind the facade.
 
-**Materials and game read:** Brick-faced concrete and tiled roofs carry the working mass; selective marble and pools mark public rooms. The detached cistern silhouette and repeated chambers remain legible at card scale.
+**Materials and game read:** Brick-faced concrete and tiled roofs carry the working mass; selective marble and blue water mark the public bathing rooms. The dry sand-colored palaestra, open-air natatio, central water sequence, and detached repeated-chamber cistern remain distinct at card scale.
 
-**Reconstruction limit:** The relationship of surviving fabric, service routes, water connections, and individual phases is partly reconstructed. The asset shows the system required to operate the baths without asserting that every connection is archaeologically fixed.
+**Reconstruction limit:** The broad bath plan, Domus Aurea relationship, bathing and exercise functions, and permanent service burden are secure at the system level. The placement of individual activities, service routes, water connections, and building phases is partly reconstructed; the image does not assert that every connection or room use is archaeologically fixed.
 
-**Reject if revised:** Reject a single domed spa, a Christian basilica, a late-antique ruin, exposed modern plumbing, a palace without service yards, or an image where the Sette Sale support cannot be recognized.
+**Reject if revised:** Reject a single domed spa, a Christian basilica, a late-antique ruin, exposed modern plumbing, a palace without service yards, modern exercise clothing, any modern machines, or any presentation that fails to state no modern gym equipment; reject an exercise court that reads as another garden, or an image where the Sette Sale support cannot be recognized.
 
 ## Aqua Traiana
 

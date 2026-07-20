@@ -1717,6 +1717,21 @@ test('Act XII historical knowledge covers every Trajanic turn', () => {
   assert.equal(ids.size, 6)
 })
 
+test('Act XII bath context explains the palaestra and bathing sequence', () => {
+  const notes = notesForTurn(74)
+  assert.equal(notes.length, 1)
+  const [note] = notes
+  assert.equal(note.id, 'baths-trajan')
+  assert.equal(note.title, 'Baths Joined Exercise, Bathing, and Civic Life')
+  assert.ok(note.text.includes('palaestra (exercise court)'))
+  assert.match(note.text, /natatio/i)
+  assert.match(note.text, /frigidarium[\s\S]+tepidarium[\s\S]+caldarium/i)
+  assert.match(note.text, /conversation and business/i)
+  assert.match(note.text, /status, sex, hour, and period/i)
+  assert.ok(note.evidence.length >= 100)
+  assert.doesNotMatch(`${note.title} ${note.text}`, /systemic racism|equity|marginalized|whiteness/i)
+})
+
 test('Act XII chronicle records the Trajanic settlement and consulted knowledge', () => {
   const result = runAllTrajanicCapitalStrategies()[0]
   const withoutResearch = campaignMarkdown({ ...result.state, consultedNotes: [] })

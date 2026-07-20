@@ -467,7 +467,7 @@ export const TRAJANIC_CAPITAL_PROJECTS = {
   bathsTrajan: {
     id: 'bathsTrajan', name: 'Baths of Trajan and Sette Sale Support', seasons: 4, unlockTurn: 74,
     cost: { stone: 6, timber: 3, treasury: 6, bronze: 2 }, evidence: 'Evidence-led conversion of Domus Aurea ground; service connections and phases remain partly uncertain',
-    summary: 'Convert and bury portions of the Domus Aurea beneath a public bathing establishment, carrying water, cisterns, fuel, staff, and the Sette Sale support into an operating burden rather than treating dedication as completion.',
+    summary: 'Convert and bury portions of the Domus Aurea beneath a public establishment joining a bathing sequence, the palaestra (exercise court), and an open-air pool with exercise, bathing, conversation, and business. Water, cisterns, fuel, staff, and Sette Sale support remain an operating burden rather than a dedication alone.',
     completionMetrics: { water: 7, sanitation: 9, order: 4 }, completionTrajanic: { publicProvision: 14, capitalSupply: 4, maintenanceCapacity: -2, constitutionalContinuity: 2 },
     upkeepResources: { treasury: -2, grain: -1 }, upkeepTrajanic: { maintenanceCapacity: -2, maintenanceDebt: 2 }, burdenLabel: 'Water lifting, cisterns, fuel, attendants, cleaning, storage, heating, and repairs make the baths a lasting charge.', prerequisite: 'domus-aurea-ground'
   },

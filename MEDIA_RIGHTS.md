@@ -91,6 +91,8 @@ The completed Act XII project-art set contains six transparent PNG assets produc
 - `public/images/projects/trajanic-portus-v1.png` — Evidence-led dual-harbor and supply-system synthesis
 - `public/images/projects/trajanic-circus-v1.png` — Evidence-led valley and circulation synthesis
 
+The Baths of Trajan asset was refined on July 20, 2026 to make its palaestra and water program legible at game scale. The refinement used only the original project asset and project-authored direction; no third-party source image or source pixel was introduced.
+
 The prior Act XI Aqua Claudia, Claudian Portus, and Flavian Amphitheatre assets were used only as original-project style and continuity references. The original Titans of Constantinople AD 532 map was consulted only for the long Hippodrome track's compositional geometry when directing the Circus Maximus asset; no Byzantine building, wall, church, palace, or source pixel was copied into the Roman reconstruction. Each Act XII render was produced anew, converted to transparent RGBA, and visually reviewed against the project's AD 117 boundary. Detailed reconstruction limits and rejection criteria are recorded in `docs/ACT_XII_VISUAL_PRODUCTION_REPORT.md`.
 
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.

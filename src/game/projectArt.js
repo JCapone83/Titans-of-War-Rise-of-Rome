@@ -77,8 +77,8 @@ export const TRAJANIC_PROJECT_ART = {
   },
   bathsTrajan: {
     src: '/images/projects/baths-trajan-v1.png',
-    alt: 'Isometric reconstruction of the Baths of Trajan with bathing halls, palaestra courts, gardens, service rooms, and Sette Sale cistern support.',
-    evidence: 'Evidence-led bath precinct and hydraulic synthesis',
+    alt: 'Isometric reconstruction of the Baths of Trajan with an open-air natatio, central bathing rooms, a palaestra exercise court, service areas, and Sette Sale cistern support.',
+    evidence: 'Evidence-led bath, palaestra, and hydraulic precinct synthesis',
   },
   aquaTraiana: {
     src: '/images/projects/aqua-traiana-v1.png',

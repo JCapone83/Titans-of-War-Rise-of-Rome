@@ -335,8 +335,8 @@ export const HISTORICAL_NOTES = [
     evidence: 'Column base inscription, CIL VI 960; surviving architecture and archaeological stratigraphy of the Forum of Trajan, Basilica Ulpia, libraries, and Column; Cassius Dio 68.16; later topographical notices. Internal uses and exact construction sequence remain debated.',
   },
   {
-    id: 'baths-trajan', title: 'The Baths Converted Palace Ground Into Public Service', category: 'Archaeology + brick stamps + later topography', turns: [74],
-    text: 'The Baths of Trajan rose over and around portions of Nero\'s Domus Aurea, converting an imperial precinct while also using its buried fabric. A bath complex was not only a grand facade: cisterns, water routes, furnaces, fuel, attendants, cleaning, storage, drainage, crowd movement, and repair made it a permanent establishment. The Sette Sale belongs to that service problem even where individual connections and phases remain uncertain.',
+    id: 'baths-trajan', title: 'Baths Joined Exercise, Bathing, and Civic Life', category: 'Archaeology + brick stamps + later topography', turns: [74],
+    text: 'The Baths of Trajan rose over and around portions of Nero\'s Domus Aurea, converting an imperial precinct while also using its buried fabric. A visit could join exercise in the palaestra (exercise court), an open-air natatio, and movement through the frigidarium, tepidarium, and caldarium; conversation and business accompanied bathing. Access and routines varied by establishment, status, sex, hour, and period. The complex was not only a grand facade: cisterns, water routes, furnaces, fuel, attendants, cleaning, storage, drainage, crowd movement, and repair made it a permanent establishment. The Sette Sale belongs to that service problem even where individual connections and phases remain uncertain.',
     evidence: 'Surviving fabric, plan, brick stamps, substructures of the Domus Aurea, and the Sette Sale cistern complex; Cassius Dio 69.4 for later Trajanic building memory; later topographical evidence. Apollodorus attributions and detailed service phasing require caution.',
   },
   {
