@@ -1056,28 +1056,59 @@ export function mediterraneanForecast(state) {
   const m = { ...createMediterraneanState(), ...state.mediterranean }
   const changes = {
     fleetCapacity: m.fleetCapacity > 0 ? -1 : 0,
-    maritimeLosses: state.turn === 30 ? 3 : state.turn === 31 ? 4 : 2,
+    maritimeLosses: state.turn === 30 ? 3 : state.turn === 31 ? 4 : state.turn === 32 ? 2 : 1,
     warCredit: m.fleetCapacity >= 20 ? -3 : -1,
     contractorExposure: m.fleetCapacity >= 20 ? 2 : 0,
     provincialTrust: m.contractorExposure >= 40 ? -2 : 0,
     importedGrainShare: 0,
     alliedExhaustion: m.fleetCapacity >= 20 ? 3 : 1,
     overseasCommandDuration: 1,
+    emergencyReserve: 0,
+    veteranSettlementPressure: state.turn >= 33 ? 1 : 0,
+  }
+  const pressureNotes = []
+  if (state.turn === 33) {
+    const pressure = state.flags?.hannibalPosture === 'decision'
+      ? { emergencyReserve: -14, alliedExhaustion: 10, veteranSettlementPressure: 6, order: -3, readiness: -4, note: 'The early decision exposes the largest share of trained reserves and allied contingents to one campaign.' }
+      : state.flags?.hannibalPosture === 'compacts'
+        ? { emergencyReserve: -3, alliedExhaustion: 2, veteranSettlementPressure: 2, order: 1, readiness: 0, note: 'Distributed strongpoints absorb the opening shock while slowing concentration.' }
+        : { emergencyReserve: -6, alliedExhaustion: 4, veteranSettlementPressure: 3, order: -1, readiness: -1, note: 'Containment preserves more of the field system but concedes movement and immediate prestige.' }
+    changes.emergencyReserve += pressure.emergencyReserve
+    changes.alliedExhaustion += pressure.alliedExhaustion
+    changes.veteranSettlementPressure += pressure.veteranSettlementPressure
+    pressureNotes.push(pressure.note)
+  }
+  if (state.turn === 34) {
+    const inherited = state.flags?.hannibalPosture === 'decision'
+      ? { emergencyReserve: -12, alliedExhaustion: 8, veteranSettlementPressure: 8, note: 'The earlier concentration makes the post-Cannae replacement burden exceptionally severe.' }
+      : state.flags?.hannibalPosture === 'compacts'
+        ? { emergencyReserve: -5, alliedExhaustion: 3, veteranSettlementPressure: 4, note: 'The defended compact loses men but retains more local depth after Cannae.' }
+        : { emergencyReserve: -8, alliedExhaustion: 5, veteranSettlementPressure: 5, note: 'The contained campaign still demands replacement armies after Cannae, though fewer reserves were exposed at once.' }
+    changes.emergencyReserve += inherited.emergencyReserve
+    changes.alliedExhaustion += inherited.alliedExhaustion
+    changes.veteranSettlementPressure += inherited.veteranSettlementPressure
+    pressureNotes.push(inherited.note)
+  }
+  if (state.turn === 35) pressureNotes.push('Holding recovered communities now depends on whether punishment, records, and repair distinguish different conduct.')
+  if (state.turn === 36) {
+    changes.veteranSettlementPressure += 5
+    pressureNotes.push('Demobilization converts military endurance into land, pay, and household claims that victory cannot cancel.')
   }
   const projected = Object.fromEntries(Object.entries(m).map(([key, value]) => [key, clamp(value + changes[key])]))
   return {
     ...projected,
     changes,
     projected,
-    resourceDelta: { treasury: m.fleetCapacity >= 20 ? -2 : -1, grain: m.importedGrainShare >= 10 ? 1 : 0 },
+    resourceDelta: { treasury: state.turn >= 33 ? -2 : m.fleetCapacity >= 20 ? -2 : -1, grain: m.importedGrainShare >= 10 ? 1 : 0 },
     metricDelta: {
-      readiness: m.fleetCapacity >= 18 ? 1 : m.fleetCapacity < 8 ? -1 : 0,
+      readiness: (m.fleetCapacity >= 18 ? 1 : m.fleetCapacity < 8 ? -1 : 0) + (state.turn === 33 && state.flags?.hannibalPosture === 'decision' ? -4 : 0),
       trade: m.importedGrainShare >= 10 ? 1 : 0,
-      order: m.contractorExposure >= 45 || m.alliedExhaustion >= 55 ? -2 : 0,
+      order: (m.contractorExposure >= 45 || m.alliedExhaustion >= 55 ? -2 : 0) + (state.turn === 33 && state.flags?.hannibalPosture === 'decision' ? -3 : 0),
     },
     notes: [
       m.fleetCapacity < 10 ? 'Maritime capacity remains dependent on borrowed hulls and crews.' : 'The opening fleet is usable but institutionally young.',
       m.contractorExposure >= 40 ? 'Contracting now limits senatorial control over replacement and accounts.' : 'Maritime contracts remain bounded enough for public inspection.',
+      ...pressureNotes,
     ],
   }
 }
@@ -1393,10 +1424,13 @@ export function advanceTurn(state) {
   if (forecast.regional) report.notes.push(...forecast.regional.notes)
   report.italianChanges = forecast.italian?.changes ?? null
   if (forecast.italian) report.notes.push(...forecast.italian.notes)
+  report.mediterraneanChanges = forecast.mediterranean?.changes ?? null
+  if (forecast.mediterranean) report.notes.push(...forecast.mediterranean.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
   const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, reports: [...state.reports, report] }
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
-  if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
+  if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
+  if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }
   if (state.turn === 16) return {

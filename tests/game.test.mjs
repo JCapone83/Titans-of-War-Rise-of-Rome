@@ -2,11 +2,12 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createInitialState, createItalianState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
 import { BUILDING_FAMILIES, TURN_YEARS, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
+import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject } from '../src/game/simulation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
-import { continueToMediterranean, enterMediterranean } from '../src/game/continuation.js'
+import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from '../src/game/continuation.js'
+import { HISTORICAL_NOTES } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -345,7 +346,7 @@ test('version three saves remove legacy labor and gain workforce and projects', 
   delete old.workforceAllocation
   delete old.projects
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 9)
+  assert.equal(migrated.version, 10)
   assert.equal('labor' in migrated.resources, false)
   assert.equal(Object.values(migrated.workforceAllocation).reduce((sum, value) => sum + value, 0), 100)
   assert.deepEqual(migrated.projects, [])
@@ -357,7 +358,7 @@ test('version one saves migrate to the current population state', () => {
   delete old.actionsMax
   delete old.actionLog
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 9)
+  assert.equal(migrated.version, 10)
   assert.equal(migrated.actionsMax, 2)
   assert.deepEqual(migrated.actionLog, [])
   assert.equal(migrated.population.total, 1030)
@@ -367,7 +368,7 @@ test('version two saves retain mechanics while gaining population', () => {
   const old = { ...createInitialState(), version: 2, actionsUsed: 1, actionLog: [{ type: 'build' }] }
   delete old.population
   const migrated = migrateState(old)
-  assert.equal(migrated.version, 9)
+  assert.equal(migrated.version, 10)
   assert.equal(migrated.actionsUsed, 1)
   assert.equal(migrated.actionLog.length, 1)
   assert.equal(migrated.population.districts.palatine, 450)
@@ -558,7 +559,7 @@ test('three Act III reference strategies complete cleanly at C or better', () =>
 
 test('a completed version four campaign migrates to a resumable republic transition', () => {
   const migrated = migrateState({ ...createInitialState(), version: 4, turn: 10, era: 1, outcome: 'complete' })
-  assert.equal(migrated.version, 9)
+  assert.equal(migrated.version, 10)
   assert.equal(migrated.outcome, 'acts-complete')
   assert.equal(migrated.republicTransition, true)
   assert.equal(enterEarlyRepublic(migrated).turn, 11)
@@ -607,7 +608,7 @@ test('Tier IV works remain locked until reconstruction', () => {
 test('a version five save completed at turn sixteen opens reconstruction', () => {
   const saved = { ...createInitialState(), version: 5, era: 2, turn: 16, republic: createRepublicState(), war: createWarState(), outcome: 'complete' }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 9)
+  assert.equal(migrated.version, 10)
   assert.equal(migrated.outcome, 'act-three-complete')
   assert.equal(migrated.reconstructionTransition, true)
 })
@@ -714,7 +715,7 @@ test('version seven regional completion migrates to the Italian transition', () 
     italianTransition: undefined,
   }
   const migrated = migrateState(saved)
-  assert.equal(migrated.version, 9)
+  assert.equal(migrated.version, 10)
   assert.equal(migrated.outcome, 'regional-complete')
   assert.equal(migrated.italianTransition, true)
   assert.equal(migrated.turn, 23)
@@ -893,19 +894,85 @@ test('frozen core judgment is immutable', () => {
   assert.equal(continued.coreJudgment.choiceLogLength, endpoint.choiceLog.length)
 })
 
-test('three-turn Mediterranean completion and chronicle separation', () => {
+function mediterraneanOpeningEndpoint() {
+  let state = enterMediterranean(continueToMediterranean(runAllActFiveStrategies()[0].state))
+  for (const [turn, optionId] of [[30, 'allied-hulls'], [31, 'pilotage-exchange'], [32, 'local-compact']]) {
+    assert.equal(state.turn, turn)
+    state = resolveCouncil(state, optionId)
+    state = advanceTurn(state).state
+  }
+  return state
+}
+
+test('turn thirty-two opens a visible bridge without exposing the final outcome', () => {
+  const state = mediterraneanOpeningEndpoint()
+  assert.equal(state.turn, 32)
+  assert.equal(state.outcome, 'mediterranean-opening-complete')
+  assert.equal(state.hannibalicTransition, true)
+  assert.ok(calculateOutcome(state).grades['Mediterranean Opening'])
+})
+
+test('version nine Mediterranean endpoint migrates to the Hannibalic bridge', () => {
+  const old = { ...mediterraneanOpeningEndpoint(), version: 9, outcome: 'mediterranean-complete', hannibalicTransition: undefined }
+  const migrated = migrateState(old)
+  assert.equal(migrated.version, 10)
+  assert.equal(migrated.turn, 32)
+  assert.equal(migrated.outcome, 'mediterranean-opening-complete')
+  assert.equal(migrated.hannibalicTransition, true)
+  assert.equal(migrated.chronologyBridges.length, 0)
+})
+
+test('interwar bridge is idempotent and preserves the frozen core judgment', () => {
+  const endpoint = mediterraneanOpeningEndpoint()
+  const frozen = structuredClone(endpoint.coreJudgment)
+  const bridged = enterHannibalicEmergency(endpoint)
+  assert.equal(bridged.turn, 33)
+  assert.equal(bridged.chronologyBridges.length, 1)
+  assert.deepEqual(bridged.coreJudgment, frozen)
+  assert.strictEqual(enterHannibalicEmergency(bridged), bridged)
+  assert.deepEqual(bridged.choiceLog.slice(0, endpoint.choiceLog.length), endpoint.choiceLog)
+})
+
+test('an early decisive battle exposes more reserve and allies than containment', () => {
+  const base = enterHannibalicEmergency(mediterraneanOpeningEndpoint())
+  const decision = mediterraneanForecast({ ...base, flags: { ...base.flags, hannibalPosture: 'decision' } })
+  const contain = mediterraneanForecast({ ...base, flags: { ...base.flags, hannibalPosture: 'contain' } })
+  const compacts = mediterraneanForecast({ ...base, flags: { ...base.flags, hannibalPosture: 'compacts' } })
+  assert.ok(decision.changes.emergencyReserve < contain.changes.emergencyReserve)
+  assert.ok(contain.changes.emergencyReserve < compacts.changes.emergencyReserve)
+  assert.ok(decision.changes.alliedExhaustion > contain.changes.alliedExhaustion)
+})
+
+test('all Hannibalic councils expose three bounded courses', () => {
+  const expected = new Map([[33, 'hannibal-enters-italy'], [34, 'after-cannae'], [35, 'allied-endurance'], [36, 'victory-and-return']])
+  for (const [turn, id] of expected) {
+    assert.equal(getCouncil(turn).id, id)
+    assert.equal(getCouncil(turn).options.length, 3)
+  }
+})
+
+test('Act VI completes at 201 BC with a separated chronicle', () => {
   const result = runAllMediterraneanStrategies()[0]
-  assert.equal(result.state.turn, 32)
+  assert.equal(result.state.turn, 36)
+  assert.equal(result.state.outcome, 'mediterranean-complete')
   assert.match(result.outcome.title, /Mediterranean/i)
-  assert.ok(result.outcome.grades['Mediterranean Opening'])
+  assert.ok(result.outcome.grades['Mediterranean Republic'])
   const chronicle = campaignMarkdown(result.state)
   assert.match(chronicle, /Frozen 264 BC Core Judgment/)
-  assert.match(chronicle, /Mediterranean Opening/)
+  assert.match(chronicle, /Interwar Bridge: 241-218 BC/)
+  assert.match(chronicle, /## Mediterranean Republic/)
+})
+
+test('historical context covers every Mediterranean turn', () => {
+  for (const turn of [30, 31, 32, 33, 34, 35, 36]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)))
 })
 
 test('three continuation strategies finish without skips and expose distinct ledgers', () => {
   const results = runAllMediterraneanStrategies()
   assert.equal(results.length, 3)
-  assert.ok(results.every((result) => result.state.turn === 32 && result.skipped.length === 0))
+  assert.ok(results.every((result) => result.state.turn === 36 && result.state.outcome === 'mediterranean-complete' && result.skipped.length === 0))
+  assert.ok(results.every((result) => result.outcome.overall >= 60))
+  assert.ok(results.every((result) => result.state.choiceLog.filter((entry) => entry.turn >= 30).length === 7))
   assert.equal(new Set(results.map((result) => JSON.stringify(result.ledger))).size, 3)
+  assert.equal(new Set(results.map((result) => JSON.stringify(result.state.choiceLog.filter((entry) => entry.turn >= 33).map((entry) => entry.optionId)))).size, 3)
 })

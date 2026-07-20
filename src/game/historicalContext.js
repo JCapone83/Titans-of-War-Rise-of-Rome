@@ -129,6 +129,31 @@ export const HISTORICAL_NOTES = [
     text: 'The opening of the First Punic War marks a change in scale. Rome had become the leading power in Italy, but an Italian alliance-and-road system did not automatically provide fleets, overseas commands, or provincial institutions. Ending here lets the player judge the system before a different Mediterranean game begins.',
     evidence: 'Polybius 1.5-12; Diodorus Siculus fragments for the opening crisis. The causes and immediate decisions remain disputed, but 264 BC is a defensible institutional boundary.',
   },
+  {
+    id: 'first-punic-institutions', title: 'Fleet, Credit, and the First Overseas Settlement', category: 'Primary narrative + institutional inference', turns: [30, 31, 32],
+    text: 'The First Punic War forced Rome to sustain fleets, credit, allied crews, and commands beyond Italy. Polybius explains the war through maritime learning and repeated loss, but his set-piece account of a captured Punic model should not be mistaken for the whole institutional history of Roman shipbuilding.',
+    evidence: 'Polybius 1.20-63 is the main surviving continuous account. Inscriptions and later provincial evidence clarify institutions only imperfectly; exact fleet totals and dramatic episodes remain debated.',
+  },
+  {
+    id: 'hannibalic-invasion', title: 'Hannibal and the Italian System', category: 'Primary narrative + strategic structure', turns: [33],
+    text: 'Hannibal sought more than battlefield victories. His invasion tested whether Roman and allied armies could be separated from the differentiated compacts, colonies, roads, and local interests that sustained them. Those relationships did not respond uniformly.',
+    evidence: 'Polybius 3.33-118; Livy books 21-22. Routes, numbers, speeches, and motives in both narratives require comparison, while the invasion and its pressure on Roman alliances are secure.',
+  },
+  {
+    id: 'cannae-recovery', title: 'Cannae and Replacement Capacity', category: 'Primary narrative + strategic inference', turns: [34],
+    text: 'Cannae destroyed a major Roman field force but did not compel immediate settlement. Refusing negotiations, recruiting new armies, guarding the city, and retaining enough allied cooperation mattered more to survival than pretending the defeat was inexpensive.',
+    evidence: 'Polybius 3.107-118; Livy 22.43-61 and 23. The broad defeat and Roman continuation are firm; casualty totals, speeches, and some later exemplary stories are not exact transcripts.',
+  },
+  {
+    id: 'capua-and-allies', title: 'Capua, Loyalty, and Differentiated Settlement', category: 'Narrative history + institutional complexity', turns: [35],
+    text: 'Capua became the most prominent Italian community to join Hannibal and later received a severe settlement. Other communities remained loyal, defected under different conditions, or returned on different terms. The game therefore separates punishment, compact, and reconstruction.',
+    evidence: 'Livy books 23-26; Polybius fragments and strategic narrative. Livy supplies much of the detail and writes with Roman moral and political purposes, so legal sequences and speeches require caution.',
+  },
+  {
+    id: 'peace-201', title: 'Victory Did Not Cancel Obligations', category: 'Primary narrative + structural inference', turns: [36],
+    text: 'The peace of 201 BC confirmed Roman predominance in the western Mediterranean, but soldiers, allied communities, creditors, contractors, and damaged households still carried claims. Indemnity and victory enlarged future choices without settling how Rome should use them.',
+    evidence: 'Polybius 15.18-19; Livy 30.37-45. The treaty framework is better secured than later stories about every negotiation or the precise distribution of returning veterans.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

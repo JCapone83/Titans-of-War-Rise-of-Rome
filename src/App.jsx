@@ -21,7 +21,7 @@ import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
 import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState, migrateState } from './game/initialState.js'
-import { continueToMediterranean, enterMediterranean } from './game/continuation.js'
+import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
 import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject } from './game/simulation.js'
 
@@ -48,7 +48,7 @@ export default function App() {
   const [surface, setSurface] = useState('city')
   const era = ERAS[state.era]
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
-  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition ? calculateOutcome(state) : null, [state])
+  const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition ? calculateOutcome(state) : null, [state])
 
   useEffect(() => {
     const handleKey = (event) => {
@@ -193,9 +193,9 @@ export default function App() {
       <WalkthroughOverlay open={walkthroughOpen} onClose={closeWalkthrough} />
       <TurnReport report={report} onClose={() => setReport(null)} />
       <EraTransition
-        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition) && !report}
-        kind={state.mediterraneanTransition ? 'mediterranean' : state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
-        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.mediterraneanTransition ? enterMediterranean(state) : state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
+        open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition || state.hannibalicTransition) && !report}
+        kind={state.hannibalicTransition ? 'hannibalic' : state.mediterraneanTransition ? 'mediterranean' : state.italianTransition ? 'italian' : state.regionalTransition ? 'regional' : state.reconstructionTransition ? 'reconstruction' : state.republicTransition ? 'republic' : 'kings'}
+        onContinue={() => { setSurface(state.italianTransition ? 'region' : 'city'); setState(state.hannibalicTransition ? enterHannibalicEmergency(state) : state.mediterraneanTransition ? enterMediterranean(state) : state.italianTransition ? enterItalianStrategy(state) : state.regionalTransition ? enterRegionalStrategy(state) : state.reconstructionTransition ? enterReconstruction(state) : state.republicTransition ? enterEarlyRepublic(state) : enterCityOfKings(state)) }}
       />
       <OutcomeOverlay outcome={report ? null : outcome} onExport={exportCampaign} onRestart={restart} onContinue={state.turn === 29 && state.outcome === 'complete' ? () => setState(continueToMediterranean(state)) : null} />
     </div>

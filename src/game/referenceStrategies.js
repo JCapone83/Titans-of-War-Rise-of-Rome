@@ -1,5 +1,5 @@
 import { createInitialState } from './initialState.js'
-import { continueToMediterranean, enterMediterranean } from './continuation.js'
+import { continueToMediterranean, enterHannibalicEmergency, enterMediterranean } from './continuation.js'
 import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
 import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject } from './simulation.js'
 
@@ -409,9 +409,9 @@ export function runAllActFiveStrategies() {
 }
 
 export const MEDITERRANEAN_STRATEGIES = [
-  { id: 'borrowed-hulls', name: 'Borrowed Hulls', councils: { 30: 'allied-hulls', 31: 'pilotage-exchange', 32: 'war-credit' } },
-  { id: 'roman-squadron', name: 'Roman Squadron', councils: { 30: 'roman-keels', 31: 'drill-boarding', 32: 'local-compact' } },
-  { id: 'bounded-convoy', name: 'Bounded Convoy', councils: { 30: 'limited-convoy', 31: 'safe-harbors', 32: 'short-command' } },
+  { id: 'distributed-endurance', name: 'Distributed Endurance', councils: { 30: 'allied-hulls', 31: 'pilotage-exchange', 32: 'war-credit', 33: 'shadow-and-contain', 34: 'protect-allied-cities', 35: 'differentiated-settlement', 36: 'restore-public-credit' } },
+  { id: 'state-mobilization', name: 'State Mobilization', councils: { 30: 'roman-keels', 31: 'drill-boarding', 32: 'local-compact', 33: 'seek-decision', 34: 'rebuild-the-legions', 35: 'exemplary-punishment', 36: 'veteran-land-settlement' } },
+  { id: 'bounded-command', name: 'Bounded Command', councils: { 30: 'limited-convoy', 31: 'safe-harbors', 32: 'short-command', 33: 'defend-the-compacts', 34: 'ransom-and-reconstitute', 35: 'shared-recovery', 36: 'victory-and-provision' } },
 ]
 
 export function runAllMediterraneanStrategies() {
@@ -420,9 +420,10 @@ export function runAllMediterraneanStrategies() {
     let state = enterMediterranean(continueToMediterranean(bases[index].state))
     const skipped = []
     const ledger = []
-    while (!state.outcome) {
+    while (state.outcome !== 'mediterranean-complete') {
+      if (state.hannibalicTransition) state = enterHannibalicEmergency(state)
       if (state.council && !state.councilResolved) state = resolveCouncil(state, strategy.councils[state.turn])
-      ledger.push({ turn: state.turn, mediterranean: { ...state.mediterranean } })
+      ledger.push({ turn: state.turn, mediterranean: { ...state.mediterranean }, bridges: structuredClone(state.chronologyBridges ?? []) })
       const result = advanceTurn(state)
       if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
       state = result.state

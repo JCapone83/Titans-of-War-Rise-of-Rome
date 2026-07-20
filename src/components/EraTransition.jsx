@@ -36,6 +36,13 @@ const CONTENT = {
     unlocks: ['Fleet acquisition', 'Maritime learning', 'Sicilian settlement'],
     action: 'Enter the Mediterranean',
   },
+  hannibalic: {
+    eyebrow: '241-218 BC - the interwar ledger',
+    title: 'The Hannibalic Emergency',
+    text: 'The First Punic War left fleets, Sicilian obligations, contracts, grain routes, and tired allies. Twenty-three years recover some burdens and preserve others. A new invasion will test the Italian system behind the maritime victory.',
+    unlocks: ['Visible interwar changes', 'Emergency reserves', 'Veteran settlement pressure'],
+    action: 'Advance to 218 BC',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

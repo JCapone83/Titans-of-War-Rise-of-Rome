@@ -61,7 +61,12 @@ for (const result of actFive) {
 }
 if (actFive.some((result) => result.outcome.overall < 70 || result.italianScore.score < 70 || result.skipped.length || Object.values(result.state.italian.projects).some((project) => !project.completed))) process.exitCode = 1
 
-console.log('\nMediterranean opening strategies')
+console.log('\nAct VI Mediterranean Republic strategies')
 const mediterranean = runAllMediterraneanStrategies()
-for (const result of mediterranean) console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Mediterranean Opening ${result.outcome.grades['Mediterranean Opening'].grade} (${result.outcome.grades['Mediterranean Opening'].score}) | 241 BC`)
-if (mediterranean.some((result) => result.state.turn !== 32 || result.skipped.length)) process.exitCode = 1
+for (const result of mediterranean) {
+  const grade = result.outcome.grades['Mediterranean Republic']
+  const m = result.state.mediterranean
+  console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Mediterranean Republic ${grade.grade} (${grade.score}) | 201 BC`)
+  console.log(`  Fleet ${m.fleetCapacity} | Reserve ${m.emergencyReserve} | Trust ${m.provincialTrust} | Allied exhaustion ${m.alliedExhaustion} | Veteran pressure ${m.veteranSettlementPressure}`)
+}
+if (mediterranean.some((result) => result.state.turn !== 36 || result.state.outcome !== 'mediterranean-complete' || result.outcome.overall < 60 || result.skipped.length)) process.exitCode = 1

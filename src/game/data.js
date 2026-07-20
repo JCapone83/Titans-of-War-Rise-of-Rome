@@ -44,13 +44,13 @@ export const ERAS = [
   {
     id: 'mediterranean-republic',
     name: 'Mediterranean Republic',
-    span: '264-241 BC',
-    turns: [30, 32],
-    summary: 'Learn to finance, crew, and command a maritime war without confusing a new theater with an inherited naval state.',
+    span: '264-201 BC',
+    turns: [30, 36],
+    summary: 'Build maritime capacity, survive the Hannibalic emergency, and settle victory without exhausting the city or Italian compact.',
   },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201]
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -493,6 +493,46 @@ COUNCILS.push(
       { id: 'short-command', label: 'Limit the overseas command', detail: 'Return command to a short, bounded mandate before costs compound, preserving trust at the expense of momentum.', impacts: { mediterranean: { overseasCommandDuration: -2, contractorExposure: -5, alliedExhaustion: -6, warCredit: 3, provincialTrust: 5, importedGrainShare: 3 }, resources: { treasury: 2 }, flags: { sicilianSettlement: 'short-command' } } },
     ],
   },
+  {
+    turn: 33, id: 'hannibal-enters-italy', title: 'Hannibal Enters Italy', speaker: 'Consuls, allied envoys, quartermasters, and survivors from the northern roads',
+    prompt: 'A Carthaginian army has crossed into Italy. Rome must decide whether to preserve its system, seek a quick decision, or make allied strongpoints carry the first shock.',
+    context: 'Polybius presents the invasion as a test of Roman alliances and replacement capacity as well as battlefield command. The exact numbers and speeches remain literary evidence, not a complete staff record.',
+    options: [
+      { id: 'shadow-and-contain', label: 'Shadow the march and preserve the field armies', detail: 'Trade immediate prestige for intelligence, guarded roads, and reserves that can survive an early reverse without exposing the whole compact.', impacts: { resources: { treasury: -4, grain: -2 }, metrics: { readiness: 3 }, mediterranean: { emergencyReserve: 10, alliedExhaustion: 4, veteranSettlementPressure: 3 }, italian: { campaignPersistence: 7, reserveDepth: 4 }, flags: { hannibalPosture: 'contain' } } },
+      { id: 'seek-decision', label: 'Concentrate for an early decisive battle', detail: 'Commit heavily before defections spread, gaining operational weight while exposing trained reserves and allied confidence to one field decision.', impacts: { resources: { grain: -4, treasury: -3 }, metrics: { readiness: 8, order: -2 }, mediterranean: { emergencyReserve: -5, alliedExhaustion: 9, veteranSettlementPressure: 8 }, italian: { reserveDepth: -9, campaignPersistence: 3 }, flags: { hannibalPosture: 'decision' } } },
+      { id: 'defend-the-compacts', label: 'Fortify allied roads, depots, and strongpoints', detail: 'Disperse money and command among loyal communities so the invasion meets a network rather than a single army, accepting slower concentration.', impacts: { resources: { treasury: -5, timber: -2 }, metrics: { trade: -2, order: 3 }, factions: { allies: 6 }, mediterranean: { emergencyReserve: 6, alliedExhaustion: 2, provincialTrust: 4 }, italian: { allianceDepth: 9, campaignPersistence: 5 }, flags: { hannibalPosture: 'compacts' } } },
+    ],
+  },
+  {
+    turn: 34, id: 'after-cannae', title: 'After Cannae', speaker: 'Senators, levy officers, bereaved households, allied delegates, and surviving commanders',
+    prompt: 'A field army has been shattered. The Republic must replace men and command without treating endurance as proof that the losses were affordable.',
+    context: 'The scale and detail of Cannae are transmitted chiefly through Polybius and Livy. The strategic consequence is firmer: Rome refused settlement, raised new forces, and struggled to hold its allied system together.',
+    options: [
+      { id: 'rebuild-the-legions', label: 'Raise replacement legions and refuse negotiation', detail: 'Restore field capacity at once, drawing deeply on households, treasury, and future veteran claims while keeping the central command in the war.', impacts: { resources: { grain: -5, treasury: -5, bronze: -2 }, metrics: { readiness: 6, order: -3 }, mediterranean: { emergencyReserve: 20, alliedExhaustion: 6, veteranSettlementPressure: 12, warCredit: -4 }, italian: { reserveDepth: -7, campaignPersistence: 10 }, flags: { cannaeResponse: 'rebuild' } } },
+      { id: 'protect-allied-cities', label: 'Rebuild around loyal allied cities', detail: 'Share garrisons, supply, and operational discretion with communities still holding, accepting less concentrated Roman control in return for endurance.', impacts: { resources: { treasury: -4, grain: -3 }, metrics: { order: 2, readiness: 3 }, factions: { allies: 7 }, mediterranean: { emergencyReserve: 8, alliedExhaustion: -5, provincialTrust: 4, veteranSettlementPressure: 6 }, italian: { allianceDepth: 8, campaignPersistence: 7 }, flags: { cannaeResponse: 'allied-defense' } } },
+      { id: 'ransom-and-reconstitute', label: 'Ransom captives and reconstitute bounded commands', detail: 'Recover experienced men and shorten commands, spending heavily and conceding political ground to avoid replacing every loss with inexperienced levies.', impacts: { resources: { treasury: -7 }, metrics: { order: 4, readiness: 2 }, mediterranean: { emergencyReserve: 6, overseasCommandDuration: -3, warCredit: -5, alliedExhaustion: 2, veteranSettlementPressure: 5 }, flags: { cannaeResponse: 'ransom' } } },
+    ],
+  },
+  {
+    turn: 35, id: 'allied-endurance', title: 'Capua and Allied Endurance', speaker: 'Senators, Italian envoys, censors, grain officers, and commanders in Campania',
+    prompt: 'Some communities have defected, many have not, and recovered ground must be governed. How should punishment, clemency, and shared burdens be distinguished?',
+    context: 'The war did not divide Italy into two uniform camps. Capua became the leading example of defection and punishment, while other communities retained different statuses and records of service.',
+    options: [
+      { id: 'differentiated-settlement', label: 'Judge communities by conduct and compact', detail: 'Punish organized defection, preserve local arrangements where service held, and keep records clear enough that loyalty is not treated as mere submission.', impacts: { resources: { treasury: -3 }, metrics: { order: 4, trade: 2 }, factions: { allies: 6 }, mediterranean: { provincialTrust: 13, alliedExhaustion: -8, contractorExposure: -2, emergencyReserve: 4 }, italian: { allianceDepth: 7, coalitionRisk: -5 }, flags: { alliedSettlement: 'differentiated' } } },
+      { id: 'exemplary-punishment', label: 'Make Capua an exemplary settlement', detail: 'Convert confiscation and direct control into immediate security and revenue, accepting that loyal communities may read the precedent as a warning.', impacts: { resources: { treasury: 6, grain: 3 }, metrics: { order: 6, trade: 2 }, mediterranean: { provincialTrust: -10, importedGrainShare: 8, warCredit: 10, alliedExhaustion: 4, veteranSettlementPressure: 3 }, italian: { allianceDepth: -6, coalitionRisk: -3 }, flags: { alliedSettlement: 'punitive' } } },
+      { id: 'shared-recovery', label: 'Fund a shared Italian recovery', detail: 'Repair roads, stores, and local obligations with Rome carrying more of the immediate cost, reducing exhaustion without pretending defection never occurred.', impacts: { resources: { treasury: -7, stone: -2 }, metrics: { food: 3, trade: 4 }, factions: { allies: 8 }, mediterranean: { provincialTrust: 8, alliedExhaustion: -11, emergencyReserve: 5, veteranSettlementPressure: 4 }, italian: { allianceDepth: 9, maintenanceDebt: 3 }, flags: { alliedSettlement: 'shared-recovery' } } },
+    ],
+  },
+  {
+    turn: 36, id: 'victory-and-return', title: 'Victory, Credit, and the Returning Army', speaker: 'Censors, treasury officers, allied delegates, veterans, contractors, and grain merchants',
+    prompt: 'The war is won, but victory returns armies, claims, debts, and damaged communities to Italy. Which obligations should the settlement discharge first?',
+    context: 'The settlement after 201 BC brought indemnity, overseas commitments, veterans, and a changed balance of power. It did not erase the costs carried by Roman and allied households during the war.',
+    options: [
+      { id: 'restore-public-credit', label: 'Retire obligations and restore public credit', detail: 'Use victory receipts to close exposed contracts, restore reserves, and reduce accumulated burdens before authorizing a new program of expansion.', impacts: { resources: { treasury: 4 }, metrics: { order: 5, trade: 3 }, mediterranean: { warCredit: 13, contractorExposure: -11, alliedExhaustion: -8, veteranSettlementPressure: -6, emergencyReserve: 5 }, flags: { victorySettlement: 'public-credit' } } },
+      { id: 'veteran-land-settlement', label: 'Settle veterans through recorded land grants', detail: 'Meet military claims through surveyed assignments and enforceable records, accepting local land disputes and a smaller immediate treasury recovery.', impacts: { resources: { treasury: -4, grain: -2 }, metrics: { order: 3, readiness: 4 }, mediterranean: { veteranSettlementPressure: -19, alliedExhaustion: 1, provincialTrust: -3, emergencyReserve: 12 }, italian: { reserveDepth: 6, allianceDepth: -2 }, flags: { victorySettlement: 'veteran-land' } } },
+      { id: 'victory-and-provision', label: 'Pair victory works with grain and allied repair', detail: 'Use a bounded share of indemnity for public display while funding stores and allied reconstruction, leaving some contracts and veteran claims open.', impacts: { resources: { treasury: 1, stone: 3, grain: 4 }, metrics: { food: 5, trade: 5, order: 3 }, mediterranean: { importedGrainShare: 7, provincialTrust: 6, contractorExposure: 4, alliedExhaustion: -5, veteranSettlementPressure: 5 }, flags: { victorySettlement: 'provision' } } },
+    ],
+  },
 )
 
 export const OBJECTIVES = [
@@ -523,6 +563,10 @@ export const OBJECTIVES = [
   { from: 30, to: 30, text: 'Acquire maritime capacity without pretending Rome already possesses a naval state.' },
   { from: 31, to: 31, text: 'Learn the practices that make a fleet more than a collection of hulls.' },
   { from: 32, to: 32, text: 'Finance the First Punic War opening and settle the first Sicilian obligations.' },
+  { from: 33, to: 33, text: 'Meet invasion without staking the entire Italian system on one early decision.' },
+  { from: 34, to: 34, text: 'Rebuild command after catastrophe while recording what replacement armies cost.' },
+  { from: 35, to: 35, text: 'Distinguish loyal service, defection, punishment, and recovery across the Italian compact.' },
+  { from: 36, to: 36, text: 'Settle war credit, allied exhaustion, and returning veterans before victory becomes a new burden.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null
