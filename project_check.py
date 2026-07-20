@@ -192,6 +192,28 @@ def main() -> None:
     require("src/game/referenceStrategies.js", "runAllCivilSettlementStrategies")
     require("scripts/run-balance.mjs", "Act IX Civil War and Settlement strategies")
     require("src/game/historicalContext.js", "settlement-27")
+    require("src/game/data.js", "AUGUSTAN_PROJECTS")
+    require("src/game/data.js", "formatYear")
+    require("src/game/data.js", "The Settlement Outlives Augustus")
+    require("src/game/initialState.js", "createAugustanState")
+    require("src/game/continuation.js", "continueToAugustanCity")
+    require("src/game/continuation.js", "enterAugustanCity")
+    require("src/game/simulation.js", "augustanCityForecast")
+    require("src/game/simulation.js", "workAugustanProject")
+    require("src/game/outcomes.js", "calculateAugustanCityScore")
+    require("src/game/projectArt.js", "AUGUSTAN_PROJECT_ART")
+    require("src/game/projectArt.js", "agrippan-pantheon-v1.png")
+    require("src/components/AugustanCityPanel.jsx", "Augustan City")
+    require("src/components/AugustanWorksPanel.jsx", "Augustan works")
+    require("src/game/referenceStrategies.js", "runAllAugustanCityStrategies")
+    require("scripts/run-balance.mjs", "Act X The Augustan City strategies")
+    require("src/game/historicalContext.js", "succession-ad14")
+    for asset in [
+        "house-of-augustus-v1.png", "mausoleum-of-augustus-v1.png", "agrippan-pantheon-v1.png",
+        "baths-of-agrippa-v1.png", "theatre-of-marcellus-v1.png", "ara-pacis-v1.png",
+        "forum-of-augustus-v1.png", "vigiles-ward-station-v1.png",
+    ]:
+        require_rgba_png(f"public/images/projects/{asset}")
     require("src/game/data.js", "first-secession")
     require("src/game/data.js", "veii-settlement")
     require("src/game/data.js", "gallic-approach")

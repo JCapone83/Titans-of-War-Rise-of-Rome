@@ -1,5 +1,5 @@
 import { BookOpen, Download, HelpCircle, RotateCcw, Save } from 'lucide-react'
-import { TURN_YEARS } from '../game/data.js'
+import { TURN_YEARS, formatYear } from '../game/data.js'
 
 export function TopBar({ era, turn, year, onOpenHistory, onOpenWalkthrough, onSave, onExport, onRestart }) {
   return (
@@ -11,9 +11,9 @@ export function TopBar({ era, turn, year, onOpenHistory, onOpenWalkthrough, onSa
           <h1>Birth of Rome</h1>
         </div>
       </div>
-      <div className="date-block" aria-label={`Turn ${turn}, ${year} BC, ${era.name}`}>
+      <div className="date-block" aria-label={`Turn ${turn}, ${formatYear(year)}, ${era.name}`}>
         <span>{era.name}</span>
-        <strong>{year} BC</strong>
+        <strong>{formatYear(year)}</strong>
         <small>Turn {turn} of {TURN_YEARS.length}</small>
       </div>
       <nav className="top-actions" aria-label="Campaign tools">

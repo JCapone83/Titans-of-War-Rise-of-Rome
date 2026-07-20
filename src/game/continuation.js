@@ -1,5 +1,5 @@
 import { getCouncil } from './data.js'
-import { createCivilSettlementState, createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
+import { createAugustanState, createCivilSettlementState, createMediterraneanState, createMetropolitanState, createRepublicStrainState } from './initialState.js'
 import { calculateOutcome } from './outcomes.js'
 
 export function freezeCoreJudgment(state) {
@@ -229,6 +229,42 @@ export function enterCivilSettlement(state) {
     nextWorksBonus: 0,
     selectedBuildingId: null,
     council: getCouncil(49),
+    councilResolved: false,
+  }
+}
+
+export function continueToAugustanCity(state) {
+  if (state.turn !== 54 || state.outcome !== 'civil-settlement-complete' || state.augustanTransition) return state
+  return { ...state, augustanTransition: true }
+}
+
+export function enterAugustanCity(state) {
+  if (!state.augustanTransition || state.turn !== 54 || state.outcome !== 'civil-settlement-complete') return state
+  const bridgeExists = (state.chronologyBridges ?? []).some((bridge) => bridge.id === 'augustan-opening')
+  const bridge = {
+    id: 'augustan-opening',
+    fromYear: 27,
+    toYear: 23,
+    mediterraneanChanges: {},
+    notes: [
+      'The arrangements of 27 BC were revised by 23 BC; the continuation begins with an operating settlement rather than treating one ceremony as a finished constitution.',
+      'Every inherited civic work, military settlement, title claim, public obligation, and constitutional choice remains in the Augustan ledger.',
+    ],
+  }
+  return {
+    ...state,
+    version: 14,
+    turn: 55,
+    era: 10,
+    outcome: null,
+    augustanTransition: false,
+    augustanCity: state.augustanCity ?? createAugustanState(state.civilSettlement),
+    resources: { ...state.resources, treasury: state.resources.treasury + 10, stone: state.resources.stone + 3, timber: state.resources.timber + 2 },
+    chronologyBridges: bridgeExists ? state.chronologyBridges : [...(state.chronologyBridges ?? []), bridge],
+    actionsUsed: 0,
+    nextWorksBonus: 0,
+    selectedBuildingId: null,
+    council: getCouncil(55),
     councilResolved: false,
   }
 }

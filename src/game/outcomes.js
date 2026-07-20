@@ -107,6 +107,39 @@ export function calculateCivilSettlementScore(state) {
   return { score: bounded, grade: grade(bounded), institutions: Math.round(institutions), demobilization: Math.round(demobilization), commandSettlement: Math.round(commandSettlement), civicLife: Math.round(civicLife), succession: Math.round(succession), physical: Math.round(physical), completed, active, commandGap, settlementGap, operatingForm }
 }
 
+export function calculateAugustanCityScore(state) {
+  if (!state.augustanCity) return null
+  const a = state.augustanCity
+  const projects = Object.values(a.projects ?? {})
+  const completed = projects.filter((project) => project.completed).length
+  const active = projects.filter((project) => !project.completed && project.progress > 0).length
+  const stages = projects.reduce((sum, project) => sum + (project.progress ?? 0), 0)
+  const civicCapacity = Math.max(0, Math.min(100, (a.senateMagistrateCapacity + a.urbanAdministration + a.publicAccess + a.maintenanceCapacity) / 4))
+  const commandBalance = Math.max(0, Math.min(100, 70 + a.provincialCommandBalance * 0.35 + a.princepsAuthority * 0.2 - Math.abs(a.princepsAuthority - a.senateMagistrateCapacity) * 0.35 - a.patronageConcentration * 0.18))
+  const services = Math.max(0, Math.min(100, (a.fireCoverage + a.annonaReliability + a.urbanAdministration + a.maintenanceCapacity + a.publicAccess) / 5 + 15))
+  const succession = Math.max(0, Math.min(100, a.successionConfidence * 0.72 + Math.min(a.householdStanding, a.senateMagistrateCapacity) * 0.28))
+  const memory = Math.max(0, Math.min(100, a.monumentMemory * 0.58 + a.publicAccess * 0.27 + a.maintenanceCapacity * 0.15))
+  const physical = Math.max(0, Math.min(100, 48 + stages * 3 + completed * 8 + active * 2))
+  const score = Math.round(civicCapacity * 0.2 + commandBalance * 0.2 + services * 0.18 + succession * 0.2 + memory * 0.1 + physical * 0.12)
+  const bounded = Math.max(0, Math.min(100, score))
+  let operatingForm = 'Administrative Principate'
+  if (state.flags?.augustanOperatingRule === 'civic-compact') operatingForm = 'Civic Augustan Compact'
+  else if (state.flags?.augustanOperatingRule === 'household-principate') operatingForm = 'Household-Centered Principate'
+  const strengths = [
+    civicCapacity >= 55 ? 'Operating civic institutions' : null,
+    services >= 55 ? 'Urban service capacity' : null,
+    succession >= 55 ? 'Legible first succession' : null,
+    commandBalance >= 55 ? 'Bounded command settlement' : null,
+  ].filter(Boolean)
+  const risks = [
+    a.patronageConcentration >= 60 ? 'Patronage is crowding out public channels' : null,
+    a.fireCoverage < 45 ? 'Fire coverage remains thin' : null,
+    succession < 50 ? 'Succession depends too heavily on persons' : null,
+    a.maintenanceCapacity < 45 ? 'Maintenance trails the monumental program' : null,
+  ].filter(Boolean)
+  return { score: bounded, grade: grade(bounded), operatingForm, civicCapacity: Math.round(civicCapacity), commandBalance: Math.round(commandBalance), services: Math.round(services), succession: Math.round(succession), memory: Math.round(memory), physical: Math.round(physical), completed, active, stages, strengths, risks }
+}
+
 export function calculateOutcome(state) {
   const average = (keys) => keys.reduce((sum, key) => sum + state.metrics[key], 0) / keys.length
   const drainage = hasBuilding(state, 'cloaca-works') ? 12 : hasBuilding(state, 'drainage-ditch') ? 5 : -10
@@ -124,7 +157,7 @@ export function calculateOutcome(state) {
   const civic = Math.round(average(['order', 'auspices']) + 8 - factionSpread * 0.35 + (republic ? (republicanConsent - 40) * 0.25 : 0) + (reconstruction ? (reconstruction.recordsIntegrity - 50) * 0.08 + (reconstruction.latinTrust - 50) * 0.06 : 0))
   const logistics = Math.round(average(['food', 'water', 'trade']) + Math.min(10, state.resources.grain + state.resources.treasury) / 2 - damagedWorks * 2 - (republic ? republic.debtStrain * 0.08 : 0) - (reconstruction ? reconstruction.displaced * 0.08 : 0))
   const military = Math.round(state.metrics.readiness + countFamily(state, 'defense') * 5 - Math.max(0, 45 - state.metrics.food) * 0.25 - (republic ? Math.max(0, republic.levyBurden - 35) * 0.15 : 0) - (reconstruction ? reconstruction.wallUrgency * 0.05 : 0))
-  const expectedCouncils = state.turn >= 30 ? 24 + Math.min(25, state.turn - 29) : state.turn >= 29 ? 24 : state.turn >= 23 ? 18 : state.turn >= 20 ? 15 : state.turn >= 16 ? 11 : state.turn >= 13 ? 8 : 5
+  const expectedCouncils = state.turn >= 30 ? 24 + Math.min(32, state.turn - 29) : state.turn >= 29 ? 24 : state.turn >= 23 ? 18 : state.turn >= 20 ? 15 : state.turn >= 16 ? 11 : state.turn >= 13 ? 8 : 5
   const actThreeContinuity = state.turn >= 16 ? (state.flags?.veiiResolution ? 3 : -3) + (state.flags?.gallicPlan ? 3 : -3) : 0
   const actFourContinuity = state.turn >= 20 ? (state.flags?.reconstructionPolicy ? 4 : -4) + (state.flags?.latinSettlement ? 4 : -4) : 0
   const regionalContinuity = state.turn >= 23 ? (state.flags?.regionalDoctrine ? 3 : -3) + (state.flags?.regionalCharter ? 3 : -3) + (state.flags?.regionalSettlement ? 3 : -3) : 0
@@ -156,11 +189,14 @@ export function calculateOutcome(state) {
   if (strainScore && state.turn >= 42) scores['Republic Under Strain'] = strainScore.score
   const civilSettlementScore = calculateCivilSettlementScore(state)
   if (civilSettlementScore && state.turn >= 49) scores['Civil War and Settlement'] = civilSettlementScore.score
+  const augustanCityScore = calculateAugustanCityScore(state)
+  if (augustanCityScore && state.turn >= 55) scores['The Augustan City'] = augustanCityScore.score
   const overall = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.keys(scores).length)
   const operatingFormName = civilSettlementScore?.operatingForm.toLowerCase()
   const operatingFormArticle = operatingFormName?.startsWith('augustan') ? 'an' : 'a'
   let title = 'A City Still Becoming'
-  if (state.turn >= 54) title = civilSettlementScore.operatingForm
+  if (state.turn >= 61) title = augustanCityScore.operatingForm
+  else if (state.turn >= 54) title = civilSettlementScore.operatingForm
   else if (state.turn >= 48) title = scores['Republic Under Strain'] >= 70 ? 'A Republic Still Capable of Settlement' : 'Command Outruns the Republic'
   else if (state.turn >= 41) title = scores['Conquest and Metropolis'] >= 70 ? 'A Metropolitan Republic With Working Limits' : 'Conquest Outruns the Republican City'
   else if (state.turn >= 36) title = scores['Mediterranean Republic'] >= 70 ? 'The Mediterranean Republic Endures' : 'Mediterranean Victory With Unpaid Obligations'
@@ -174,7 +210,7 @@ export function calculateOutcome(state) {
     title,
     overall,
     summary: overall >= 72
-      ? state.turn >= 54 ? `Rome reaches 27 BC as ${operatingFormArticle} ${operatingFormName}, with constitutional language judged separately from command, demobilization, courts, finance, Italian titles, public provision, and succession.` : state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
+      ? state.turn >= 61 ? `Rome reaches AD 14 as a ${augustanCityScore.operatingForm.toLowerCase()}. Authority, Senate and magistrates, public access, provincial command, maintenance, fire response, memory, and succession are judged as separate operating systems.` : state.turn >= 54 ? `Rome reaches 27 BC as ${operatingFormArticle} ${operatingFormName}, with constitutional language judged separately from command, demobilization, courts, finance, Italian titles, public provision, and succession.` : state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
       : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
     grades: Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, { score: value, grade: grade(value) }])),
   }

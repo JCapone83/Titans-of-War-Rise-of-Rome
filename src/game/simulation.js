@@ -1,5 +1,5 @@
-import { BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
-import { createCivilSettlementState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState } from './initialState.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, formatYear, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { createAugustanState, createCivilSettlementState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
 const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value))
@@ -122,6 +122,14 @@ export const updateRepublicStrain = (strain, changes = {}) => {
 export const updateCivilSettlement = (settlement, changes = {}) => {
   if (!settlement) return settlement
   return Object.fromEntries(Object.entries(settlement).map(([key, value]) => [
+    key,
+    typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
+  ]))
+}
+
+export const updateAugustanCity = (augustan, changes = {}) => {
+  if (!augustan) return augustan
+  return Object.fromEntries(Object.entries(augustan).map(([key, value]) => [
     key,
     typeof value === 'number' ? clamp(value + (changes[key] ?? 0)) : value,
   ]))
@@ -571,7 +579,7 @@ export function republicStrainProjectAvailability(state, projectId) {
   const definition = REPUBLIC_STRAIN_PROJECTS[projectId]
   const project = state.republicStrain.projects?.[projectId]
   if (!definition || !project) return blocked('Choose a valid late-Republic civic work.')
-  if (state.turn < definition.unlockTurn) return blocked(`Available in ${TURN_YEARS[definition.unlockTurn - 1]} BC.`)
+  if (state.turn < definition.unlockTurn) return blocked(`Available in ${formatYear(TURN_YEARS[definition.unlockTurn - 1])}.`)
   if (project.completed) return blocked(`${definition.name} is complete.`)
   if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this season.`)
   if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this season.')
@@ -614,7 +622,7 @@ export function civilSettlementProjectAvailability(state, projectId) {
   const definition = CIVIL_SETTLEMENT_PROJECTS[projectId]
   const project = state.civilSettlement.projects?.[projectId]
   if (!definition || !project) return blocked('Choose a valid civil-settlement work.')
-  if (state.turn < definition.unlockTurn) return blocked(`Available in ${TURN_YEARS[definition.unlockTurn - 1]} BC.`)
+  if (state.turn < definition.unlockTurn) return blocked(`Available in ${formatYear(TURN_YEARS[definition.unlockTurn - 1])}.`)
   if (project.completed) return blocked(`${definition.name} is complete.`)
   if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this season.`)
   if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this season.')
@@ -647,6 +655,47 @@ export function workCivilSettlementProject(state, projectId) {
       actionLog: appendAction(state, { type: 'civil-settlement-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
     },
     message: completed ? `${definition.name} completed; its civic capacity and permanent operating burden enter the settlement ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} stages.`,
+  }
+}
+
+export function augustanProjectAvailability(state, projectId) {
+  const blocked = (reason) => ({ available: false, ok: false, reason })
+  if (!state.augustanCity || state.era < 10) return blocked('The Augustan City public works are not yet available.')
+  const definition = AUGUSTAN_PROJECTS[projectId]
+  const project = state.augustanCity.projects?.[projectId]
+  if (!definition || !project) return blocked('Choose a valid Augustan work.')
+  if (state.turn < definition.unlockTurn) return blocked(`Available in ${formatYear(TURN_YEARS[definition.unlockTurn - 1])}.`)
+  if (project.completed) return blocked(`${definition.name} is operating.`)
+  if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this turn.`)
+  if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this turn.')
+  const affordability = affordabilityFailure(state, definition.cost)
+  if (affordability) return blocked(affordability)
+  return { available: true, ok: true, definition, project }
+}
+
+export function workAugustanProject(state, projectId) {
+  const availability = augustanProjectAvailability(state, projectId)
+  if (!availability.ok) return { state, error: availability.reason }
+  const { definition, project } = availability
+  const progress = project.progress + 1
+  const completed = progress >= project.requiredSeasons
+  const nextProject = { ...project, progress, completed, lastWorkedTurn: state.turn }
+  let augustanCity = { ...state.augustanCity, projects: { ...state.augustanCity.projects, [projectId]: nextProject } }
+  let metrics = state.metrics
+  if (completed) {
+    metrics = addMap(metrics, definition.completionMetrics)
+    augustanCity = updateAugustanCity(augustanCity, definition.completionAugustan)
+  }
+  return {
+    state: {
+      ...state,
+      resources: addResources(state.resources, reverseChanges(definition.cost)),
+      metrics,
+      augustanCity,
+      actionsUsed: (state.actionsUsed ?? 0) + 1,
+      actionLog: appendAction(state, { type: 'augustan-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
+    },
+    message: completed ? `${definition.name} is operating; its service and upkeep enter the Augustan ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} stages.`,
   }
 }
 
@@ -1018,8 +1067,11 @@ export function resolveCouncil(state, optionId) {
   const nextCivilSettlement = state.civilSettlement
     ? updateCivilSettlement({ ...createCivilSettlementState(), ...state.civilSettlement }, impacts.settlement)
     : state.civilSettlement
+  const nextAugustanCity = state.augustanCity
+    ? updateAugustanCity({ ...createAugustanState(state.civilSettlement), ...state.augustanCity }, impacts.augustan)
+    : state.augustanCity
   const nextFlags = mergeFlagChanges(state.flags, impacts.flags)
-  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, flags: nextFlags }
+  const capacityState = { ...state, nextWorksBonus, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, flags: nextFlags }
   return {
     ...state,
     resources: addResources(state.resources, impacts.resources),
@@ -1035,6 +1087,7 @@ export function resolveCouncil(state, optionId) {
     metropolitan: nextMetropolitan,
     republicStrain: nextRepublicStrain,
     civilSettlement: nextCivilSettlement,
+    augustanCity: nextAugustanCity,
     nextWorksBonus,
     actionsMax: Math.max(state.actionsUsed ?? 0, workforceSummary(capacityState).constructionCapacity),
     councilResolved: true,
@@ -1602,6 +1655,71 @@ export function civilSettlementForecast(state) {
   }
 }
 
+export function augustanCityForecast(state) {
+  if (!state.augustanCity) return null
+  const a = { ...createAugustanState(state.civilSettlement ?? {}), ...state.augustanCity }
+  const works = a.projects ?? {}
+  const completedWorks = Object.values(works).filter((project) => project.completed)
+  const burdens = completedWorks.reduce((result, project) => {
+    const definition = AUGUSTAN_PROJECTS[project.id]
+    return {
+      resourceDelta: mergeChanges(result.resourceDelta, definition?.upkeepResources),
+      metricDelta: mergeChanges(result.metricDelta, definition?.upkeepMetrics),
+      augustanChanges: mergeChanges(result.augustanChanges, definition?.upkeepAugustan),
+    }
+  }, { resourceDelta: {}, metricDelta: {}, augustanChanges: {} })
+  const authorityGap = Math.max(0, a.princepsAuthority + a.householdStanding - a.senateMagistrateCapacity - a.provincialCommandBalance)
+  const serviceGap = Math.max(0, 120 - a.urbanAdministration - a.maintenanceCapacity + a.patronageConcentration * 0.35)
+  const successionGap = Math.max(0, 70 - a.successionConfidence + Math.max(0, a.householdStanding - a.senateMagistrateCapacity) * 0.25)
+  const changes = {
+    princepsAuthority: 0,
+    senateMagistrateCapacity: authorityGap >= 45 ? -2 : 0,
+    householdStanding: 0,
+    successionConfidence: state.turn >= 57 ? (successionGap >= 35 ? -2 : -1) : 0,
+    urbanAdministration: serviceGap >= 45 ? -1 : 0,
+    fireCoverage: state.turn === 60 && a.fireCoverage < 45 ? -4 : 0,
+    annonaReliability: a.urbanAdministration >= 55 ? 1 : -1,
+    monumentMemory: completedWorks.length ? 1 : 0,
+    patronageConcentration: a.publicAccess < 40 ? 1 : 0,
+    provincialCommandBalance: authorityGap >= 50 ? -1 : 0,
+    publicAccess: a.patronageConcentration >= 65 ? -2 : 0,
+    maintenanceCapacity: completedWorks.length >= 3 ? -1 : 0,
+    ...burdens.augustanChanges,
+  }
+  const projected = {
+    ...Object.fromEntries(Object.entries(a)
+      .filter(([key]) => key !== 'projects')
+      .map(([key, value]) => [key, clamp(value + (changes[key] ?? 0))])),
+    projects: structuredClone(works),
+  }
+  return {
+    ...projected,
+    changes,
+    projected,
+    resourceDelta: mergeChanges({ treasury: -1 }, a.annonaReliability < 45 ? { grain: -1 } : {}, burdens.resourceDelta),
+    metricDelta: {
+      order: (authorityGap >= 55 ? -2 : 0) + (serviceGap >= 55 ? -2 : 0),
+      food: a.annonaReliability < 40 ? -2 : 0,
+      sanitation: state.turn === 60 && a.fireCoverage < 45 ? -3 : 0,
+      ...burdens.metricDelta,
+    },
+    publicWorks: {
+      completed: completedWorks.map((project) => project.id),
+      resourceDelta: burdens.resourceDelta,
+      metricDelta: burdens.metricDelta,
+      augustanChanges: burdens.augustanChanges,
+    },
+    authorityGap,
+    serviceGap,
+    successionGap,
+    notes: [
+      authorityGap >= 45 ? 'Household and princeps authority are outrunning magistrates and provincial review.' : 'Central command remains counterweighted by operating magistracies and reviewed provincial authority.',
+      serviceGap >= 45 ? 'New monuments and services are outrunning maintenance and urban administration.' : 'Urban administration and maintenance still support the public city behind its dedications.',
+      successionGap >= 35 ? 'The first transfer remains dangerously dependent on personal recognition.' : 'Succession is becoming legible across household, Senate, offices, and commands.',
+    ],
+  }
+}
+
 export function forecastSeason(state) {
   const production = sumBuildingMaps(state, 'production')
   const upkeep = reverseChanges(sumBuildingMaps(state, 'upkeep'))
@@ -1615,8 +1733,9 @@ export function forecastSeason(state) {
   const metropolitan = metropolitanForecast(state)
   const republicStrain = republicStrainForecast(state)
   const civilSettlement = civilSettlementForecast(state)
+  const augustanCity = augustanCityForecast(state)
   return {
-    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta, republicStrain?.resourceDelta, civilSettlement?.resourceDelta),
+    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta, republicStrain?.resourceDelta, civilSettlement?.resourceDelta, augustanCity?.resourceDelta),
     pressures: civicPressures(state),
     actionsRemaining: actionRemaining(state),
     population: projectPopulation(state),
@@ -1631,6 +1750,7 @@ export function forecastSeason(state) {
     metropolitan,
     republicStrain,
     civilSettlement,
+    augustanCity,
   }
 }
 
@@ -1871,7 +1991,7 @@ export function advanceTurn(state) {
   const pressures = forecast.pressures
   const event = timedEvent(state)
   const resourceDelta = mergeChanges(forecast.resourceDelta, event?.resources)
-  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta, forecast.republicStrain?.metricDelta, forecast.civilSettlement?.metricDelta)
+  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta, forecast.republicStrain?.metricDelta, forecast.civilSettlement?.metricDelta, forecast.augustanCity?.metricDelta)
   const nextResources = addResources(state.resources, resourceDelta)
   let nextMetrics = addMap(state.metrics, metricDelta)
   const shortages = Object.entries(nextResources).filter(([key, value]) => value === 0 && ['grain', 'timber', 'treasury'].includes(key))
@@ -1910,6 +2030,7 @@ export function advanceTurn(state) {
   const nextMetropolitan = forecast.metropolitan ? forecast.metropolitan.projected : state.metropolitan
   const nextRepublicStrain = forecast.republicStrain ? forecast.republicStrain.projected : state.republicStrain
   const nextCivilSettlement = forecast.civilSettlement ? forecast.civilSettlement.projected : state.civilSettlement
+  const nextAugustanCity = forecast.augustanCity ? forecast.augustanCity.projected : state.augustanCity
   report.republicChanges = mergeChanges(forecast.republic?.changes, warRepublicChanges)
   report.warChanges = forecast.war?.changes ?? null
   report.reconstructionChanges = forecast.reconstruction?.changes ?? null
@@ -1930,8 +2051,10 @@ export function advanceTurn(state) {
   if (forecast.republicStrain) report.notes.push(...forecast.republicStrain.notes)
   report.civilSettlementChanges = forecast.civilSettlement?.changes ?? null
   if (forecast.civilSettlement) report.notes.push(...forecast.civilSettlement.notes)
+  report.augustanCityChanges = forecast.augustanCity?.changes ?? null
+  if (forecast.augustanCity) report.notes.push(...forecast.augustanCity.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, reports: [...state.reports, report] }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, reports: [...state.reports, report] }
   if (forecast.mediterranean?.publicWorks) {
     shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
     report.publicWorks = forecast.mediterranean.publicWorks
@@ -1939,11 +2062,13 @@ export function advanceTurn(state) {
   if (forecast.metropolitan?.publicWorks) report.metropolitanPublicWorks = forecast.metropolitan.publicWorks
   if (forecast.republicStrain?.publicWorks) report.republicStrainPublicWorks = forecast.republicStrain.publicWorks
   if (forecast.civilSettlement?.publicWorks) report.civilSettlementPublicWorks = forecast.civilSettlement.publicWorks
+  if (forecast.augustanCity?.publicWorks) report.augustanCityPublicWorks = forecast.augustanCity.publicWorks
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
   if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
   if (state.turn === 41) return { state: { ...state, ...shared, outcome: 'metropolitan-complete' }, report }
   if (state.turn === 48) return { state: { ...state, ...shared, outcome: 'republic-strain-complete' }, report }
   if (state.turn === 54) return { state: { ...state, ...shared, outcome: 'civil-settlement-complete' }, report }
+  if (state.turn === 61) return { state: { ...state, ...shared, outcome: 'augustan-city-complete' }, report }
   if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }

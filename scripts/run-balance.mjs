@@ -1,4 +1,4 @@
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 const results = runAllReferenceStrategies()
 for (const result of results) {
@@ -107,3 +107,15 @@ for (const result of civilSettlement) {
   if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
 }
 if (civilSettlement.some((result) => result.state.turn !== 54 || result.state.outcome !== 'civil-settlement-complete' || result.outcome.overall < 60 || result.civilScore.score < 60 || result.skipped.length)) process.exitCode = 1
+
+console.log('\nAct X The Augustan City strategies')
+const augustanCity = runAllAugustanCityStrategies()
+for (const result of augustanCity) {
+  const score = result.augustanScore
+  const projects = Object.values(result.state.augustanCity.projects)
+  console.log(`${result.strategy.name}: ${result.outcome.overall} overall | The Augustan City ${score.grade} (${score.score}) | ${score.operatingForm} | AD 14`)
+  console.log(`  Civic capacity ${score.civicCapacity} | Command balance ${score.commandBalance} | Services ${score.services} | Succession ${score.succession} | Memory ${score.memory} | Physical ${score.physical}`)
+  console.log(`  Augustan works: ${projects.filter((project) => project.completed).map((project) => project.id).join(', ') || 'none'} operating; ${projects.filter((project) => !project.completed && project.progress > 0).map((project) => `${project.id} ${project.progress}/${project.requiredSeasons}`).join(', ') || 'none active'}`)
+  if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
+}
+if (augustanCity.some((result) => result.state.turn !== 61 || result.state.outcome !== 'augustan-city-complete' || result.outcome.overall < 58 || result.augustanScore.score < 58 || result.skipped.length)) process.exitCode = 1

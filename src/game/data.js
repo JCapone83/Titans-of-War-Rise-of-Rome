@@ -69,9 +69,18 @@ export const ERAS = [
     turns: [49, 54],
     summary: 'End competing commands, settle armies and debts, and determine which institutions can operate after victory without disguising personal rule as ordinary office.',
   },
+  {
+    id: 'augustan-city',
+    name: 'The Augustan City',
+    span: '27 BC-AD 14',
+    turns: [55, 61],
+    summary: 'Test whether one household can concentrate command while leaving magistrates, public access, urban services, and succession strong enough to outlive the founder.',
+  },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133, 121, 91, 88, 82, 78, 63, 49, 49, 46, 44, 42, 31, 27, 23, 19, 13, 9, 2, -6, -14]
+
+export const formatYear = (year) => year < 0 ? `AD ${Math.abs(year)}` : `${year} BC`
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -273,6 +282,81 @@ export const CIVIL_SETTLEMENT_PROJECTS = {
     upkeepResources: { treasury: -1 },
     upkeepSettlement: { italianLandSecurity: 1 },
     burdenLabel: 'Surveyors, appeals, municipal duplicates, road maintenance, and unresolved title cases continue after allotment.',
+  },
+}
+
+export const AUGUSTAN_PROJECTS = {
+  palatineOfficialPrecinct: {
+    id: 'palatineOfficialPrecinct', name: 'Palatine Official Precinct', seasons: 3, unlockTurn: 55,
+    cost: { stone: 1 },
+    summary: 'A deliberately restrained official residence and temple precinct joins household, cult, petition, and command on the Palatine without turning the whole hill into a later imperial palace.',
+    completionMetrics: { order: 3, auspices: 3 },
+    completionAugustan: { princepsAuthority: 8, householdStanding: 10, urbanAdministration: 4, publicAccess: -2, patronageConcentration: 5 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { householdStanding: 1, patronageConcentration: 1 },
+    burdenLabel: 'Household officials, petition routes, temple service, and guarded access require continuing supervision.',
+  },
+  mausoleumAugustus: {
+    id: 'mausoleumAugustus', name: 'Mausoleum of Augustus', seasons: 4, unlockTurn: 55,
+    cost: { stone: 1 },
+    summary: 'A great dynastic tomb in the Campus Martius makes the ruling household part of Rome\'s public memory while raising the cost of an uncertain succession.',
+    completionMetrics: { auspices: 4 },
+    completionAugustan: { householdStanding: 9, successionConfidence: 5, monumentMemory: 13, patronageConcentration: 4 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { monumentMemory: 1 },
+    burdenLabel: 'Grounds, ritual service, access, and dynastic commemorations continue after construction.',
+  },
+  agrippanPantheon: {
+    id: 'agrippanPantheon', name: 'Agrippa\'s Pantheon Precinct', seasons: 4, unlockTurn: 55,
+    cost: { timber: 1 },
+    summary: 'An uncertainty-labeled reconstruction of Agrippa\'s Augustan temple precinct. Its form is disputed and it must not be mistaken for Hadrian\'s later domed rotunda.',
+    completionMetrics: { auspices: 4, order: 2 },
+    completionAugustan: { senateMagistrateCapacity: 3, monumentMemory: 8, publicAccess: 8, householdStanding: 4 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { publicAccess: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Cult service, precinct repair, drainage, and public approach remain operating obligations.',
+  },
+  bathsAgrippa: {
+    id: 'bathsAgrippa', name: 'Baths of Agrippa', seasons: 4, unlockTurn: 56,
+    cost: { stone: 1 },
+    summary: 'A public bathing complex tied to water, maintenance, crowd access, and Agrippa\'s patronage turns conquest wealth into a recurring urban service.',
+    completionMetrics: { water: 5, sanitation: 5 },
+    completionAugustan: { urbanAdministration: 5, publicAccess: 13, maintenanceCapacity: -2, householdStanding: 3 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { publicAccess: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Water, heating, fuel, cleaning, attendants, and repairs make bathing a permanent service rather than a dedication alone.',
+  },
+  theatreMarcellus: {
+    id: 'theatreMarcellus', name: 'Theatre of Marcellus', seasons: 4, unlockTurn: 57,
+    cost: { stone: 1 },
+    summary: 'A monumental theatre joins public entertainment, circulation, dynastic memory, and elite seating in one visible civic institution.',
+    completionMetrics: { order: 4, trade: 3 },
+    completionAugustan: { householdStanding: 6, monumentMemory: 8, publicAccess: 9, patronageConcentration: 3 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { publicAccess: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Performances, seating order, crowd routes, substructures, and repairs remain annual charges.',
+  },
+  araPacis: {
+    id: 'araPacis', name: 'Ara Pacis Augustae', seasons: 3, unlockTurn: 57,
+    cost: { stone: 1 },
+    summary: 'An altar voted after Augustus returned from the western provinces links peace, Senate ritual, family imagery, and provincial command without erasing the force behind the settlement.',
+    completionMetrics: { auspices: 5, order: 2 },
+    completionAugustan: { senateMagistrateCapacity: 6, householdStanding: 5, monumentMemory: 10, provincialCommandBalance: 5 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { senateMagistrateCapacity: 1 },
+    burdenLabel: 'Sacrifice, processions, precinct care, and senatorial commemoration keep the monument politically active.',
+  },
+  forumAugustus: {
+    id: 'forumAugustus', name: 'Forum of Augustus and Temple of Mars Ultor', seasons: 5, unlockTurn: 59,
+    cost: { stone: 1 },
+    summary: 'A new forum adds courts, ceremony, military departure, and a curated gallery of Roman memory while concentrating credit in the princeps\' household.',
+    completionMetrics: { order: 5, trade: 4, auspices: 3 },
+    completionAugustan: { princepsAuthority: 8, senateMagistrateCapacity: 6, urbanAdministration: 6, monumentMemory: 13, patronageConcentration: 5, publicAccess: 4 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { urbanAdministration: 1, maintenanceCapacity: -1 },
+    burdenLabel: 'Courts, ceremonies, records, security, porticoes, and the temple require a permanent civic staff.',
+  },
+  vigilesWardNetwork: {
+    id: 'vigilesWardNetwork', name: 'Vigiles Ward Network', seasons: 3, unlockTurn: 60,
+    cost: { timber: 1 },
+    summary: 'A game-scale ward network represents the AD 6 fire brigade, night watch, equipment stores, routes, and accountable command rather than one monumental building.',
+    completionMetrics: { sanitation: 6, order: 4 },
+    completionAugustan: { urbanAdministration: 10, fireCoverage: 22, publicAccess: 4, maintenanceCapacity: -2 },
+    upkeepResources: { treasury: -1 }, upkeepAugustan: { fireCoverage: 2, maintenanceCapacity: -1 },
+    burdenLabel: 'Pay, patrols, buckets, hooks, ladders, stations, water access, and command review recur every year.',
   },
 }
 
@@ -748,6 +832,79 @@ COUNCILS.push(
 
 COUNCILS.push(
   {
+    turn: 55, id: 'principate-operating-rule', title: 'The Principate in Practice', speaker: 'Augustus, Agrippa, consuls, senators, equestrian administrators, provincial envoys, and grain officers',
+    prompt: 'The settlement has names and honors; now it needs an operating rule. Where should command, petitions, finance, and ordinary magistracy meet?',
+    context: 'The arrangements associated with 27 and 23 BC were successive adjustments, not one finished constitution. Augustus accumulated powers while consuls, Senate, courts, cities, and provincial commands continued to operate.',
+    options: [
+      { id: 'administrative-princeps', label: 'Build a supervised administrative center', detail: 'Join the princeps\' command to auditable equestrian and senatorial offices, gaining coordination at the cost of making routine business depend upon the center.', impacts: { resources: { treasury: 5, stone: 2 }, metrics: { order: 4, trade: 2 }, augustan: { princepsAuthority: 9, urbanAdministration: 10, senateMagistrateCapacity: 3, patronageConcentration: 4, provincialCommandBalance: 5 }, flags: { augustanOperatingRule: 'administrative-principate' } } },
+      { id: 'civic-compact', label: 'Route business through Senate and magistrates', detail: 'Reserve more petitions, accounts, and appointments for ordinary offices, accepting slower coordination and harder bargaining over provincial command.', impacts: { resources: { treasury: 3, stone: 1 }, metrics: { order: 3 }, augustan: { senateMagistrateCapacity: 12, publicAccess: 6, princepsAuthority: 3, urbanAdministration: 4, provincialCommandBalance: 3 }, flags: { augustanOperatingRule: 'civic-compact' } } },
+      { id: 'household-command', label: 'Make the household the clearing house', detail: 'Use trusted family, freedmen, friends, and commanders to move decisions quickly, accepting patronal concentration and a more personal succession problem.', impacts: { resources: { treasury: 6, grain: 2 }, metrics: { readiness: 4, order: 2 }, augustan: { princepsAuthority: 12, householdStanding: 11, urbanAdministration: 5, patronageConcentration: 11, senateMagistrateCapacity: -3 }, flags: { augustanOperatingRule: 'household-principate' } } },
+    ],
+  },
+  {
+    turn: 56, id: 'agrippas-civic-program', title: 'Agrippa and the Public City', speaker: 'Agrippa, aediles, water officials, contractors, senators, neighborhood delegates, and bath attendants',
+    prompt: 'Water, baths, temples, roads, and spectacles can widen civic access or consolidate one partnership. How should Agrippa\'s program operate?',
+    context: 'Agrippa combined commands, offices, wealth, technical direction, and public benefaction. The surviving evidence is stronger for major works and dedications than for every administrative arrangement behind them.',
+    options: [
+      { id: 'municipal-service-board', label: 'Put services under recorded public boards', detail: 'Fund water and maintenance through accountable offices, sacrificing speed and some personal credit for operating continuity.', impacts: { resources: { treasury: -3, stone: 2 }, metrics: { water: 5, sanitation: 4 }, augustan: { urbanAdministration: 9, maintenanceCapacity: 10, publicAccess: 8, senateMagistrateCapacity: 5, householdStanding: -2 }, flags: { agrippanProgram: 'public-boards' } } },
+      { id: 'agrippan-benefaction', label: 'Accept Agrippa\'s integrated benefaction', detail: 'Let one trusted partner coordinate works and access rapidly, while tying services and memory to the ruling partnership.', impacts: { resources: { treasury: 4, stone: 3 }, metrics: { water: 6, trade: 3 }, augustan: { publicAccess: 9, householdStanding: 7, monumentMemory: 6, urbanAdministration: 5, patronageConcentration: 6 }, flags: { agrippanProgram: 'integrated-benefaction' } } },
+      { id: 'district-service-compacts', label: 'Disperse service through district compacts', detail: 'Give neighborhoods defined maintenance duties and access guarantees, gaining local resilience while accepting uneven capacity.', impacts: { resources: { timber: 3, grain: 2 }, metrics: { sanitation: 5, order: 2 }, augustan: { publicAccess: 11, maintenanceCapacity: 6, fireCoverage: 5, urbanAdministration: 2, princepsAuthority: -2 }, flags: { agrippanProgram: 'district-compacts' } } },
+    ],
+  },
+  {
+    turn: 57, id: 'household-senate-succession', title: 'Household, Senate, and Succession', speaker: 'Augustus, Livia, Agrippa, consuls, senators, jurists, priests, and representatives of the younger household',
+    prompt: 'The regime depends on persons as well as offices. How should honors, commands, and public expectations prepare for succession without declaring a monarchy?',
+    context: 'Augustan succession was repeatedly revised through marriages, adoptions, offices, honors, deaths, and command grants. No early arrangement proved permanent.',
+    options: [
+      { id: 'staged-public-apprenticeship', label: 'Stage office and command under public review', detail: 'Prepare possible successors through visible magistracies and bounded commands, improving legibility but exposing rivalry and delay.', impacts: { resources: { treasury: -2 }, metrics: { order: 3 }, augustan: { successionConfidence: 11, senateMagistrateCapacity: 7, provincialCommandBalance: 6, householdStanding: 3, princepsAuthority: -1 }, flags: { successionMethod: 'public-apprenticeship' } } },
+      { id: 'dynastic-honors', label: 'Center honors in the ruling household', detail: 'Make continuity visible through marriage, adoption, youth honors, and dynastic monuments, gaining recognition while narrowing the field.', impacts: { resources: { treasury: 2, stone: 2 }, metrics: { auspices: 4 }, augustan: { successionConfidence: 8, householdStanding: 12, monumentMemory: 7, patronageConcentration: 8, senateMagistrateCapacity: -2 }, flags: { successionMethod: 'dynastic-honors' } } },
+      { id: 'senatorial-contingency', label: 'Keep several senatorial contingencies viable', detail: 'Avoid naming one inevitable heir and preserve multiple officeholders, reducing dynastic concentration but leaving a less decisive transfer.', impacts: { resources: { treasury: -1 }, metrics: { order: 1 }, augustan: { senateMagistrateCapacity: 10, successionConfidence: 5, householdStanding: -3, patronageConcentration: -4, provincialCommandBalance: 3 }, flags: { successionMethod: 'senatorial-contingency' } } },
+    ],
+  },
+  {
+    turn: 58, id: 'peace-and-provincial-command', title: 'Peace, Ritual, and Provincial Command', speaker: 'Consuls, priests, provincial governors, allied delegations, veterans, and the Augustan household',
+    prompt: 'The language of peace now rests on armies and provincial settlements. How should commemoration relate to actual command?',
+    context: 'The Senate voted the Ara Pacis after Augustus returned from Spain and Gaul. Its imagery and ritual belonged to a political settlement sustained by provincial command and military force.',
+    options: [
+      { id: 'senatorial-peace-account', label: 'Join commemoration to senatorial accounts', detail: 'Require command reports, ritual votes, and provincial petitions beside celebration, making peace a reviewed settlement.', impacts: { resources: { treasury: -2, stone: 2 }, metrics: { auspices: 4, order: 3 }, augustan: { senateMagistrateCapacity: 8, provincialCommandBalance: 10, monumentMemory: 6, princepsAuthority: 2 }, flags: { peaceSettlement: 'reviewed-command' } } },
+      { id: 'victory-peace-program', label: 'Present peace as the princeps\' victory', detail: 'Unify public memory around restored order and the ruling household, strengthening authority while obscuring bargaining and command costs.', impacts: { resources: { treasury: 3, stone: 3 }, metrics: { auspices: 6, readiness: 3 }, augustan: { princepsAuthority: 10, householdStanding: 8, monumentMemory: 10, provincialCommandBalance: 2, patronageConcentration: 5 }, flags: { peaceSettlement: 'victory-program' } } },
+      { id: 'provincial-renewal-calendar', label: 'Publish command renewals and provincial petitions', detail: 'Make terms, revenues, and appeals more legible, limiting spectacle in favor of enforceable provincial review.', impacts: { resources: { treasury: -3 }, metrics: { trade: 4, order: 2 }, augustan: { provincialCommandBalance: 13, senateMagistrateCapacity: 5, urbanAdministration: 4, monumentMemory: -2, publicAccess: 4 }, flags: { peaceSettlement: 'published-renewals' } } },
+    ],
+  },
+  {
+    turn: 59, id: 'forum-memory-justice', title: 'The Forum of Augustus', speaker: 'Augustus, praetors, senators, advocates, architects, priests, veterans, and property holders',
+    prompt: 'The new forum can relieve courts and organize military ceremony, but it also edits Roman memory around one victor. Which operating rule should govern it?',
+    context: 'The Forum of Augustus and Temple of Mars Ultor combined legal business, military and religious ceremony, ancestry, exempla, and dynastic representation. Construction and land constraints stretched across decades.',
+    options: [
+      { id: 'courts-first-forum', label: 'Give courts and public access first claim', detail: 'Staff hearings, routes, and records before expanding ceremony, limiting exclusive household control at a recurring cost.', impacts: { resources: { treasury: -4, stone: 3 }, metrics: { order: 5, trade: 3 }, augustan: { senateMagistrateCapacity: 8, urbanAdministration: 7, publicAccess: 9, maintenanceCapacity: 4, monumentMemory: 3 }, flags: { forumAugustusRule: 'courts-first' } } },
+      { id: 'martial-dynastic-forum', label: 'Center Mars Ultor and dynastic memory', detail: 'Make military departure, vengeance, ancestry, and household authority the precinct\'s organizing language.', impacts: { resources: { treasury: 3, stone: 4 }, metrics: { readiness: 5, auspices: 4 }, augustan: { princepsAuthority: 9, householdStanding: 9, monumentMemory: 12, patronageConcentration: 6, publicAccess: 1 }, flags: { forumAugustusRule: 'martial-dynastic' } } },
+      { id: 'mixed-civic-calendar', label: 'Divide the calendar among civic functions', detail: 'Reserve dated periods for courts, Senate ceremony, military business, and public festivals, gaining balance at the cost of slower throughput.', impacts: { resources: { treasury: -2, stone: 2 }, metrics: { order: 4, trade: 2 }, augustan: { senateMagistrateCapacity: 6, publicAccess: 7, monumentMemory: 7, provincialCommandBalance: 4, princepsAuthority: 4 }, flags: { forumAugustusRule: 'mixed-calendar' } } },
+    ],
+  },
+  {
+    turn: 60, id: 'fire-and-vigiles', title: 'The Fire of AD 6', speaker: 'Augustus, magistrates, equestrian officers, neighborhood leaders, water officials, property holders, and night watchmen',
+    prompt: 'Fire exposes the limits of improvised response. Who should command a permanent night watch and fire service?',
+    context: 'After serious fires, Augustus established the vigiles in AD 6 under an equestrian prefect, organized across the city. The playable network is a scale abstraction of stations, men, equipment, routes, water, and command.',
+    options: [
+      { id: 'central-vigiles', label: 'Create a centrally commanded vigiles', detail: 'Fund a permanent citywide service under one accountable prefect, gaining reach while enlarging central administration and coercive capacity.', impacts: { resources: { treasury: -5, timber: 3 }, metrics: { sanitation: 6, order: 4 }, augustan: { fireCoverage: 18, urbanAdministration: 10, princepsAuthority: 5, maintenanceCapacity: 5, patronageConcentration: 3 }, flags: { vigilesCommand: 'central-prefect' } } },
+      { id: 'magistrate-ward-service', label: 'Coordinate ward crews through magistrates', detail: 'Keep local knowledge and civic offices in command, accepting uneven readiness and slower reinforcement.', impacts: { resources: { treasury: -3, timber: 2 }, metrics: { sanitation: 5, order: 3 }, augustan: { fireCoverage: 13, senateMagistrateCapacity: 8, publicAccess: 5, maintenanceCapacity: 6, urbanAdministration: 4 }, flags: { vigilesCommand: 'magistrate-wards' } } },
+      { id: 'contracted-night-watch', label: 'Contract equipment and neighborhood watches', detail: 'Mobilize property holders and contractors quickly, reducing public payroll while weakening uniform standards and inspection.', impacts: { resources: { treasury: 2, timber: 3 }, metrics: { sanitation: 3, trade: 2 }, augustan: { fireCoverage: 9, urbanAdministration: 2, maintenanceCapacity: 2, patronageConcentration: 9, publicAccess: -2 }, flags: { vigilesCommand: 'contracted-watch' } } },
+    ],
+  },
+  {
+    turn: 61, id: 'succession-ad14', title: 'The Settlement Outlives Augustus', speaker: 'Augustus\' household, Tiberius, consuls, senators, praetorians, provincial commanders, magistrates, and the Roman people',
+    prompt: 'The founder is dying. Which institutions carry command, grain, public order, provinces, and legitimacy through the first transfer?',
+    context: 'Augustus died in AD 14 and Tiberius succeeded through accumulated powers, family position, military standing, and senatorial action. The transition was neither an ordinary election nor a simple published law of hereditary monarchy.',
+    options: [
+      { id: 'recorded-transfer', label: 'Record powers and renew them through Senate and armies', detail: 'Make each command, tribunal power, oath, and provincial instruction explicit, reducing ambiguity while revealing how exceptional the package has become.', impacts: { resources: { treasury: -2 }, metrics: { order: 5, readiness: 2 }, augustan: { successionConfidence: 14, senateMagistrateCapacity: 7, provincialCommandBalance: 8, urbanAdministration: 5, princepsAuthority: 3 }, flags: { augustanSuccession: 'recorded-transfer' } } },
+      { id: 'household-acclamation', label: 'Secure household and military acclamation first', detail: 'Use the established heir, guards, armies, and household network to prevent a vacuum, accepting a more openly personal transfer.', impacts: { resources: { treasury: 2, grain: 2 }, metrics: { order: 5, readiness: 6 }, augustan: { successionConfidence: 12, householdStanding: 10, princepsAuthority: 8, patronageConcentration: 8, senateMagistrateCapacity: -2 }, flags: { augustanSuccession: 'household-acclamation' } } },
+      { id: 'senatorial-interregnum', label: 'Let consuls and Senate conduct an interregnum', detail: 'Reassert ordinary offices before assigning exceptional powers, preserving civic capacity while risking delay among armies and provinces.', impacts: { resources: { treasury: -3, grain: -1 }, metrics: { order: 2, readiness: -3 }, augustan: { successionConfidence: 8, senateMagistrateCapacity: 12, princepsAuthority: -5, provincialCommandBalance: 4, publicAccess: 4 }, flags: { augustanSuccession: 'senatorial-interregnum' } } },
+    ],
+  },
+)
+
+COUNCILS.push(
+  {
     turn: 42, id: 'land-commission-and-grain', title: 'Land Commission and Grain', speaker: 'Tribunes, senators, commissioners, possessors, veterans, tenants, grain officers, and Italian delegates',
     prompt: 'The Gracchan conflicts have made land, grain, military service, and constitutional procedure inseparable in public debate. What rule should survive the men who first pressed it?',
     context: 'Appian and Plutarch provide the fullest connected narratives, but both wrote long afterward and shaped events around character and constitutional decline. Surviving agrarian-law evidence confirms complex claims and procedures without supplying a complete transcript of the conflicts.',
@@ -985,6 +1142,13 @@ export const OBJECTIVES = [
   { from: 52, to: 52, text: 'Finance the triumviral wars without allowing confiscation to consume Italian title security.' },
   { from: 53, to: 53, text: 'Turn final military victory into demobilization, provincial settlement, and enforceable accounts.' },
   { from: 54, to: 54, text: 'Judge operating authority in 27 BC separately from the constitutional language used to describe it.' },
+  { from: 55, to: 55, text: 'Turn the settlement into an operating system without allowing command to consume every civic channel.' },
+  { from: 56, to: 56, text: 'Decide whether Agrippa\'s public services become institutions, benefactions, or district compacts.' },
+  { from: 57, to: 57, text: 'Make succession legible without pretending the ruling household and ordinary office are the same thing.' },
+  { from: 58, to: 58, text: 'Connect the language of peace to reviewed provincial command and enforceable obligations.' },
+  { from: 59, to: 59, text: 'Make monumental memory serve courts and civic access as well as the ruling household.' },
+  { from: 60, to: 60, text: 'Build fire response as an operating service with command, equipment, routes, and recurring cost.' },
+  { from: 61, to: 61, text: 'Test whether authority, services, provinces, and succession can survive the founder.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

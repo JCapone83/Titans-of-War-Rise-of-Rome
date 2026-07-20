@@ -64,6 +64,13 @@ const CONTENT = {
     unlocks: ['Operating settlement ledger', 'Caesarian civic works', 'Multiple constitutional outcomes'],
     action: 'Enter the civil war',
   },
+  augustan: {
+    eyebrow: '27-23 BC - settlement becomes administration',
+    title: 'The Augustan City',
+    text: 'Civil war has ended, but the first settlement is already changing. Command, Senate and magistrates, household succession, provincial review, water, fire, grain, public access, and monumental memory must now operate together through AD 14.',
+    unlocks: ['Augustan operating ledger', 'Eight evidence-labeled projects', 'The first succession test'],
+    action: 'Enter the Augustan City',
+  },
   italian: {
     eyebrow: '312 BC - recovery becomes a system',
     title: 'Roads to Italy',

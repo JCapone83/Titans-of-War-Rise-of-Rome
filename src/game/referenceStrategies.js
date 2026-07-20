@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
-import { continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
-import { calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
+import { continueToAugustanCity, continueToCivilSettlement, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterMediterranean, enterMetropolis, enterRepublicUnderStrain } from './continuation.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -597,5 +597,50 @@ export function runAllCivilSettlementStrategies() {
       state = result.state
     }
     return { strategy, state, outcome: calculateOutcome(state), civilScore: calculateCivilSettlementScore(state), skipped, ledger }
+  })
+}
+
+export const AUGUSTAN_CITY_STRATEGIES = [
+  {
+    id: 'administrative-principate', name: 'Administrative Principate',
+    councils: { 55: 'administrative-princeps', 56: 'municipal-service-board', 57: 'staged-public-apprenticeship', 58: 'senatorial-peace-account', 59: 'courts-first-forum', 60: 'central-vigiles', 61: 'recorded-transfer' },
+    projectPriorities: { 55: 'palatineOfficialPrecinct', 56: 'palatineOfficialPrecinct', 57: 'palatineOfficialPrecinct', 58: 'agrippanPantheon', 59: 'forumAugustus', 60: 'vigilesWardNetwork', 61: 'vigilesWardNetwork' },
+  },
+  {
+    id: 'civic-augustan-compact', name: 'Civic Augustan Compact',
+    councils: { 55: 'civic-compact', 56: 'district-service-compacts', 57: 'senatorial-contingency', 58: 'provincial-renewal-calendar', 59: 'mixed-civic-calendar', 60: 'magistrate-ward-service', 61: 'senatorial-interregnum' },
+    projectPriorities: { 55: 'agrippanPantheon', 56: 'agrippanPantheon', 57: 'agrippanPantheon', 58: 'bathsAgrippa', 59: 'bathsAgrippa', 60: 'bathsAgrippa', 61: 'araPacis' },
+  },
+  {
+    id: 'household-centered-principate', name: 'Household-Centered Principate',
+    councils: { 55: 'household-command', 56: 'agrippan-benefaction', 57: 'dynastic-honors', 58: 'victory-peace-program', 59: 'martial-dynastic-forum', 60: 'contracted-night-watch', 61: 'household-acclamation' },
+    projectPriorities: { 55: 'mausoleumAugustus', 56: 'mausoleumAugustus', 57: 'mausoleumAugustus', 58: 'mausoleumAugustus', 59: 'theatreMarcellus', 60: 'theatreMarcellus', 61: 'theatreMarcellus' },
+  },
+]
+
+export function runAllAugustanCityStrategies() {
+  const bases = runAllCivilSettlementStrategies()
+  return AUGUSTAN_CITY_STRATEGIES.map((strategy, index) => {
+    let state = enterAugustanCity(continueToAugustanCity(bases[index].state))
+    const skipped = []
+    const ledger = []
+    while (state.outcome !== 'augustan-city-complete') {
+      const optionId = strategy.councils[state.turn]
+      if (state.council && !state.councilResolved) {
+        if (!optionId) skipped.push({ turn: state.turn, reason: 'No Augustan City council choice declared.' })
+        else state = resolveCouncil(state, optionId)
+      }
+      const projectId = strategy.projectPriorities[state.turn]
+      if (projectId && actionRemaining(state)) {
+        const work = workAugustanProject(state, projectId)
+        if (work.error) skipped.push({ turn: state.turn, projectId, reason: work.error })
+        else state = work.state
+      }
+      ledger.push({ turn: state.turn, augustanCity: { ...state.augustanCity, projects: structuredClone(state.augustanCity.projects ?? {}) }, resources: { ...state.resources }, bridges: structuredClone(state.chronologyBridges ?? []) })
+      const result = advanceTurn(state)
+      if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+      state = result.state
+    }
+    return { strategy, state, outcome: calculateOutcome(state), augustanScore: calculateAugustanCityScore(state), skipped, ledger }
   })
 }

@@ -1,5 +1,5 @@
-import { TURN_YEARS } from './data.js'
-import { calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
+import { TURN_YEARS, formatYear } from './data.js'
+import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore } from './outcomes.js'
 import { regionalForecast, workforceSummary } from './simulation.js'
 
 const section = (title, lines) => [`## ${title}`, ...lines, ''].join('\n')
@@ -15,6 +15,7 @@ export function campaignMarkdown(state) {
   const metropolitanScore = calculateMetropolitanScore(state)
   const strainScore = calculateRepublicStrainScore(state)
   const civilScore = calculateCivilSettlementScore(state)
+  const augustanScore = calculateAugustanCityScore(state)
   const output = [
     '# Titans of War: Birth of Rome',
     '',
@@ -156,8 +157,23 @@ export function campaignMarkdown(state) {
     '### Settlement Public Works',
     ...projectLines(state.civilSettlement.projects, 'stages', 'operating'),
   ]))
+  if (state.augustanCity) output.push(section('The Augustan City', [
+    `- Operating rule: ${state.flags?.augustanOperatingRule ?? 'unsettled'}`,
+    `- Agrippan program: ${state.flags?.agrippanProgram ?? 'unsettled'}`,
+    `- Succession method: ${state.flags?.successionMethod ?? 'unsettled'}`,
+    `- Provincial peace settlement: ${state.flags?.peaceSettlement ?? 'unsettled'}`,
+    `- Forum operating rule: ${state.flags?.forumAugustusRule ?? 'unsettled'}`,
+    `- Vigiles command: ${state.flags?.vigilesCommand ?? 'unsettled'}`,
+    `- AD 14 succession: ${state.flags?.augustanSuccession ?? 'unsettled'}`,
+    `- Operating form: **${augustanScore.operatingForm}**`,
+    `- Succession capacity: ${augustanScore.succession}`,
+    ...ledgerLines(state.augustanCity),
+    `- The Augustan City score: ${augustanScore.grade} (${augustanScore.score})`,
+    '### Augustan Public Works',
+    ...projectLines(state.augustanCity.projects, 'stages', 'operating'),
+  ]))
 
-  output.push(section('Council Record', state.choiceLog.length ? state.choiceLog.map((entry) => `- Turn ${entry.turn} (${TURN_YEARS[entry.turn - 1]} BC): **${entry.council}** - ${entry.option}`) : ['- No councils recorded.']))
+  output.push(section('Council Record', state.choiceLog.length ? state.choiceLog.map((entry) => `- Turn ${entry.turn} (${formatYear(TURN_YEARS[entry.turn - 1])}): **${entry.council}** - ${entry.option}`) : ['- No councils recorded.']))
   output.push(section('Works Established', state.buildings.length ? state.buildings.map((building) => `- ${building.name}, ${building.districtId} (turn ${building.builtTurn})`) : ['- No works established.']))
   output.push(section('Unfinished Major Projects', state.projects?.length ? state.projects.map((project) => `- ${project.name}, ${project.districtId}: ${project.progress}/${project.requiredSeasons} work seasons`) : ['- No unfinished major projects.']))
   return `${output.join('\n')}\n`

@@ -239,6 +239,41 @@ export const HISTORICAL_NOTES = [
     text: 'The settlement called a restoration preserved consuls, magistrates, Senate business, courts, and assemblies while concentrating provinces, armies, honors, fiscal means, and public obligations around Augustus. The arrangement developed further after 27 BC; one date did not produce the finished principate.',
     evidence: 'Augustus, Res Gestae 34; the Fasti, coin legends, honors, provincial assignments, and later legal evidence; Cassius Dio 53 supplies a much later constitutional narrative. Modern labels such as principate summarize an operating pattern and should not be mistaken for an ancient founding statute.',
   },
+  {
+    id: 'settlement-23', title: 'The Principate Was Revised in Practice', category: 'Contemporary offices + later constitutional narrative', turns: [55],
+    text: 'Augustus did not operate from one final charter. The adjustments around 23 BC changed the relation between consulship, tribunician power, provincial command, Senate business, and the public standing of the princeps.',
+    evidence: 'Augustus, Res Gestae 4 and 34; fasti, coinage, and command evidence; Cassius Dio 53-54. Dio offers a connected later account, while contemporary evidence better establishes individual powers than a single constitutional theory.',
+  },
+  {
+    id: 'agrippa-public-city', title: 'Agrippa Joined Benefaction to Administration', category: 'Material evidence + contemporary commemoration', turns: [56],
+    text: 'Agrippa\'s works widened water, bathing, ritual, circulation, and spectacle. His offices, wealth, command, friendship with Augustus, and technical direction made public benefit and ruling partnership parts of the same system.',
+    evidence: 'Frontinus, Aqueducts 9-10 and 98 for Agrippa\'s water administration; Cassius Dio 53-54; inscriptions and archaeology of the Campus Martius. Individual plans and administrative details remain uneven.',
+  },
+  {
+    id: 'augustan-succession-plans', title: 'Succession Was a Sequence of Failed Plans', category: 'Contemporary honors + later biography and history', turns: [57],
+    text: 'Marriage, adoption, youth honors, offices, command, and public visibility prepared several possible successors. Death repeatedly broke these arrangements, showing that household recognition alone did not transfer the full operating package.',
+    evidence: 'Res Gestae 14; fasti, coinage, inscriptions, and monuments associated with Marcellus, Agrippa, Gaius, Lucius, Tiberius, and Germanicus; Velleius 2, Suetonius, Augustus and Tiberius, and Cassius Dio 54-56.',
+  },
+  {
+    id: 'ara-pacis-command', title: 'The Ara Pacis Joined Peace to Command', category: 'Monument + senatorial decree context', turns: [58],
+    text: 'The Senate voted the altar after Augustus returned from Spain and Gaul. Procession, sacrifice, family, fertility, Senate, and Roman exempla framed peace as an operating order supported by provincial command.',
+    evidence: 'Res Gestae 12; Ovid, Fasti 1.709-724; the surviving altar and relief program. Reconstruction of the original precinct and interpretation of individual figures remain debated.',
+  },
+  {
+    id: 'forum-augustus-memory', title: 'The Forum of Augustus Organized Justice and Memory', category: 'Archaeology + inscriptions + later description', turns: [59],
+    text: 'The forum relieved some legal and ceremonial pressure while arranging military departure, vengeance, ancestry, exempla, and dynastic standing around Mars Ultor. Its public use did not make its political authorship disappear.',
+    evidence: 'Res Gestae 21; Ovid, Fasti 5; Suetonius, Augustus 29; inscriptions and archaeology of the forum and Temple of Mars Ultor. The precinct opened in 2 BC after a long and constrained building history.',
+  },
+  {
+    id: 'vigiles-ad6', title: 'The Vigiles Made Fire Response a Permanent Service', category: 'Later administrative history + inscriptions', turns: [60],
+    text: 'After major fires Augustus organized the vigiles in AD 6 under an equestrian prefect. Men, equipment, stations, ward routes, water, night patrol, pay, and command turned improvised response into recurring administration.',
+    evidence: 'Cassius Dio 55.26; Suetonius, Augustus 30; inscriptions and later legal evidence for vigiles organization. The game network is explicitly a city-scale abstraction, not a reconstruction of one station in AD 6.',
+  },
+  {
+    id: 'succession-ad14', title: 'AD 14 Tested the First Transfer', category: 'Contemporary and near-contemporary evidence + later narrative', turns: [61],
+    text: 'Tiberius succeeded through family position, accumulated powers, military standing, provincial command, oaths, and senatorial action. The transfer worked, but it exposed how much of the principate existed in a package attached to a person.',
+    evidence: 'Res Gestae 14; Velleius Paterculus 2.123-124; Tacitus, Annals 1; Suetonius, Augustus and Tiberius; Cassius Dio 56-57; fasti, oaths, and command evidence. Tacitus and Dio organize the transition through later political judgments.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

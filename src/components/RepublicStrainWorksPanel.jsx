@@ -1,4 +1,4 @@
-import { REPUBLIC_STRAIN_PROJECTS, TURN_YEARS } from '../game/data.js'
+import { REPUBLIC_STRAIN_PROJECTS, TURN_YEARS, formatYear } from '../game/data.js'
 import { republicStrainProjectAvailability } from '../game/simulation.js'
 
 export function RepublicStrainWorksPanel({ state, onWork }) {
@@ -12,7 +12,7 @@ export function RepublicStrainWorksPanel({ state, onWork }) {
       const availability = republicStrainProjectAvailability(state, definition.id)
       return <article key={definition.id} className={project?.completed ? 'public-work complete' : 'public-work'}>
         <div><strong>{definition.name}</strong><span>{project?.completed ? 'Complete' : `${project?.progress ?? 0}/${definition.seasons} seasons`}</span></div>
-        <small>Available {TURN_YEARS[definition.unlockTurn - 1]} BC</small>
+        <small>Available {formatYear(TURN_YEARS[definition.unlockTurn - 1])}</small>
         <p>{definition.summary}</p>
         {!project?.completed && <button type="button" onClick={() => onWork(definition.id)} disabled={!availability.available}>{availability.available ? 'Commit crews' : availability.reason}</button>}
       </article>

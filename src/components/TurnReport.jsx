@@ -1,4 +1,5 @@
 import { ArrowRight, X } from 'lucide-react'
+import { formatYear } from '../game/data.js'
 
 export function TurnReport({ report, onClose }) {
   if (!report) return null
@@ -7,7 +8,7 @@ export function TurnReport({ report, onClose }) {
     <div className="overlay" role="presentation">
       <section className="report-modal" role="dialog" aria-modal="true" aria-labelledby="report-title">
         <button className="close-button" onClick={onClose} aria-label="Close season report"><X /></button>
-        <p className="eyebrow">Season report · {report.year} BC</p>
+        <p className="eyebrow">Season report · {formatYear(report.year)}</p>
         <h2 id="report-title">{report.title}</h2>
         <p className="report-lead">{report.text}</p>
         {report.resolvedRisk !== null && <p className="resolved-risk">{report.riskLabel ?? 'Resolved risk'}: <strong>{report.resolvedRisk}/100</strong></p>}

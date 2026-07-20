@@ -220,9 +220,19 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .civil-project-art figcaption strong { color: var(--gold); text-align: right; }
 .public-work-heading { display: flex; justify-content: space-between; gap: 8px; }
 .civil-settlement-works .public-work small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
+.augustan-city-panel { border-bottom: 1px solid #796735; background: #202019; }
+.augustan-measures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.augustan-risks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.augustan-risks span { padding: 7px; border: 1px solid var(--line); background: #191a17; color: var(--muted); font-size: 9px; }
+.augustan-risks strong { display: block; margin-top: 2px; color: var(--gold); font-size: 13px; }
+.augustan-works .public-works-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.augustan-works .public-work { min-width: 0; padding: 10px; }
+.augustan-works .public-work small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
+.augustan-works .civil-project-art { aspect-ratio: 3 / 2; }
 .project-stage-meter { height: 7px; margin: 8px 0; overflow: hidden; background: #35362f; }
 .project-stage-meter i { display: block; height: 100%; background: var(--gold); transition: width .15s ease; }
 @media (max-width: 720px) { .civil-settlement-works .public-works-list { grid-template-columns: 1fr; } }
+@media (max-width: 720px) { .augustan-works .public-works-list, .augustan-risks { grid-template-columns: 1fr; } }
 
 .regional-map-section { border-bottom: 1px solid var(--line); background: #25271f; }.regional-map-section .map-heading > p { display: flex; align-items: center; gap: 7px; max-width: 260px; margin: 0; }.regional-map-section .map-heading svg { width: 17px; color: var(--gold); flex: 0 0 auto; }
 .regional-map { position: relative; height: clamp(500px, 53vw, 650px); min-height: 500px; overflow: hidden; isolation: isolate; background: #566344; }.regional-map::before { content: ""; position: absolute; inset: 6%; border: 1px solid #92966b; opacity: .5; transform: rotate(-2deg); }.regional-map::after { content: ""; position: absolute; right: -10%; top: -8%; width: 48%; height: 70%; border-radius: 50%; background: #6a744f; opacity: .55; }.regional-coast { position: absolute; left: -12%; bottom: -25%; width: 52%; height: 75%; border-radius: 50%; background: #487888; box-shadow: inset -6px 8px 0 #7ea0a3; transform: rotate(-12deg); z-index: 0; }.regional-tiber { position: absolute; left: 16%; top: 10%; width: 34%; height: 6px; background: #73a2aa; transform: rotate(72deg); transform-origin: right center; z-index: 1; }

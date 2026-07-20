@@ -1,18 +1,18 @@
-import { CIVIL_SETTLEMENT_PROJECTS, TURN_YEARS, formatYear } from '../game/data.js'
-import { artForCivilSettlementProject, civilSettlementProjectStage } from '../game/projectArt.js'
-import { civilSettlementProjectAvailability } from '../game/simulation.js'
+import { AUGUSTAN_PROJECTS, TURN_YEARS, formatYear } from '../game/data.js'
+import { artForAugustanProject, augustanProjectStage } from '../game/projectArt.js'
+import { augustanProjectAvailability } from '../game/simulation.js'
 
-export function CivilSettlementWorksPanel({ state, onWork }) {
-  if (!state.civilSettlement) return null
-  return <section className="mediterranean-works-panel civil-settlement-works" aria-labelledby="civil-settlement-works-title">
-    <div className="italian-heading"><div><p className="eyebrow">Civic core and demobilization</p><h2 id="civil-settlement-works-title">Settlement works</h2></div></div>
-    <p className="works-intro">Playable stages span irregular historical intervals. Completion means operating capacity, not an instantly finished or permanently pristine monument.</p>
-    <div className="public-works-list">{Object.values(CIVIL_SETTLEMENT_PROJECTS).map((definition) => {
-      const project = state.civilSettlement.projects?.[definition.id]
-      const availability = civilSettlementProjectAvailability(state, definition.id)
-      const art = artForCivilSettlementProject(definition.id)
+export function AugustanWorksPanel({ state, onWork }) {
+  if (!state.augustanCity) return null
+  return <section className="mediterranean-works-panel augustan-works" aria-labelledby="augustan-works-title">
+    <div className="italian-heading"><div><p className="eyebrow">Memory must operate</p><h2 id="augustan-works-title">Augustan works</h2></div></div>
+    <p className="works-intro">Each image is labeled by evidence status. Progress means reserved site, foundations and service, structural form, then an operating institution with recurring costs.</p>
+    <div className="public-works-list">{Object.values(AUGUSTAN_PROJECTS).map((definition) => {
+      const project = state.augustanCity.projects?.[definition.id]
+      const availability = augustanProjectAvailability(state, definition.id)
+      const art = artForAugustanProject(definition.id)
       const progress = Math.min(definition.seasons, Math.max(0, project?.progress ?? 0))
-      const stage = civilSettlementProjectStage(project, definition)
+      const stage = augustanProjectStage(project, definition)
       const percent = Math.round(progress / definition.seasons * 100)
       return <article key={definition.id} className={project?.completed ? 'public-work complete' : 'public-work'}>
         <figure className="civil-project-art" data-stage={stage.key}>

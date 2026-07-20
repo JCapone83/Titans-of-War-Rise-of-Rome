@@ -2,13 +2,13 @@
 
 Build Rome before Rome is inevitable.
 
-**Birth of Rome** is a local-first historical city-building strategy game. Its deterministic campaign follows Rome from separate hill settlements in 753 BC through kingship, republic, Italian and Mediterranean expansion, metropolitan strain, civil war, and the operating settlement of 27 BC. The player must place works according to terrain, divide households among farming, construction, and levy service, preserve public records and political channels, and convert victory into institutions without exhausting the city or its allies.
+**Birth of Rome** is a local-first historical city-building strategy game. Its deterministic campaign follows Rome from separate hill settlements in 753 BC through kingship, republic, Italian and Mediterranean expansion, civil war, the operating settlement of 27 BC, and the first succession in AD 14. The player must place works according to terrain, divide households among farming, construction, and levy service, preserve public records and political channels, and convert victory into institutions without exhausting the city or its allies.
 
 No AI model, account, remote service, or internet connection is required after installation.
 
 ## Current Campaign
 
-This `0.1.0` campaign contains 54 deterministic turns and 49 political councils. The 264 BC core judgment and every later act are explicit opt-in continuations, so a completed earlier campaign is never silently rewritten.
+This `0.1.0` campaign contains 61 deterministic turns and 56 political councils. The 264 BC core judgment and every later act are explicit opt-in continuations, so a completed earlier campaign is never silently rewritten.
 
 - **Hill Settlements, 753-650 BC**
 - **City of Kings, 650-509 BC**
@@ -20,6 +20,7 @@ This `0.1.0` campaign contains 54 deterministic turns and 49 political councils.
 - **Conquest and Metropolis, 197-133 BC**
 - **Republic Under Strain, 121-49 BC**
 - **Civil War and Settlement, 49-27 BC**
+- **The Augustan City, 27 BC-AD 14**
 - Six districts with terrain rules and limited plots
 - A household population model with district occupancy, births, arrivals, departures, illness, and crisis losses
 - Visible population composition: households, workers, levy-eligible people, craftsmen, and dependents
@@ -52,7 +53,10 @@ This `0.1.0` campaign contains 54 deterministic turns and 49 political councils.
 - Civil-war settlement mechanics separating command, demobilization, property, finance, succession, civic operation, and monumental credit
 - Four staged settlement works: the Forum of Caesar, Curia Julia, Basilica Julia, and a veteran land-and-road registry
 - Three viable 27 BC operating forms: an Augustan-style principate, a negotiated republican restoration, and a collegial military oligarchy
-- Local save/restore through schema version 13, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
+- Seven Augustan councils, twelve operating measures, and eight staged works spanning the revised settlement of 23 BC through the succession of AD 14
+- Evidence-labeled project art that distinguishes reconstruction, synthesis, hypothesis, and game abstraction, including an explicitly pre-Hadrianic Agrippan Pantheon
+- Three viable Augustan operating forms: an administrative principate, a civic compact, and a household-centered principate
+- Local save/restore through schema version 14, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
 
 ## Play Locally
 
@@ -78,7 +82,7 @@ After 509 BC, office structure matters directly. Paired annual magistrates cap t
 
 The **Season Forecast** exposes known production, upkeep, structural penalties, and population change before the player ends a turn. It explains expected births, arrivals, departures, and illness without revealing floods or enemy action in advance. The district inspector records condition and permits damaged works to be repaired, upgraded in place, or cleared for limited salvage.
 
-Run `npm run balance` to execute the published reference strategies from the hill settlements through 27 BC. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act VIII](docs/ACT_VIII_BALANCE_REPORT.md) and [Act IX](docs/ACT_IX_BALANCE_REPORT.md).
+Run `npm run balance` to execute the published reference strategies from the hill settlements through AD 14. Design claims and measured results are recorded in the balance reports under `docs/`, including [Act IX](docs/ACT_IX_BALANCE_REPORT.md) and [Act X](docs/ACT_X_BALANCE_REPORT.md).
 
 The campaign retains five city grades and adds separate grades for each later operating system:
 
@@ -93,6 +97,7 @@ The campaign retains five city grades and adds separate grades for each later op
 - Conquest and Metropolis
 - Republic Under Strain
 - Civil War and Settlement
+- The Augustan City
 
 Historical continuity measures how closely the city reproduces major developments associated with early Rome. It is not a moral grade, and alternate development remains valid play.
 
