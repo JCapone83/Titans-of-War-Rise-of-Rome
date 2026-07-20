@@ -58,7 +58,11 @@ The following five transparent PNG assets were produced with the built-in OpenAI
 - `public/images/projects/mausoleum-of-augustus-v1.png` — Text-and-evidence synthesis with an explicitly hypothetical planted upper profile
 - `public/images/projects/theatre-of-marcellus-v1.png` — Evidence-led reconstruction
 - `public/images/projects/agrippan-pantheon-v1.png` — Uncertainty-labeled reconstruction hypothesis
+- `public/images/projects/house-of-augustus-v1.png` — Evidence-led reconstruction with debated phase details
+- `public/images/projects/ara-pacis-v1.png` — Evidence-led reconstruction
+- `public/images/projects/baths-of-agrippa-v1.png` — Text-and-evidence synthesis
+- `public/images/projects/vigiles-ward-station-v1.png` — Game abstraction grounded in the Augustan ward and cohort system
 
-The Agrippan Pantheon asset deliberately excludes the standing Hadrianic rotunda, dome, and oculus. The Mausoleum cutaway is a game presentation device for its concentric burial structure and is not a claim that the monument stood open. These assets remain preproduction landmarks until their corresponding playable projects or historical-context surfaces pass separate implementation and historical-review gates.
+The Agrippan Pantheon asset deliberately excludes the standing Hadrianic rotunda, dome, and oculus. The Mausoleum cutaway is a game presentation device for its concentric burial structure and is not a claim that the monument stood open. The House of Augustus is a phased reconstruction rather than the later Domitianic palace. The Baths of Agrippa and vigiles station combine incomplete early evidence with functional game presentation. These assets remain preproduction landmarks until their corresponding playable projects or historical-context surfaces pass separate implementation and historical-review gates.
 
 Future maps, music, generated art, or public-domain historical material must be listed here with creator, source, license, and any required attribution before being added to a public release.
