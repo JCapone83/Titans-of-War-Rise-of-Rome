@@ -128,6 +128,13 @@ export const createMediterraneanState = () => ({
   projects: createMediterraneanProjects(),
 })
 
+export const createMetropolitanProjects = () => ({
+  republicanBasilica: { id: 'republicanBasilica', progress: 0, requiredSeasons: 4, completed: false, lastWorkedTurn: null },
+  regulatedMacellum: { id: 'regulatedMacellum', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+  aquaMarcia: { id: 'aquaMarcia', progress: 0, requiredSeasons: 4, completed: false, lastWorkedTurn: null },
+  civicPorticoes: { id: 'civicPorticoes', progress: 0, requiredSeasons: 3, completed: false, lastWorkedTurn: null },
+})
+
 export const createMetropolitanState = () => ({
   urbanMigration: 18,
   rentPressure: 20,
@@ -141,6 +148,7 @@ export const createMetropolitanState = () => ({
   provincialPetitionBacklog: 14,
   importedGrainDependence: 18,
   publicProvision: 42,
+  projects: createMetropolitanProjects(),
 })
 
 export const createInitialState = () => ({
@@ -189,7 +197,7 @@ export const createInitialState = () => ({
 })
 
 export function migrateState(saved) {
-  if (!saved || saved.turn < 1 || saved.turn > 39) return null
+  if (!saved || saved.turn < 1 || saved.turn > 41) return null
   if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(saved.version)) return null
   const population = saved.population ?? createInitialPopulation()
   const workforceAllocation = saved.workforceAllocation ?? createInitialWorkforceAllocation()
@@ -223,7 +231,7 @@ export function migrateState(saved) {
       metropolitanTransition: saved.metropolitanTransition ?? false,
       coreJudgment: saved.coreJudgment ?? null,
       chronologyBridges: saved.chronologyBridges ?? [],
-      metropolitan: saved.era >= 7 ? { ...createMetropolitanState(), ...(saved.metropolitan ?? {}) } : null,
+      metropolitan: saved.era >= 7 ? { ...createMetropolitanState(), ...(saved.metropolitan ?? {}), projects: { ...createMetropolitanProjects(), ...(saved.metropolitan?.projects ?? {}) } } : null,
       actionsMax: Math.max(saved.actionsUsed ?? 0, migratedWorksCapacity(population, workforceAllocation, saved.nextWorksBonus ?? 0, saved.republic, saved.flags?.magistrateMode)),
     }
   }

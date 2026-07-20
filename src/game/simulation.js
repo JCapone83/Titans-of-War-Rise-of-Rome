@@ -1,4 +1,4 @@
-import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { BUILDING_FAMILIES, DISTRICTS, DISTRICT_LINKS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TURN_YEARS, getCouncil, getDistrict, getFamily, getTier } from './data.js'
 import { createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
@@ -503,6 +503,49 @@ export function workMediterraneanProject(state, projectId) {
   return {
     state: { ...state, resources: addResources(state.resources, reverseChanges(definition.cost)), metrics, italian, mediterranean, actionsUsed: (state.actionsUsed ?? 0) + 1, actionLog: appendAction(state, { type: 'republican-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }) },
     message: completed ? `${definition.name} completed; its access, service, and upkeep obligations now enter the city ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} seasons.`,
+  }
+}
+
+export function metropolitanProjectAvailability(state, projectId) {
+  const blocked = (reason) => ({ available: false, ok: false, reason })
+  if (!state.metropolitan || state.era < 7) return blocked('Metropolitan public works are not yet available.')
+  const definition = METROPOLITAN_PROJECTS[projectId]
+  const project = state.metropolitan.projects?.[projectId]
+  if (!definition || !project) return blocked('Choose a valid metropolitan public work.')
+  if (project.completed) return blocked(`${definition.name} is complete.`)
+  if (project.lastWorkedTurn === state.turn) return blocked(`${definition.name} has already received the shared crews this season.`)
+  if (actionRemaining(state) < 1) return blocked('No shared public capacity remains this season.')
+  if (definition.prerequisite === 'tiberEmporium' && !state.mediterranean?.projects?.tiberEmporium?.completed) return blocked('The inherited Tiber Emporium must be complete first.')
+  if (definition.prerequisite === 'aquaAppia' && !state.italian?.projects?.aquaAppia?.completed) return blocked('The inherited Aqua Appia must be complete first.')
+  if (definition.prerequisite === 'republicanBasilica' && !state.metropolitan.projects.republicanBasilica?.completed) return blocked('The Republican Basilica must be complete first.')
+  const affordability = affordabilityFailure(state, definition.cost)
+  if (affordability) return blocked(affordability)
+  return { available: true, ok: true, definition, project }
+}
+
+export function workMetropolitanProject(state, projectId) {
+  const availability = metropolitanProjectAvailability(state, projectId)
+  if (!availability.ok) return { state, error: availability.reason }
+  const { definition, project } = availability
+  const progress = project.progress + 1
+  const completed = progress >= project.requiredSeasons
+  const nextProject = { ...project, progress, completed, lastWorkedTurn: state.turn }
+  let metropolitan = { ...state.metropolitan, projects: { ...state.metropolitan.projects, [projectId]: nextProject } }
+  let metrics = state.metrics
+  if (completed) {
+    metrics = addMap(metrics, definition.completionMetrics)
+    metropolitan = updateMetropolitan(metropolitan, definition.completionMetropolitan)
+  }
+  return {
+    state: {
+      ...state,
+      resources: addResources(state.resources, reverseChanges(definition.cost)),
+      metrics,
+      metropolitan,
+      actionsUsed: (state.actionsUsed ?? 0) + 1,
+      actionLog: appendAction(state, { type: 'metropolitan-public-work', project: definition.name, progress, requiredSeasons: project.requiredSeasons }),
+    },
+    message: completed ? `${definition.name} completed; its civic capacity and permanent service burden now enter the metropolitan ledger.` : `${definition.name} advanced to ${progress} of ${project.requiredSeasons} seasons.`,
   }
 }
 
@@ -1122,6 +1165,30 @@ export function mediterraneanForecast(state) {
       mediterraneanChanges: mergeChanges(result.mediterraneanChanges, definition?.upkeepMediterranean),
     }
   }, { resourceDelta: {}, metricDelta: {}, mediterraneanChanges: {} })
+  if (state.era >= 7) {
+    const projected = {
+      ...Object.fromEntries(Object.entries(m)
+        .filter(([key]) => key !== 'projects')
+        .map(([key, value]) => [key, clamp(value + (worksBurden.mediterraneanChanges[key] ?? 0))])),
+      projects: structuredClone(works),
+    }
+    return {
+      ...projected,
+      changes: worksBurden.mediterraneanChanges,
+      projected,
+      resourceDelta: worksBurden.resourceDelta,
+      metricDelta: worksBurden.metricDelta,
+      publicWorks: {
+        completed: completedWorks.map((project) => project.id),
+        resourceDelta: worksBurden.resourceDelta,
+        metricDelta: worksBurden.metricDelta,
+        mediterraneanChanges: worksBurden.mediterraneanChanges,
+      },
+      notes: [completedWorks.length
+        ? `Inherited Republican public works remain operating obligations: ${completedWorks.map((project) => MEDITERRANEAN_PROJECTS[project.id]?.name).join(', ')}.`
+        : 'No inherited Republican public work adds an operating burden to the metropolitan account.'],
+    }
+  }
   const changes = {
     fleetCapacity: m.fleetCapacity > 0 ? -1 : 0,
     maritimeLosses: state.turn === 30 ? 3 : state.turn === 31 ? 4 : state.turn === 32 ? 2 : 1,
@@ -1190,6 +1257,64 @@ export function mediterraneanForecast(state) {
   }
 }
 
+export function metropolitanForecast(state) {
+  if (!state.metropolitan) return null
+  const m = { ...createMetropolitanState(), ...state.metropolitan }
+  const works = m.projects ?? {}
+  const completedWorks = Object.values(works).filter((project) => project.completed)
+  const burdens = completedWorks.reduce((result, project) => {
+    const definition = METROPOLITAN_PROJECTS[project.id]
+    return {
+      resourceDelta: mergeChanges(result.resourceDelta, definition?.upkeepResources),
+      metricDelta: mergeChanges(result.metricDelta, definition?.upkeepMetrics),
+      metropolitanChanges: mergeChanges(result.metropolitanChanges, definition?.upkeepMetropolitan),
+    }
+  }, { resourceDelta: {}, metricDelta: {}, metropolitanChanges: {} })
+  const changes = {
+    urbanMigration: 2,
+    rentPressure: m.publicProvision >= 60 ? 0 : m.urbanMigration >= 30 ? 2 : 1,
+    legalCaseLoad: m.contractingCapacity >= 50 ? 1 : 2,
+    patronageConcentration: m.contractingCapacity >= 50 ? 1 : 0,
+    contractingCapacity: m.corruptionExposure >= 45 ? -1 : 1,
+    corruptionExposure: m.contractingCapacity >= 55 ? 1 : 0,
+    enslavedLaborInflow: state.turn === 40 ? 2 : 1,
+    freedHouseholdIntegration: m.publicProvision >= 55 ? 2 : 1,
+    citizenAbsence: state.turn <= 40 ? 1 : 0,
+    provincialPetitionBacklog: m.legalCaseLoad >= 45 ? 2 : 1,
+    importedGrainDependence: m.urbanMigration >= 28 ? 1 : 0,
+    publicProvision: m.urbanMigration >= 30 ? -1 : 0,
+    ...burdens.metropolitanChanges,
+  }
+  const projected = {
+    ...Object.fromEntries(Object.entries(m)
+      .filter(([key]) => key !== 'projects')
+      .map(([key, value]) => [key, clamp(value + (changes[key] ?? 0))])),
+    projects: structuredClone(works),
+  }
+  return {
+    ...projected,
+    changes,
+    projected,
+    resourceDelta: burdens.resourceDelta,
+    metricDelta: {
+      order: (m.legalCaseLoad >= 50 || m.corruptionExposure >= 50 ? -2 : 0),
+      food: m.importedGrainDependence >= 45 && state.resources.grain < 8 ? -2 : 0,
+      ...burdens.metricDelta,
+    },
+    publicWorks: {
+      completed: completedWorks.map((project) => project.id),
+      resourceDelta: burdens.resourceDelta,
+      metricDelta: burdens.metricDelta,
+      metropolitanChanges: burdens.metropolitanChanges,
+    },
+    notes: [
+      m.urbanMigration >= 40 ? 'Migration is increasing rent, circulation, provision, and hearing burdens faster than one institution can absorb them.' : 'Urban growth remains visible without yet overwhelming every metropolitan service.',
+      completedWorks.length ? `Metropolitan upkeep: ${completedWorks.map((project) => METROPOLITAN_PROJECTS[project.id]?.name).join(', ')} require recurring clerks, inspection, water, repairs, policing, or records.` : 'No metropolitan public work is complete; planned capacity has not yet become an operating institution.',
+      m.corruptionExposure >= 45 ? 'Contracting exposure is outrunning inspection and public records.' : 'Contracting remains open to public supervision, though patronage claims continue to accumulate.',
+    ],
+  }
+}
+
 export function forecastSeason(state) {
   const production = sumBuildingMaps(state, 'production')
   const upkeep = reverseChanges(sumBuildingMaps(state, 'upkeep'))
@@ -1200,8 +1325,9 @@ export function forecastSeason(state) {
   const regional = regionalForecast(state)
   const italian = italianForecast(state)
   const mediterranean = mediterraneanForecast(state)
+  const metropolitan = metropolitanForecast(state)
   return {
-    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta),
+    resourceDelta: mergeChanges(baseYield, production, upkeep, war?.resourceDelta, regional?.resourceDelta, italian?.resourceDelta, mediterranean?.resourceDelta, metropolitan?.resourceDelta),
     pressures: civicPressures(state),
     actionsRemaining: actionRemaining(state),
     population: projectPopulation(state),
@@ -1213,6 +1339,7 @@ export function forecastSeason(state) {
     regional,
     italian,
     mediterranean,
+    metropolitan,
   }
 }
 
@@ -1453,7 +1580,7 @@ export function advanceTurn(state) {
   const pressures = forecast.pressures
   const event = timedEvent(state)
   const resourceDelta = mergeChanges(forecast.resourceDelta, event?.resources)
-  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta)
+  const metricDelta = mergeChanges(pressures.effects, { readiness: forecast.workforce.readinessDelta }, event?.metrics, forecast.regional?.metricDelta, forecast.italian?.metricDelta, forecast.mediterranean?.metricDelta, forecast.metropolitan?.metricDelta)
   const nextResources = addResources(state.resources, resourceDelta)
   let nextMetrics = addMap(state.metrics, metricDelta)
   const shortages = Object.entries(nextResources).filter(([key, value]) => value === 0 && ['grain', 'timber', 'treasury'].includes(key))
@@ -1489,6 +1616,7 @@ export function advanceTurn(state) {
   const nextRegional = forecast.regional ? forecast.regional.projected : state.regional
   const nextItalian = forecast.italian ? forecast.italian.projected : state.italian
   const nextMediterranean = forecast.mediterranean ? forecast.mediterranean.projected : state.mediterranean
+  const nextMetropolitan = forecast.metropolitan ? forecast.metropolitan.projected : state.metropolitan
   report.republicChanges = mergeChanges(forecast.republic?.changes, warRepublicChanges)
   report.warChanges = forecast.war?.changes ?? null
   report.reconstructionChanges = forecast.reconstruction?.changes ?? null
@@ -1503,15 +1631,18 @@ export function advanceTurn(state) {
   if (forecast.italian) report.notes.push(...forecast.italian.notes)
   report.mediterraneanChanges = forecast.mediterranean?.changes ?? null
   if (forecast.mediterranean) report.notes.push(...forecast.mediterranean.notes)
+  report.metropolitanChanges = forecast.metropolitan?.changes ?? null
+  if (forecast.metropolitan) report.notes.push(...forecast.metropolitan.notes)
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
-  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: state.metropolitan, reports: [...state.reports, report] }
+  const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, reports: [...state.reports, report] }
   if (forecast.mediterranean?.publicWorks) {
     shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
     report.publicWorks = forecast.mediterranean.publicWorks
   }
+  if (forecast.metropolitan?.publicWorks) report.metropolitanPublicWorks = forecast.metropolitan.publicWorks
   if (state.turn === 29) return { state: { ...state, ...shared, outcome: 'complete' }, report }
   if (state.turn === 36) return { state: { ...state, ...shared, outcome: 'mediterranean-complete' }, report }
-  if (state.turn === 39) return { state: { ...state, ...shared, outcome: 'metropolitan-opening-complete' }, report }
+  if (state.turn === 41) return { state: { ...state, ...shared, outcome: 'metropolitan-complete' }, report }
   if (state.turn === 32) return { state: { ...state, ...shared, outcome: 'mediterranean-opening-complete', hannibalicTransition: true }, report }
   if (state.turn === 23) return { state: { ...state, ...shared, outcome: 'regional-complete', italianTransition: true }, report }
   if (state.turn === 20) return { state: { ...state, ...shared, outcome: 'act-four-complete', regionalTransition: true }, report }

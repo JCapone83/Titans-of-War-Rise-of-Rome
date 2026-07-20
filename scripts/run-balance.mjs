@@ -1,4 +1,4 @@
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 
 const results = runAllReferenceStrategies()
 for (const result of results) {
@@ -71,3 +71,15 @@ for (const result of mediterranean) {
   console.log(`  Republican public works: ${Object.values(m.projects ?? {}).filter((project) => project.completed).map((project) => project.id).join(', ') || 'none'} | recurring burdens visible in mediterraneanForecast`)
 }
 if (mediterranean.some((result) => result.state.turn !== 36 || result.state.outcome !== 'mediterranean-complete' || result.outcome.overall < 60 || result.skipped.length)) process.exitCode = 1
+
+console.log('\nAct VII Conquest and Metropolis strategies')
+const metropolitan = runAllMetropolitanStrategies()
+for (const result of metropolitan) {
+  const score = result.metropolitanScore
+  const projects = Object.values(result.state.metropolitan.projects)
+  console.log(`${result.strategy.name}: ${result.outcome.overall} overall | Conquest and Metropolis ${score.grade} (${score.score}) | 133 BC`)
+  console.log(`  Capacity ${score.capacity} | Bounded power ${score.boundedPower} | Household ${score.household} | Status legibility ${score.statusLegibility} | Physical systems ${score.physical}`)
+  console.log(`  Metropolitan public works: ${projects.filter((project) => project.completed).map((project) => project.id).join(', ') || 'none'} complete; ${projects.filter((project) => !project.completed && project.progress > 0).map((project) => `${project.id} ${project.progress}/${project.requiredSeasons}`).join(', ') || 'none active'}`)
+  if (result.skipped.length) console.log(`  Skipped: ${result.skipped.map((item) => `T${item.turn} ${item.projectId ?? 'council'} - ${item.reason}`).join('; ')}`)
+}
+if (metropolitan.some((result) => result.state.turn !== 41 || result.state.outcome !== 'metropolitan-complete' || result.outcome.overall < 60 || result.metropolitanScore.score < 60 || result.skipped.length)) process.exitCode = 1

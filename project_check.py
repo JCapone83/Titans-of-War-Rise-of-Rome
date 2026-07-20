@@ -49,6 +49,7 @@ def main() -> None:
         "src/components/LaborAllocationPanel.jsx": "Seasonal obligations",
         "src/components/RepublicPanel.jsx": "Republican balance",
         "src/components/ReconstructionPanel.jsx": "Reconstruction ledger",
+        "src/components/MetropolitanWorksPanel.jsx": "Metropolitan public works",
         "src/components/RegionalMap.jsx": "The Regional Compact",
         "src/components/RegionalInspector.jsx": "Regional forecast",
         "src/components/ProjectLedger.jsx": "Major Projects",
@@ -63,6 +64,7 @@ def main() -> None:
         "docs/ACT_IV_BALANCE_REPORT.md": "Rapid Household Return",
         "docs/REGIONAL_SPINE_BALANCE_REPORT.md": "Strategic Depth",
         "docs/ACT_V_BALANCE_REPORT.md": "Appian Persistence",
+        "docs/ACT_VII_OPENING_BALANCE_REPORT.md": "200-133 BC",
         "docs/ART_DIRECTION_AND_ASSET_SPEC.md": "Approve one Palatine Huts master first",
         "docs/FIRST_STRUCTURE_CONCEPT_BIBLE.md": "Palatine Huts",
         "docs/BATCH_5_STRUCTURE_CONCEPT_BIBLE.md": "Comitium",
@@ -114,6 +116,7 @@ def main() -> None:
     require("src/game/simulation.js", "enterRegionalStrategy")
     require("src/game/simulation.js", "regionalForecast")
     require("src/game/simulation.js", "mediterraneanForecast")
+    require("src/game/simulation.js", "metropolitanForecast")
     require("src/game/continuation.js", "continueToMediterranean")
     require("src/game/continuation.js", "enterMediterranean")
     require("src/game/continuation.js", "enterHannibalicEmergency")
@@ -133,7 +136,17 @@ def main() -> None:
     require("src/game/data.js", "Victory, Credit, and the Returning Army")
     require("src/game/historicalContext.js", "Polybius 3.107-118")
     require("src/game/referenceStrategies.js", "runAllMediterraneanStrategies")
+    require("src/game/referenceStrategies.js", "runAllMetropolitanStrategies")
     require("scripts/run-balance.mjs", "Act VI Mediterranean Republic strategies")
+    require("scripts/run-balance.mjs", "Act VII Conquest and Metropolis strategies")
+    require("src/game/data.js", "METROPOLITAN_PROJECTS")
+    require("src/game/data.js", "Republican Basilica")
+    require("src/game/data.js", "Aqua Marcia")
+    require("src/game/data.js", "Land, Grain, and Service")
+    require("src/game/initialState.js", "createMetropolitanProjects")
+    require("src/game/outcomes.js", "calculateMetropolitanScore")
+    require("src/game/campaignExport.js", "Metropolitan Public Works")
+    require("src/game/historicalContext.js", "gracchan-threshold")
     require("src/game/data.js", "first-secession")
     require("src/game/data.js", "veii-settlement")
     require("src/game/data.js", "gallic-approach")

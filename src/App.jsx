@@ -17,6 +17,7 @@ import { OutcomeOverlay } from './components/OutcomeOverlay.jsx'
 import { MediterraneanPanel } from './components/MediterraneanPanel.jsx'
 import { MediterraneanWorksPanel } from './components/MediterraneanWorksPanel.jsx'
 import { MetropolitanPanel } from './components/MetropolitanPanel.jsx'
+import { MetropolitanWorksPanel } from './components/MetropolitanWorksPanel.jsx'
 import { TopBar } from './components/TopBar.jsx'
 import { TurnReport } from './components/TurnReport.jsx'
 import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
@@ -25,7 +26,7 @@ import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState, migrateState } from './game/initialState.js'
 import { continueToMediterranean, continueToMetropolis, enterHannibalicEmergency, enterMediterranean, enterMetropolis } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
-import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject } from './game/simulation.js'
+import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject, workMetropolitanProject } from './game/simulation.js'
 
 const STORAGE_KEY = 'titans-of-war-birth-of-rome-v1'
 
@@ -174,6 +175,7 @@ export default function App() {
           <MediterraneanPanel state={state} />
           <MediterraneanWorksPanel state={state} onWork={(id) => applyRegionalAction(workMediterraneanProject, id)} />
           <MetropolitanPanel state={state} />
+          <MetropolitanWorksPanel state={state} onWork={(id) => applyRegionalAction(workMetropolitanProject, id)} />
           <DecisionCouncil
             council={state.council}
             resolved={state.councilResolved}
@@ -183,7 +185,7 @@ export default function App() {
           <section className="advance-section">
             <div>
               <p className="eyebrow">Next</p>
-              <strong>{state.turn === 29 ? 'Judge the Italian system' : state.turn === 23 ? 'Recover from the Caudine Forks' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
+              <strong>{state.turn === 41 ? 'Judge the metropolitan Republic' : state.turn === 29 ? 'Judge the Italian system' : state.turn === 23 ? 'Recover from the Caudine Forks' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
             </div>
             <button className="advance-button" onClick={endSeason} disabled={Boolean(state.council && !state.councilResolved)}>
               End season <ArrowRight />

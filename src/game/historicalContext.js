@@ -164,6 +164,16 @@ export const HISTORICAL_NOTES = [
     text: 'The Macedonian settlement brought treasure, captives, claims, and prestige to Rome while extending the reach of commanders and public contractors. Enslaved captives, freed households, citizen soldiers, Italian allies, and provincial petitioners held different legal positions and cannot be treated as one interchangeable labor body.',
     evidence: 'Polybius 29-30 and fragments; Livy books 44-45; Plutarch, Aemilius Paulus. Polybius is closest to the political world described, while triumphal detail, speeches, totals, and later character judgments require comparison rather than literal transcription.',
   },
+  {
+    id: 'carthage-corinth-146', title: 'Two Victories, Different Settlements', category: 'Ancient narrative + archaeology + institutional inference', turns: [40],
+    text: 'Carthage and Corinth were destroyed in 146 BC after different wars, decisions, and local circumstances. Their defeat brought land, captives, artworks, commercial openings, and long commands into Roman politics, but a shared date does not make the settlements identical or every later provincial arrangement immediate.',
+    evidence: 'Polybius 38-39 and surviving fragments; Appian, Punic Wars 118-135; Livy, Periochae 51-52; archaeological evidence from Carthage and Corinth. Polybius was close to the Carthaginian settlement, while Appian and the epitomes preserve later narrative frames; exact inventories, motives, and administrative sequences remain incomplete.',
+  },
+  {
+    id: 'gracchan-threshold', title: 'The Republic at the Gracchan Threshold', category: 'Ancient interpretation + legal and agrarian evidence', turns: [41],
+    text: 'By 133 BC, public land, long military service, tenancy, wealth, imported grain, Italian obligations, urban migration, and competition for command pressed on one another. Ancient writers selected different causes and moral lessons. The evidence supports a linked crisis, not a single self-explaining statistic or an inevitable reform program.',
+    evidence: 'Appian, Civil Wars 1.7-27; Plutarch, Tiberius Gracchus 5-21; Polybius 6.19-26 for the levy system; agrarian law evidence including the later lex agraria of 111 BC. Appian and Plutarch are much later than the events and should be compared with legal, demographic, military, and archaeological evidence rather than treated as transcripts.',
+  },
 ]
 
 export const notesForTurn = (turn) => HISTORICAL_NOTES.filter((note) => note.turns.includes(turn))

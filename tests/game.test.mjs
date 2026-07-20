@@ -1,11 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createInitialState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
-import { BUILDING_FAMILIES, MEDITERRANEAN_PROJECTS, TURN_YEARS, getCouncil } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject, workMediterraneanProject } from '../src/game/simulation.js'
-import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
+import { createInitialState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createWarState, migrateState } from '../src/game/initialState.js'
+import { BUILDING_FAMILIES, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, TURN_YEARS, getCouncil } from '../src/game/data.js'
+import { __test, advanceTurn, allocateWorkforce, buildingAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, upgradeBuilding, warForecast, workforceSummary, workItalianProject, workMediterraneanProject, workMetropolitanProject } from '../src/game/simulation.js'
+import { calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
-import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
+import { runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 import { continueToMediterranean, continueToMetropolis, enterHannibalicEmergency, enterMediterranean, enterMetropolis } from '../src/game/continuation.js'
 import { HISTORICAL_NOTES } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
@@ -1022,24 +1022,67 @@ test('Act VII starts only through the explicit 201-200 BC bridge', () => {
   assert.equal(entered.chronologyBridges.at(-1).toYear, 200)
 })
 
-test('Act VII opening councils preserve twelve bounded metropolitan measures', () => {
+test('Act VII opening councils preserve twelve bounded metropolitan measures and project state', () => {
   let state = enterMetropolis(continueToMetropolis(runAllMediterraneanStrategies()[0].state))
   for (const [turn, optionId] of [[37, 'retire-debt-and-water'], [38, 'public-records-and-hearings'], [39, 'audited-commands']]) {
     assert.equal(state.turn, turn)
     state = resolveCouncil(state, optionId)
     state = advanceTurn(state).state
   }
-  assert.equal(state.turn, 39)
-  assert.equal(state.outcome, 'metropolitan-opening-complete')
-  assert.equal(Object.keys(state.metropolitan).length, 12)
-  assert.ok(Object.values(state.metropolitan).every((value) => value >= 0 && value <= 100))
+  assert.equal(state.turn, 40)
+  assert.equal(state.outcome, null)
+  assert.equal(Object.keys(state.metropolitan).filter((key) => key !== 'projects').length, 12)
+  assert.ok(Object.entries(state.metropolitan).filter(([key]) => key !== 'projects').every(([, value]) => value >= 0 && value <= 100))
+  assert.deepEqual(Object.keys(state.metropolitan.projects).sort(), Object.keys(METROPOLITAN_PROJECTS).sort())
   assert.match(campaignMarkdown(state), /## Conquest and Metropolis/)
 })
 
-test('three Act VII opening doctrines finish without skipped decisions', () => {
+test('three Act VII opening doctrines reach the 146 BC council without skipped decisions', () => {
   const results = runAllMetropolitanOpeningStrategies()
   assert.equal(results.length, 3)
-  assert.ok(results.every((result) => result.state.turn === 39 && result.state.outcome === 'metropolitan-opening-complete'))
+  assert.ok(results.every((result) => result.state.turn === 40 && result.state.outcome === null))
   assert.ok(results.every((result) => result.skipped.length === 0))
   assert.equal(new Set(results.map((result) => result.state.choiceLog.filter((entry) => entry.turn >= 37).map((entry) => entry.optionId).join(','))).size, 3)
+})
+
+test('metropolitan works share capacity, preserve prerequisites, and expose upkeep', () => {
+  let state = enterMetropolis(continueToMetropolis(runAllMediterraneanStrategies()[0].state))
+  state = { ...state, actionsMax: 4, actionsUsed: 0, resources: { grain: 100, timber: 100, stone: 100, bronze: 100, treasury: 100 } }
+  state.mediterranean.projects.tiberEmporium.completed = false
+  state.italian.projects.aquaAppia.completed = false
+  assert.equal(metropolitanProjectAvailability(state, 'regulatedMacellum').available, false)
+  assert.equal(metropolitanProjectAvailability(state, 'aquaMarcia').available, false)
+  assert.equal(metropolitanProjectAvailability(state, 'civicPorticoes').available, false)
+  state = workMetropolitanProject(state, 'republicanBasilica').state
+  assert.equal(state.actionsUsed, 1)
+  assert.equal(state.metropolitan.projects.republicanBasilica.progress, 1)
+  assert.equal(metropolitanProjectAvailability(state, 'republicanBasilica').available, false)
+  for (let turn = 38; turn <= 40; turn += 1) {
+    state = { ...state, turn, actionsUsed: 0 }
+    state = workMetropolitanProject(state, 'republicanBasilica').state
+  }
+  assert.equal(state.metropolitan.projects.republicanBasilica.completed, true)
+  assert.equal(metropolitanProjectAvailability(state, 'civicPorticoes').available, true)
+  assert.deepEqual(metropolitanForecast(state).publicWorks.completed, ['republicanBasilica'])
+})
+
+test('version 11 metropolitan saves migrate missing project ledgers', () => {
+  const saved = { ...createInitialState(), version: 11, era: 7, turn: 39, metropolitan: { urbanMigration: 31 } }
+  const migrated = migrateState(saved)
+  assert.equal(migrated.metropolitan.urbanMigration, 31)
+  assert.deepEqual(migrated.metropolitan.projects, createMetropolitanProjects())
+})
+
+test('three Act VII strategies reach 133 BC with distinct viable public works portfolios', () => {
+  const results = runAllMetropolitanStrategies()
+  assert.equal(results.length, 3)
+  assert.ok(results.every((result) => result.state.turn === 41 && result.state.outcome === 'metropolitan-complete'))
+  assert.ok(results.every((result) => result.skipped.length === 0 && result.outcome.overall >= 60 && calculateMetropolitanScore(result.state).score >= 60))
+  assert.ok(results.every((result) => result.state.choiceLog.filter((entry) => entry.turn >= 37).length === 5))
+  assert.equal(new Set(results.map((result) => Object.entries(result.state.metropolitan.projects).filter(([, project]) => project.progress > 0).map(([id]) => id).sort().join(','))).size, 3)
+  assert.match(campaignMarkdown(results[0].state), /### Metropolitan Public Works/)
+})
+
+test('historical context covers the complete metropolitan act', () => {
+  for (const turn of [37, 38, 39, 40, 41]) assert.ok(HISTORICAL_NOTES.some((note) => note.turns.includes(turn)))
 })

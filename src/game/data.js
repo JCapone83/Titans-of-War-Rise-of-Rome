@@ -57,7 +57,7 @@ export const ERAS = [
   },
 ]
 
-export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167]
+export const TURN_YEARS = [753, 735, 715, 690, 660, 640, 620, 600, 575, 535, 509, 503, 494, 406, 396, 390, 390, 389, 385, 338, 338, 326, 321, 312, 304, 295, 280, 275, 264, 261, 256, 241, 218, 216, 211, 201, 197, 184, 167, 146, 133]
 
 export const ITALIAN_PROJECTS = {
   viaAppia: {
@@ -116,6 +116,53 @@ export const MEDITERRANEAN_PROJECTS = {
     upkeepResources: { treasury: -1, grain: -1 },
     upkeepMetrics: { sanitation: -1 },
     burdenLabel: 'Timber inspection, fire watch, crowd routes, and festival service consume stores and crews.',
+  },
+}
+
+export const METROPOLITAN_PROJECTS = {
+  republicanBasilica: {
+    id: 'republicanBasilica', name: 'Republican Basilica', seasons: 4,
+    cost: { stone: 1, timber: 1 },
+    summary: 'A long roofed civic hall for hearings, arbitration, exchange, and records: a Republican working building rather than a church or later imperial marble monument.',
+    completionMetrics: { order: 5, trade: 4 },
+    completionMetropolitan: { legalCaseLoad: -11, provincialPetitionBacklog: -6, contractingCapacity: 8, publicProvision: 5 },
+    upkeepResources: { treasury: -1 },
+    upkeepMetropolitan: { patronageConcentration: 1, corruptionExposure: 1 },
+    burdenLabel: 'Clerks, hearings, roof repair, crowd control, and public access require recurring supervision.',
+  },
+  regulatedMacellum: {
+    id: 'regulatedMacellum', name: 'Regulated Macellum', seasons: 3,
+    cost: { timber: 1, grain: 1 },
+    prerequisite: 'tiberEmporium',
+    summary: 'An inspected food market tied to the Tiber landings, with measured stalls, water, drains, waste removal, and enforceable market rules.',
+    completionMetrics: { food: 7, sanitation: 4, trade: 3 },
+    completionMetropolitan: { importedGrainDependence: -6, rentPressure: -3, publicProvision: 10, contractingCapacity: 4 },
+    upkeepResources: { treasury: -1 },
+    upkeepMetrics: { sanitation: -1 },
+    upkeepMetropolitan: { corruptionExposure: 1 },
+    burdenLabel: 'Inspectors, water, drains, refuse removal, and stall records must be maintained every season.',
+  },
+  aquaMarcia: {
+    id: 'aquaMarcia', name: 'Aqua Marcia', seasons: 4,
+    cost: { stone: 1, grain: 1 },
+    prerequisite: 'aquaAppia',
+    summary: 'A new high-quality water supply whose source, conduit, distribution points, inspection shafts, and maintenance organization matter more than a later arcade silhouette.',
+    completionMetrics: { water: 10, sanitation: 5 },
+    completionMetropolitan: { publicProvision: 13, rentPressure: -4, urbanMigration: 3 },
+    upkeepResources: { treasury: -2 },
+    upkeepMetropolitan: { contractingCapacity: 1, corruptionExposure: 1 },
+    burdenLabel: 'Source protection, conduit inspection, distribution, and repairs create a permanent public charge.',
+  },
+  civicPorticoes: {
+    id: 'civicPorticoes', name: 'Civic Porticoes', seasons: 3,
+    cost: { stone: 1, timber: 1 },
+    prerequisite: 'republicanBasilica',
+    summary: 'Connected shaded circulation with backing rooms and drainage that spreads public business beyond one overloaded square, not a row of decorative columns.',
+    completionMetrics: { order: 4, sanitation: 2, trade: 3 },
+    completionMetropolitan: { legalCaseLoad: -5, rentPressure: -3, provincialPetitionBacklog: -5, publicProvision: 6 },
+    upkeepResources: { treasury: -1 },
+    upkeepMetropolitan: { patronageConcentration: 1 },
+    burdenLabel: 'Roofing, paving, drains, policing, and access to the backing rooms remain recurring obligations.',
   },
 }
 
@@ -620,6 +667,26 @@ COUNCILS.push(
       { id: 'commander-discretion', label: 'Leave distribution to the victorious command', detail: 'Reward soldiers and settle claims rapidly through military authority, reducing immediate absence while strengthening personal obligations.', impacts: { resources: { treasury: 5, grain: 3 }, metrics: { readiness: 5, order: -2 }, metropolitan: { citizenAbsence: -9, patronageConcentration: 13, corruptionExposure: 6, enslavedLaborInflow: 9, freedHouseholdIntegration: 2, rentPressure: 5 }, flags: { pydnaSettlement: 'commander-discretion' } } },
     ],
   },
+  {
+    turn: 40, id: 'carthage-corinth-settlement', title: 'Carthage, Corinth, and the Uses of Victory', speaker: 'Senators, censors, commanders, contractors, allied delegates, merchants, and returning soldiers',
+    prompt: 'Two great wars end in the same year. Destruction, indemnities, land, captives, artworks, and new commands now enter Roman accounts. Which use of victory should set the governing rule?',
+    context: 'Roman forces destroyed Carthage and Corinth in 146 BC, but the two settlements arose from different wars and local conditions. Ancient accounts preserve strong moral and dramatic frames more readily than complete inventories or administrative records.',
+    options: [
+      { id: 'audited-provision-settlement', label: 'Inventory gains and fund public provision', detail: 'Close commands under recorded accounts, reserve a bounded share for water, markets, and petition hearings, and accept slower private distribution.', impacts: { resources: { treasury: 5, stone: 2, grain: 2 }, metrics: { order: 4, water: 2 }, metropolitan: { publicProvision: 10, provincialPetitionBacklog: -8, corruptionExposure: -8, contractingCapacity: 5, patronageConcentration: -4 }, flags: { conquestSettlement: 'audited-provision' } } },
+      { id: 'punitive-extraction', label: 'Turn exemplary punishment into receipts', detail: 'Sell assets, lease collection, and make the settlements warnings, gaining immediate funds while enlarging contractors, claims, and resentments.', impacts: { resources: { treasury: 12, grain: 3 }, metrics: { trade: 5, order: -3 }, metropolitan: { contractingCapacity: 10, corruptionExposure: 11, provincialPetitionBacklog: 8, patronageConcentration: 7, enslavedLaborInflow: 10, rentPressure: 4 }, flags: { conquestSettlement: 'punitive-extraction' } } },
+      { id: 'bounded-command-acquisition', label: 'Bound commands and receive selected civic spoils', detail: 'Limit continued military discretion while assigning selected works and learned specialists to public places, accepting disputes over ownership and prestige.', impacts: { resources: { treasury: 6, stone: 3 }, metrics: { auspices: 5, trade: 2 }, metropolitan: { legalCaseLoad: 4, contractingCapacity: 5, corruptionExposure: -3, patronageConcentration: 4, publicProvision: 4, freedHouseholdIntegration: 4 }, flags: { conquestSettlement: 'bounded-command' } } },
+    ],
+  },
+  {
+    turn: 41, id: 'land-grain-service', title: 'Land, Grain, and Service', speaker: 'Censors, senators, tribunes, allied delegates, veterans, grain officers, tenants, and public contractors',
+    prompt: 'By 133 BC, prolonged service, concentrated holdings, imported grain, migration, and public contracting press on one another. What settlement should the Republic authorize before a larger constitutional struggle begins?',
+    context: 'The pressures later associated with Tiberius Gracchus did not begin in one year or reduce to one cause. Ancient accounts disagree about land, manpower, poverty, military service, and political motive; the game ends at the threshold rather than resolving the Gracchan contest in advance.',
+    options: [
+      { id: 'recorded-land-service', label: 'Review public land and record service claims', detail: 'Use commissions and bounded allotments to connect military obligation with enforceable tenure, accepting litigation, delay, and resistance from established possessors.', impacts: { resources: { treasury: -5, grain: -2 }, metrics: { readiness: 4, order: 2 }, metropolitan: { citizenAbsence: -10, legalCaseLoad: 8, rentPressure: -5, patronageConcentration: -7, publicProvision: 6 }, flags: { gracchanThreshold: 'recorded-land-service' } } },
+      { id: 'grain-storage-provision', label: 'Strengthen grain storage and measured provision', detail: 'Reduce immediate urban pressure through inspected supply and reserves without claiming that food distribution alone repairs land or service obligations.', impacts: { resources: { grain: 7, treasury: -3 }, metrics: { food: 7, order: 4 }, metropolitan: { importedGrainDependence: 5, publicProvision: 12, rentPressure: -4, citizenAbsence: 2, contractingCapacity: 3 }, flags: { gracchanThreshold: 'grain-provision' } } },
+      { id: 'colonial-service-outlets', label: 'Use colonies and bounded commands as outlets', detail: 'Offer recorded settlements beyond Rome and rotate commands more firmly, preserving military pathways while shifting cost and petition burdens outward.', impacts: { resources: { treasury: -2, grain: -3 }, metrics: { readiness: 6, trade: 3 }, metropolitan: { citizenAbsence: -5, rentPressure: -5, provincialPetitionBacklog: 7, patronageConcentration: 4, publicProvision: 2 }, italian: { allianceDepth: -2, reserveDepth: 4 }, flags: { gracchanThreshold: 'colonial-service' } } },
+    ],
+  },
 )
 
 export const OBJECTIVES = [
@@ -657,6 +724,8 @@ export const OBJECTIVES = [
   { from: 37, to: 37, text: 'Decide whether conquest first serves public capacity, display, or immediate distribution.' },
   { from: 38, to: 38, text: 'Keep law, exchange, petitions, and political attendance legible in a crowded Forum.' },
   { from: 39, to: 39, text: 'Settle commands and spoils without allowing victory to outrun public accounts.' },
+  { from: 40, to: 40, text: 'Decide whether the victories of 146 BC enlarge public capacity, extraction, or bounded command.' },
+  { from: 41, to: 41, text: 'Meet the land, grain, and service crisis without pretending one measure resolves every obligation.' },
 ]
 
 export const getCouncil = (turn) => COUNCILS.find((item) => item.turn === turn) ?? null

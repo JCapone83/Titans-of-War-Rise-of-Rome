@@ -1,7 +1,7 @@
 import { createInitialState } from './initialState.js'
 import { continueToMediterranean, continueToMetropolis, enterHannibalicEmergency, enterMediterranean, enterMetropolis } from './continuation.js'
-import { calculateItalianScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
-import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject } from './simulation.js'
+import { calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore } from './outcomes.js'
+import { actionRemaining, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, gallicReadiness, placeBuilding, resolveCouncil, reviseRegionalCompact, startRegionalRoad, upgradeBuilding, workItalianProject, workMediterraneanProject, workMetropolitanProject } from './simulation.js'
 
 export const REFERENCE_STRATEGIES = [
   {
@@ -450,7 +450,7 @@ export function runAllMetropolitanOpeningStrategies() {
     let state = enterMetropolis(continueToMetropolis(bases[index].state))
     const skipped = []
     const ledger = []
-    while (state.outcome !== 'metropolitan-opening-complete') {
+    while (state.turn <= 39) {
       const optionId = strategy.councils[state.turn]
       if (state.council && !state.councilResolved) {
         if (!optionId) skipped.push({ turn: state.turn, reason: 'No metropolitan council choice declared.' })
@@ -462,5 +462,50 @@ export function runAllMetropolitanOpeningStrategies() {
       state = result.state
     }
     return { strategy, state, outcome: calculateOutcome(state), skipped, ledger }
+  })
+}
+
+export const METROPOLITAN_STRATEGIES = [
+  {
+    id: 'audited-civic-capacity', name: 'Audited Civic Capacity',
+    councils: { 37: 'retire-debt-and-water', 38: 'public-records-and-hearings', 39: 'audited-commands', 40: 'audited-provision-settlement', 41: 'recorded-land-service' },
+    projectPriorities: { 37: 'republicanBasilica', 38: 'republicanBasilica', 39: 'republicanBasilica', 40: 'republicanBasilica', 41: 'civicPorticoes' },
+  },
+  {
+    id: 'market-and-water-metropolis', name: 'Market and Water Metropolis',
+    councils: { 37: 'bounded-triumphal-program', 38: 'licensed-patronal-halls', 39: 'contracted-settlement', 40: 'punitive-extraction', 41: 'grain-storage-provision' },
+    projectPriorities: { 37: 'regulatedMacellum', 38: 'regulatedMacellum', 39: 'regulatedMacellum', 40: 'aquaMarcia', 41: 'aquaMarcia' },
+  },
+  {
+    id: 'provision-and-bounded-command', name: 'Provision and Bounded Command',
+    councils: { 37: 'distribute-gains-and-grain', 38: 'disperse-market-and-petitions', 39: 'commander-discretion', 40: 'bounded-command-acquisition', 41: 'colonial-service-outlets' },
+    projectPriorities: { 37: 'aquaMarcia', 38: 'aquaMarcia', 39: 'aquaMarcia', 40: 'aquaMarcia', 41: 'republicanBasilica' },
+  },
+]
+
+export function runAllMetropolitanStrategies() {
+  const bases = runAllMediterraneanStrategies()
+  return METROPOLITAN_STRATEGIES.map((strategy, index) => {
+    let state = enterMetropolis(continueToMetropolis(bases[index].state))
+    const skipped = []
+    const ledger = []
+    while (state.outcome !== 'metropolitan-complete') {
+      const optionId = strategy.councils[state.turn]
+      if (state.council && !state.councilResolved) {
+        if (!optionId) skipped.push({ turn: state.turn, reason: 'No metropolitan council choice declared.' })
+        else state = resolveCouncil(state, optionId)
+      }
+      const projectId = strategy.projectPriorities[state.turn]
+      if (projectId && actionRemaining(state)) {
+        const work = workMetropolitanProject(state, projectId)
+        if (work.error) skipped.push({ turn: state.turn, projectId, reason: work.error })
+        else state = work.state
+      }
+      ledger.push({ turn: state.turn, metropolitan: { ...state.metropolitan, projects: structuredClone(state.metropolitan.projects ?? {}) }, resources: { ...state.resources }, bridges: structuredClone(state.chronologyBridges ?? []) })
+      const result = advanceTurn(state)
+      if (result.error) throw new Error(`${strategy.name} stalled on turn ${state.turn}: ${result.error}`)
+      state = result.state
+    }
+    return { strategy, state, outcome: calculateOutcome(state), metropolitanScore: calculateMetropolitanScore(state), skipped, ledger }
   })
 }
