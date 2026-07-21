@@ -7,7 +7,7 @@ const PALATINE_CAPITOLINE = {
   title: 'Palatine and Capitoline',
   eyebrow: 'Build the hill communities plot by plot',
   alt: 'Natural hill terraces above the Tiber prepared for settlement',
-  background: '/images/scenes/palatine-capitoline-terrain-v1.webp',
+  background: './images/scenes/palatine-capitoline-terrain-v1.webp',
   districts: ['palatine', 'capitoline'],
   plots: [
     { id: 'palatine-1', districtId: 'palatine', x: 22, y: 63, scale: 0.74, depth: 63 },
@@ -28,7 +28,7 @@ const TIBER_AVENTINE = {
   title: 'Tiber Bank and Aventine',
   eyebrow: 'Bind the river landing to the southern hill',
   alt: 'The Tiber ford, riverbank clearings, and lower Aventine terraces prepared for settlement',
-  background: '/images/scenes/tiber-aventine-terrain-v1.webp',
+  background: './images/scenes/tiber-aventine-terrain-v1.webp',
   districts: ['tiber', 'aventine'],
   plots: [
     { id: 'tiber-1', districtId: 'tiber', x: 34, y: 82, scale: 0.75, depth: 82 },
@@ -48,7 +48,7 @@ const FORUM_QUIRINAL = {
   title: 'Forum Valley and Quirinal',
   eyebrow: 'Drain the low ground and bind it to the northern height',
   alt: 'Seasonally wet Forum lowland and dry Quirinal terraces prepared for settlement',
-  background: '/images/scenes/forum-quirinal-terrain-v1.webp',
+  background: './images/scenes/forum-quirinal-terrain-v1.webp',
   districts: ['forum', 'quirinal'],
   plots: [
     { id: 'forum-1', districtId: 'forum', x: 21, y: 82, scale: 0.74, depth: 82 },

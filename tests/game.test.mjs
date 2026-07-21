@@ -1186,21 +1186,21 @@ test('four Act V strategies finish both Appian works across every available doct
 })
 
 test('Batch 5 building art uses exact mappings for every rendered Early Republic asset', () => {
-  assert.equal(artForBuilding('comitium'), '/images/buildings/comitium-v1.png')
-  assert.equal(artForBuilding('saturn-treasury'), '/images/buildings/saturn-treasury-v1.png')
-  assert.equal(artForBuilding('circuit-fortification'), '/images/buildings/circuit-fortification-v1.png')
-  assert.equal(artForBuilding('street-courtyards'), '/images/buildings/ordered-street-courts-v1.png')
-  assert.equal(artForBuilding('public-cisterns'), '/images/buildings/public-cisterns-v1.png')
-  assert.equal(artForBuilding('public-granary'), '/images/buildings/public-granary-v1.png')
-  assert.equal(artForBuilding('contracted-craft-yards'), '/images/buildings/contracted-craft-yards-v1.png')
+  assert.equal(artForBuilding('comitium'), './images/buildings/comitium-v1.png')
+  assert.equal(artForBuilding('saturn-treasury'), './images/buildings/saturn-treasury-v1.png')
+  assert.equal(artForBuilding('circuit-fortification'), './images/buildings/circuit-fortification-v1.png')
+  assert.equal(artForBuilding('street-courtyards'), './images/buildings/ordered-street-courts-v1.png')
+  assert.equal(artForBuilding('public-cisterns'), './images/buildings/public-cisterns-v1.png')
+  assert.equal(artForBuilding('public-granary'), './images/buildings/public-granary-v1.png')
+  assert.equal(artForBuilding('contracted-craft-yards'), './images/buildings/contracted-craft-yards-v1.png')
 })
 
 test('all mapped building art paths are unique and exist under public', () => {
   const paths = Object.values(BUILDING_ART)
   assert.equal(new Set(paths).size, paths.length)
   for (const assetPath of paths) {
-    assert.ok(assetPath.startsWith('/images/buildings/'))
-    assert.ok(existsSync(resolve(process.cwd(), 'public', assetPath.slice(1))), assetPath)
+    assert.ok(assetPath.startsWith('./images/buildings/'))
+    assert.ok(existsSync(resolve(process.cwd(), 'public', assetPath.slice(2))), assetPath)
   }
 })
 
@@ -1581,7 +1581,7 @@ test('historical context covers the complete Civil War and Settlement act', () =
 test('Ides context exposes the approved Theatre of Pompey visual', () => {
   const idesNote = notesForTurn(51).find((note) => note.id === 'ides-succession')
   assert.deepEqual(idesNote.image, {
-    src: '/images/projects/theatre-of-pompey-v1.png',
+    src: './images/projects/theatre-of-pompey-v1.png',
     alt: 'Isometric reconstruction of the Theatre of Pompey, its Temple of Venus Victrix, portico garden, and attached curia precinct.',
     evidence: 'Text-and-evidence synthesis',
   })
@@ -1592,7 +1592,7 @@ test('every Civil Settlement work has project art', () => {
   assert.deepEqual(Object.keys(CIVIL_SETTLEMENT_PROJECT_ART).sort(), Object.keys(CIVIL_SETTLEMENT_PROJECTS).sort())
   for (const [id, definition] of Object.entries(CIVIL_SETTLEMENT_PROJECTS)) {
     const art = artForCivilSettlementProject(id)
-    assert.match(art.src, /^\/images\/projects\/.+-v1\.png$/)
+    assert.match(art.src, /^\.\/images\/projects\/.+-v1\.png$/)
     assert.ok(art.alt.length >= 30)
     assert.ok(['Evidence-led reconstruction', 'Game abstraction'].includes(art.evidence))
     assert.equal(civilSettlementProjectStage({ progress: 0, completed: false }, definition).key, 'reserved')
@@ -1776,14 +1776,14 @@ test('Act XI projects carry dates, evidence, stages, and recurring burdens', () 
 
 test('complete Imperial Capital visual set maps all eight project artworks', () => {
   const expected = {
-    castraPraetoria: '/images/projects/castra-praetoria-v1.png',
-    aquaClaudia: '/images/projects/aqua-claudia-v1.png',
-    claudianPortus: '/images/projects/claudian-portus-v1.png',
-    domusAurea: '/images/projects/domus-aurea-v1.png',
-    flavianAmphitheatre: '/images/projects/flavian-amphitheatre-v1.png',
-    templePeace: '/images/projects/temple-peace-v1.png',
-    archTitus: '/images/projects/arch-titus-v1.png',
-    domitianicPalace: '/images/projects/domitianic-palace-v1.png',
+    castraPraetoria: './images/projects/castra-praetoria-v1.png',
+    aquaClaudia: './images/projects/aqua-claudia-v1.png',
+    claudianPortus: './images/projects/claudian-portus-v1.png',
+    domusAurea: './images/projects/domus-aurea-v1.png',
+    flavianAmphitheatre: './images/projects/flavian-amphitheatre-v1.png',
+    templePeace: './images/projects/temple-peace-v1.png',
+    archTitus: './images/projects/arch-titus-v1.png',
+    domitianicPalace: './images/projects/domitianic-palace-v1.png',
   }
   assert.deepEqual(Object.keys(IMPERIAL_PROJECT_ART).sort(), Object.keys(expected).sort())
   for (const [id, src] of Object.entries(expected)) {
@@ -1893,12 +1893,12 @@ test('Act XII projects carry evidence, stages, costs, and recurring burdens', ()
 
 test('complete Trajanic Capital visual set maps all six project artworks', () => {
   const expected = {
-    forumTrajan: '/images/projects/forum-trajan-v1.png',
-    trajanAdministrativeComplex: '/images/projects/trajan-administrative-complex-v1.png',
-    bathsTrajan: '/images/projects/baths-trajan-v1.png',
-    aquaTraiana: '/images/projects/aqua-traiana-v1.png',
-    trajanicPortus: '/images/projects/trajanic-portus-v1.png',
-    trajanicCircus: '/images/projects/trajanic-circus-v1.png',
+    forumTrajan: './images/projects/forum-trajan-v1.png',
+    trajanAdministrativeComplex: './images/projects/trajan-administrative-complex-v1.png',
+    bathsTrajan: './images/projects/baths-trajan-v1.png',
+    aquaTraiana: './images/projects/aqua-traiana-v1.png',
+    trajanicPortus: './images/projects/trajanic-portus-v1.png',
+    trajanicCircus: './images/projects/trajanic-circus-v1.png',
   }
   assert.deepEqual(Object.keys(TRAJANIC_PROJECT_ART).sort(), Object.keys(expected).sort())
   for (const [id, src] of Object.entries(expected)) {

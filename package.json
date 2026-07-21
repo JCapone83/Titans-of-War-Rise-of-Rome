@@ -1,6 +1,6 @@
 {
   "name": "titans-of-war-birth-of-rome",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "A local-first historical city-building strategy game about the birth of Rome.",
   "type": "module",

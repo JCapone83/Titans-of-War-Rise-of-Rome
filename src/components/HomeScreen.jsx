@@ -11,7 +11,7 @@ const CHRONOLOGY = [
 export function HomeScreen({ canContinue, campaignSummary, historyOpen, creditsOpen, musicOpen, onPrimary, onNewCampaign, onOpenHistory, onOpenCredits, onToggleMusic }) {
   return (
     <main className="home-screen">
-      <img className="home-background" src="/images/home/early-rome-tiber-dawn.png" alt="Early settlements rising beside the Tiber at dawn" />
+      <img className="home-background" src="./images/home/early-rome-tiber-dawn.png" alt="Early settlements rising beside the Tiber at dawn" />
       <header className="home-header">
         <div className="home-brand" aria-label="Titans of War: Birth of Rome">
           <span className="home-brand-mark" aria-hidden="true">SPQR</span>

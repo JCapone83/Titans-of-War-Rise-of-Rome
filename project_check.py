@@ -76,6 +76,12 @@ def main() -> None:
     }
     for path, marker in checks.items():
         require(path, marker)
+    for source in (ROOT / "src").rglob("*"):
+        if source.suffix not in {".js", ".jsx"}:
+            continue
+        text = source.read_text(encoding="utf-8")
+        if "'/images/" in text or '"/images/' in text:
+            raise SystemExit(f"{source.relative_to(ROOT)} contains a root-relative image path")
     require("public/images/transitions/early-republic-v1.webp")
     require("public/images/transitions/mediterranean-republic-v1.webp")
     require("public/images/transitions/augustan-city-v1.webp")
@@ -96,13 +102,13 @@ def main() -> None:
     require("public/images/buildings/temple-of-jupiter-v1.png")
     require("public/images/buildings/forum-market-v1.png")
     require("public/images/buildings/workshop-quarter-v1.png")
-    require("src/game/buildingArt.js", "'comitium': '/images/buildings/comitium-v1.png'")
-    require("src/game/buildingArt.js", "'saturn-treasury': '/images/buildings/saturn-treasury-v1.png'")
-    require("src/game/buildingArt.js", "'circuit-fortification': '/images/buildings/circuit-fortification-v1.png'")
-    require("src/game/buildingArt.js", "'street-courtyards': '/images/buildings/ordered-street-courts-v1.png'")
-    require("src/game/buildingArt.js", "'public-cisterns': '/images/buildings/public-cisterns-v1.png'")
-    require("src/game/buildingArt.js", "'public-granary': '/images/buildings/public-granary-v1.png'")
-    require("src/game/buildingArt.js", "'contracted-craft-yards': '/images/buildings/contracted-craft-yards-v1.png'")
+    require("src/game/buildingArt.js", "'comitium': './images/buildings/comitium-v1.png'")
+    require("src/game/buildingArt.js", "'saturn-treasury': './images/buildings/saturn-treasury-v1.png'")
+    require("src/game/buildingArt.js", "'circuit-fortification': './images/buildings/circuit-fortification-v1.png'")
+    require("src/game/buildingArt.js", "'street-courtyards': './images/buildings/ordered-street-courts-v1.png'")
+    require("src/game/buildingArt.js", "'public-cisterns': './images/buildings/public-cisterns-v1.png'")
+    require("src/game/buildingArt.js", "'public-granary': './images/buildings/public-granary-v1.png'")
+    require("src/game/buildingArt.js", "'contracted-craft-yards': './images/buildings/contracted-craft-yards-v1.png'")
     require("public/images/buildings/comitium-v1.png")
     require("public/images/buildings/saturn-treasury-v1.png")
     require("public/images/buildings/circuit-fortification-v1.png")
