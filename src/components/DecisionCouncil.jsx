@@ -3,7 +3,7 @@ import { Check, LockKeyhole } from 'lucide-react'
 export function DecisionCouncil({ council, resolved, chosenId, onChoose }) {
   if (!council) {
     return (
-      <section className="council empty-council">
+      <section id="council-decision" className="council empty-council">
         <p className="eyebrow">Council</p>
         <h2>No formal council this turn</h2>
         <p>Build, inspect the city, and end the season when the balance is acceptable.</p>
@@ -11,7 +11,7 @@ export function DecisionCouncil({ council, resolved, chosenId, onChoose }) {
     )
   }
   return (
-    <section className="council" aria-labelledby="council-title">
+    <section id="council-decision" className="council" aria-labelledby="council-title">
       <div className="section-heading">
         <p className="eyebrow">{council.speaker}</p>
         <h2 id="council-title">{council.title}</h2>

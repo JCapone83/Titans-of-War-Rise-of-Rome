@@ -23,7 +23,7 @@ This `0.1.0` campaign contains 76 deterministic turns and 71 political councils.
 - **The Augustan City, 27 BC-AD 14**
 - **Imperial Capital, AD 14-96**
 - **Trajanic Capital, AD 96-117**
-- Six districts with terrain rules and limited plots
+- Nine districts with terrain rules and 33 reusable plots
 - A household population model with district occupancy, births, arrivals, departures, illness, and crisis losses
 - Visible population composition: households, workers, levy-eligible people, craftsmen, and dependents
 - Seasonal workforce allocation: farming, public works, levy readiness, festivals, shrines, and temple rites compete for the same people
@@ -31,8 +31,8 @@ This `0.1.0` campaign contains 76 deterministic turns and 71 political councils.
 - Population-derived public-works capacity: construction, rebuilding, repair, and major projects compete for crews
 - Pausable multi-season projects for the Cloaca Works, Temple of Jupiter, and stone gates
 - Direct upgrades that replace early structures with later forms on the same plot
-- District specialties and service networks: markets need storage and improved roads, while dense housing needs water, drainage, and road access
-- Switchable terrain, road, water, drainage, and defense overlays on the city map
+- District specialties and service networks: markets need storage and improved access, while dense housing needs water, drainage, and reliable access
+- Switchable terrain, water, drainage, and defense overlays on the city map
 - District-level fire, disease, and flood exposure driven by density, terrain, water, drainage, and fire-using craft
 - Resource production, upkeep, overbuilding, underbuilding, damage, repair, and salvage pressures
 - A Tiber flood and military emergency
@@ -66,7 +66,7 @@ This `0.1.0` campaign contains 76 deterministic turns and 71 political councils.
 - Three viable imperial-capital strategies: public Flavian conversion, provision-first capital, and palace-administrative concentration
 - Six Trajanic councils, six staged capital projects, and separate judgments for frontier reach, provincial trust, conquest finance, supply, maintenance, administration, succession, and constitutional continuity
 - A completed AD 117 endpoint that treats the standing Hadrianic Pantheon as later than the represented campaign
-- Local save/restore through schema version 15, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
+- Local save/restore through schema version 16, a guided walkthrough, historical context, chronicle export, five city grades, and act-specific grades
 
 ## Play Locally
 
@@ -96,13 +96,15 @@ The command writes the zip and a checksum manifest under `release/`. The zip con
 
 The game opens on a full campaign home rather than dropping the player into an active turn. **Begin Campaign** starts a fresh settlement. After play has begun, **Continue Campaign** returns to the current in-memory position and shows its era, date, and turn; a browser save remains available through the campaign toolbar. **New Campaign** requires confirmation before it replaces a saved or active position.
 
+The first campaign entry offers an action-oriented guided turn. A persistent turn guide keeps construction capacity, council status, and season readiness together while leaving every detailed ledger available. Campaign state is saved locally in the browser as choices are made; manual save and chronicle export remain available.
+
 Use the Home control in the campaign toolbar to return to the home screen without changing or silently saving the current simulation. Historical Method, Credits and Rights, and the opt-in Music control are available before entering play.
 
 ## Playable Terrain
 
-The city map opens on the **Hill terrain** view for the Palatine and Capitoline. **Tiber crossing** covers the Tiber Bank and Aventine, while **Forum valley** covers the wet Forum lowland and Quirinal terraces. Together, the three realistic sectors provide fixed construction plots for all six city districts. Selecting an open or occupied plot selects that district for the existing construction workflow. The complete **Strategic overview** remains one click away and retains every infrastructure overlay.
+The city map opens on the **Hill terrain** view for the Palatine and Capitoline. **Tiber crossing** covers the Tiber Bank and Aventine, **Forum valley** covers the wet Forum lowland and Quirinal terraces, and **Eastern hills** adds the Caelian, Esquiline, and Viminal. Together, the four realistic sectors provide 33 construction plots across nine city districts. Selecting an open plot prepares that district for construction. Selecting an occupied work opens its redevelopment controls: upgrades rebuild on the same plot, while Clear returns the plot to open land. The complete **Strategic overview** remains one click away.
 
-Paths in all playable terrain scenes connect occupied plots to their district approach. They appear as compacted earth until existing district road service is improved through the same market and defensive works already used by the simulation. The Forum sector keeps its natural drainage channels legible in the drainage overlay. These terrain layers do not create a second currency, construction action, or save format.
+Terrain views keep natural tracks inside the artwork rather than drawing schematic roads over the landscape. Water, drainage, and defense remain optional planning overlays, while regional Roman roads retain their separate strategic effects on supply, trade, response, and hostile access. The Forum sector keeps its natural drainage channels legible in the drainage overlay. These terrain layers do not create a second currency, construction action, or save format.
 
 ## Soundtrack
 

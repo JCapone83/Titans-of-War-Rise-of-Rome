@@ -1,14 +1,13 @@
 import { useState } from 'react'
-import { Droplets, Landmark, Map as MapIcon, Mountain, Route, Shield, Waves } from 'lucide-react'
+import { Droplets, Landmark, Map as MapIcon, Mountain, Shield, Waves } from 'lucide-react'
 import { artForBuilding } from '../game/buildingArt.js'
 import { augustanCapitalLandmarks } from '../game/projectArt.js'
 import { DISTRICTS, DISTRICT_LINKS } from '../game/data.js'
 import { networkCoverage } from '../game/simulation.js'
-import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../game/romeScenes.js'
+import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, sceneForId } from '../game/romeScenes.js'
 
 const MODES = [
   { id: 'terrain', label: 'Terrain', icon: MapIcon },
-  { id: 'roads', label: 'Roads', icon: Route },
   { id: 'water', label: 'Water', icon: Droplets },
   { id: 'drainage', label: 'Drainage', icon: Waves },
   { id: 'defense', label: 'Defense', icon: Shield },
@@ -20,6 +19,7 @@ const SCENE_ICONS = {
   'palatine-capitoline': Mountain,
   'tiber-aventine': Waves,
   'forum-quirinal': Landmark,
+  'eastern-hills': Mountain,
 }
 
 function NetworkLine({ from, to, mode, improved = false }) {
@@ -56,43 +56,21 @@ function BuildingModel({ building, index }) {
   )
 }
 
-function SceneRoad({ link, emphasized }) {
-  const dx = link.to.x - link.from.x
-  const dy = link.to.y - link.from.y
-  return (
-    <i
-      className={`scene-road${link.improved ? ' improved' : ''}${emphasized ? ' emphasized' : ''}`}
-      style={{ left: `${link.from.x}%`, top: `${link.from.y}%`, width: `${Math.hypot(dx, dy)}%`, transform: `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)` }}
-    />
-  )
-}
-
-function TerrainScene({ state, mode, onSelectDistrict, sceneId }) {
+function TerrainScene({ state, mode, onSelectDistrict, onSelectBuilding, sceneId }) {
   const scene = sceneForId(sceneId)
   const assignments = assignBuildingsToScene(state, scene.id)
   const assignmentByPlot = new Map(assignments.map((assignment) => [assignment.plot.id, assignment]))
-  const roads = roadLinksForScene(state, scene.id)
 
   return (
     <div className={`terrain-scene map-mode-${mode}`} data-scene={scene.id} role="group" aria-label={`${scene.label}, ${mode} overlay`}>
       <img className="terrain-scene-background" src={scene.background} alt={scene.alt} draggable="false" />
-      <div className="scene-road-layer" aria-hidden="true">
-        {roads.map((link) => <SceneRoad key={link.id} link={link} emphasized={mode === 'roads'} />)}
-      </div>
-      {scene.gates.map((gate) => (
-        <span
-          key={gate.id}
-          className={`scene-gate${mode === 'roads' ? ' visible' : ''}`}
-          style={{ left: `${gate.x}%`, top: `${gate.y}%` }}
-          aria-hidden="true"
-        >{gate.label}</span>
-      ))}
       {scene.plots.map((plot) => {
         const assignment = assignmentByPlot.get(plot.id)
         const district = DISTRICTS.find((item) => item.id === plot.districtId)
         const art = assignment ? artForBuilding(assignment.building.buildingId) : null
-        const selected = state.selectedDistrict === plot.districtId
-        const gate = districtGate(scene, plot.districtId)
+        const selected = assignment
+          ? state.selectedBuildingId === assignment.building.instanceId
+          : state.selectedDistrict === plot.districtId
         const buildingLabel = assignment ? `${assignment.building.name}, ${assignment.building.condition ?? 100}% condition` : 'empty construction plot'
         return (
           <button
@@ -100,8 +78,10 @@ function TerrainScene({ state, mode, onSelectDistrict, sceneId }) {
             key={plot.id}
             className={`scene-plot${assignment ? ' occupied' : ' empty'}${selected ? ' selected' : ''}`}
             style={{ left: `${plot.x}%`, top: `${plot.y}%`, zIndex: 10 + plot.depth, '--scene-scale': plot.scale }}
-            onClick={() => onSelectDistrict(plot.districtId)}
-            aria-label={`Select ${district.name} plot, ${buildingLabel}. Road approach: ${gate?.label ?? 'district path'}.`}
+            onClick={() => assignment ? onSelectBuilding(assignment.building.instanceId) : onSelectDistrict(plot.districtId)}
+            aria-label={assignment
+              ? `Select ${buildingLabel} in ${district.name} to upgrade, repair, or clear it.`
+              : `Select open construction plot in ${district.name}.`}
             aria-pressed={selected}
           >
             {art ? <img className="scene-building" src={art} alt="" draggable="false" /> : <span className="scene-plot-marker" aria-hidden="true" />}
@@ -110,15 +90,14 @@ function TerrainScene({ state, mode, onSelectDistrict, sceneId }) {
         )
       })}
       <div className="terrain-scene-legend" aria-hidden="true">
-        {mode === 'roads'
-          ? <><span><i className="scene-road-key" /> Paths follow occupied plots</span><span><i className="scene-road-key improved" /> Improved by district works</span></>
-          : <><span>Select a clearing to work in that district</span><span>Buildings occupy stable plots as Rome grows</span></>}
+        <span>Open clearing: select a district to build</span>
+        <span>Occupied work: select to upgrade or clear</span>
       </div>
     </div>
   )
 }
 
-export function CityMap({ state, onSelectDistrict }) {
+export function CityMap({ state, onSelectDistrict, onSelectBuilding }) {
   const [mode, setMode] = useState('terrain')
   const [view, setView] = useState(DEFAULT_SCENE_ID)
   const activeScene = view === 'overview' ? null : sceneForId(view)
@@ -126,9 +105,7 @@ export function CityMap({ state, onSelectDistrict }) {
   const landmarks = augustanCapitalLandmarks(state)
   const coverage = networkCoverage(state)
   const covered = new Set(coverage[mode] ?? [])
-  const links = mode === 'roads'
-    ? coverage.roads
-    : ['water', 'drainage', 'defense'].includes(mode)
+  const links = ['water', 'drainage', 'defense'].includes(mode)
       ? DISTRICT_LINKS.filter(([from, to]) => covered.has(from) && covered.has(to)).map(([from, to]) => ({ from, to }))
       : []
   const selectView = (nextView) => {
@@ -137,7 +114,7 @@ export function CityMap({ state, onSelectDistrict }) {
   }
 
   return (
-    <section className="city-map-section" aria-labelledby="city-map-title">
+    <section id="city-construction" className="city-map-section" aria-labelledby="city-map-title">
       <div className="map-heading">
         <div>
           <p className="eyebrow">{activeScene ? activeScene.eyebrow : state.era >= 10 ? 'From the seven hills to an Imperial capital' : 'The seven hills and the river road'}</p>
@@ -159,11 +136,9 @@ export function CityMap({ state, onSelectDistrict }) {
           </div>
         </div>
       </div>
-      {activeScene ? <TerrainScene state={state} mode={mode} onSelectDistrict={onSelectDistrict} sceneId={activeScene.id} /> : <div className={`city-map map-mode-${mode}`} role="group" aria-label={`District map showing ${mode}`}>
+      {activeScene ? <TerrainScene state={state} mode={mode} onSelectDistrict={onSelectDistrict} onSelectBuilding={onSelectBuilding} sceneId={activeScene.id} /> : <div className={`city-map map-mode-${mode}`} role="group" aria-label={`District map showing ${mode}`}>
         <div className="tiber-river" aria-hidden="true"><span>Tiber</span></div>
         <div className="forum-basin" aria-hidden="true" />
-        <div className="salt-road road-a" aria-hidden="true" />
-        <div className="salt-road road-b" aria-hidden="true" />
         <div className="network-overlay" aria-hidden="true">
           {links.map((link) => <NetworkLine key={`${mode}-${link.from}-${link.to}`} {...link} mode={mode} />)}
         </div>

@@ -17,11 +17,14 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
   const site = siteAnalysis(state, state.selectedFamily, state.selectedDistrict, selected)
   const risk = districtRiskReport(state)[district.id]
   const network = districtNetworkReport(state)[district.id]
+  const occupied = state.buildings.filter((building) => building.districtId === district.id).length
+    + (state.projects ?? []).filter((project) => project.districtId === district.id && !project.replaceInstanceId).length
   return (
-    <section className="build-dock" aria-labelledby="build-title">
+    <section id="building-construction" className="build-dock" aria-labelledby="build-title">
       <div className="selected-work">
         <p className="eyebrow">Selected district</p>
         <h2 id="build-title">{district.name}</h2>
+        <p className="district-land-status"><strong>{occupied}/{district.capacity} plots used.</strong> Upgrade keeps a plot; Clear reopens it.</p>
         <p>{district.note}</p>
         <p className="district-specialty">{district.specialty}</p>
         <div className="terrain-tags">{district.terrain.map((tag) => <span key={tag}>{tag}</span>)}</div>
@@ -34,7 +37,7 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
         <div className="network-status" aria-label={`${district.name} network services`}>
           <span className={network.water ? 'connected' : ''}>Water <strong>{network.water ? 'Served' : 'Open'}</strong></span>
           <span className={network.drainage ? 'connected' : ''}>Drainage <strong>{network.drainage ? 'Served' : 'Open'}</strong></span>
-          <span className={network.improvedRoad ? 'connected' : ''}>Road <strong>{network.improvedRoad ? 'Improved' : 'Track'}</strong></span>
+          <span className={network.improvedRoad ? 'connected' : ''}>Access <strong>{network.improvedRoad ? 'Improved' : 'Basic'}</strong></span>
           <span className={network.connectedStorage ? 'connected' : ''}>Storage <strong>{network.connectedStorage ? 'Linked' : 'Unlinked'}</strong></span>
         </div>
         {state.selectedFamily === 'market' && <p className="network-effect">Market network output: {Math.round(network.marketOutputFactor * 100)}%</p>}

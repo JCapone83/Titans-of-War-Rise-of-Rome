@@ -1,4 +1,4 @@
-import { FACTIONS, REGIONAL_COMMUNITIES, RELATIONSHIP_TYPES, getCouncil } from './data.js'
+import { DISTRICTS, FACTIONS, REGIONAL_COMMUNITIES, RELATIONSHIP_TYPES, getCouncil } from './data.js'
 
 export const createInitialPopulation = () => ({
   total: 1030,
@@ -7,7 +7,7 @@ export const createInitialPopulation = () => ({
   workers: 433,
   levyEligible: 144,
   craftsmen: 41,
-  districts: { palatine: 450, capitoline: 120, forum: 0, aventine: 210, tiber: 90, quirinal: 160 },
+  districts: Object.fromEntries(DISTRICTS.map((district) => [district.id, district.startingPopulation ?? 0])),
   lastChange: { births: 0, arrivals: 0, departures: 0, illness: 0, eventLosses: 0, net: 0 },
 })
 
@@ -96,6 +96,14 @@ export const createItalianState = (regional = null, caudineResponse = 'preserve-
 const withoutLegacyLabor = (resources = {}) => Object.fromEntries(
   Object.entries(resources).filter(([key]) => key !== 'labor'),
 )
+
+const withCurrentDistricts = (population = createInitialPopulation()) => ({
+  ...population,
+  districts: Object.fromEntries(DISTRICTS.map((district) => [
+    district.id,
+    population.districts?.[district.id] ?? 0,
+  ])),
+})
 
 const migratedWorksCapacity = (population, allocation, bonus = 0, republic = null, magistrateMode = null) => {
   const eligible = (population?.workers ?? 433) + (population?.craftsmen ?? 41) + (population?.levyEligible ?? 144)
@@ -339,7 +347,7 @@ export const createInitialState = () => ({
 export function migrateState(saved) {
   if (!saved || saved.turn < 1 || saved.turn > 76) return null
   if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(saved.version)) return null
-  const population = saved.population ?? createInitialPopulation()
+  const population = withCurrentDistricts(saved.population)
   const workforceAllocation = saved.workforceAllocation ?? createInitialWorkforceAllocation()
   if ([5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(saved.version)) {
     const completedOldRepublic = saved.era >= 2 && saved.turn === 13 && saved.outcome === 'complete'

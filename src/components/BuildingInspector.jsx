@@ -21,10 +21,10 @@ export function BuildingInspector({ state, onSelect, onUpgrade, onRepair, onRemo
   const removal = selected ? removeAvailability(state, selected.instanceId) : { ok: false, reason: 'Select a work.' }
 
   return (
-    <section className="building-inspector" aria-labelledby="inspector-title">
+    <section id="building-redevelopment" className="building-inspector" aria-labelledby="inspector-title">
       <div className="inspector-list">
         <div className="inspector-heading">
-          <div><p className="eyebrow">District works</p><h2 id="inspector-title">{district.name}</h2></div>
+          <div><p className="eyebrow">Redevelop district works</p><h2 id="inspector-title">{district.name}</h2></div>
           <span>{works.length}/{district.capacity}</span>
         </div>
         {works.length === 0
@@ -52,14 +52,14 @@ export function BuildingInspector({ state, onSelect, onUpgrade, onRepair, onRemo
             </div>
             <Effects effects={selected.appliedEffects} />
             <div className="inspector-actions">
-              <button type="button" onClick={() => onUpgrade(selected.instanceId)} disabled={!upgrade.ok} title={upgrade.reason ?? 'Rebuild in its later form'}><ArrowUp /> Upgrade</button>
+              <button type="button" onClick={() => onUpgrade(selected.instanceId)} disabled={!upgrade.ok} title={upgrade.reason ?? 'Rebuild in its later form on the same plot'}><ArrowUp /> Upgrade</button>
               <button type="button" onClick={() => onRepair(selected.instanceId)} disabled={!repair.ok} title={repair.reason ?? 'Restore damaged output'}><Wrench /> Repair</button>
               <button type="button" className="danger-button" onClick={() => onRemove(selected.instanceId)} disabled={!removal.ok} title={removal.reason ?? 'Clear the plot and recover limited material'}><Trash2 /> Clear</button>
             </div>
-            <p className="inspector-reason">{!upgrade.ok ? upgrade.reason : `Upgrade cost: ${Object.entries(upgrade.cost).map(([key, value]) => `${value} ${key}`).join(', ')}.`}</p>
+            <p className="inspector-reason">{!upgrade.ok ? upgrade.reason : `Upgrade in place for ${Object.entries(upgrade.cost).map(([key, value]) => `${value} ${key}`).join(', ')}. The work keeps this plot.`}</p>
           </>
         ) : (
-          <div className="inspector-prompt"><Hammer /><p>Select an established work to upgrade, repair, or clear it.</p></div>
+          <div className="inspector-prompt"><Hammer /><p>Select an occupied work on the map or in this list. Upgrade reuses its plot; Clear returns the plot to open land.</p></div>
         )}
       </div>
     </section>

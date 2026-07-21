@@ -32,12 +32,14 @@ import { ImperialWorksPanel } from './components/ImperialWorksPanel.jsx'
 import { TrajanicCapitalPanel } from './components/TrajanicCapitalPanel.jsx'
 import { TrajanicWorksPanel } from './components/TrajanicWorksPanel.jsx'
 import { TopBar } from './components/TopBar.jsx'
+import { TurnGuide } from './components/TurnGuide.jsx'
 import { TurnReport } from './components/TurnReport.jsx'
 import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
 import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState } from './game/initialState.js'
 import { describeCampaign, hasCampaignProgress, parseCampaignSnapshot } from './game/homeScreen.js'
+import { notesForTurn } from './game/historicalContext.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, continueToTrajanicCapital, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain, enterTrajanicCapital } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
 import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from './game/simulation.js'
@@ -61,6 +63,8 @@ export default function App() {
   const [creditsOpen, setCreditsOpen] = useState(false)
   const [soundtrackOpen, setSoundtrackOpen] = useState(false)
   const [walkthroughOpen, setWalkthroughOpen] = useState(false)
+  const [guideActive, setGuideActive] = useState(false)
+  const [saveStatus, setSaveStatus] = useState(() => storedCampaign() ? 'saved' : 'saving')
   const [report, setReport] = useState(null)
   const [message, setMessage] = useState('')
   const [toast, setToast] = useState('')
@@ -69,6 +73,8 @@ export default function App() {
   const homeCampaign = useMemo(() => describeCampaign(state), [state])
   const canContinue = hasSavedCampaign || campaignStarted || hasCampaignProgress(state)
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
+  const currentNotes = notesForTurn(state.turn)
+  const readNotes = currentNotes.filter((note) => state.consultedNotes.includes(note.id)).length
   const outcome = useMemo(() => state.outcome && !state.republicTransition && !state.reconstructionTransition && !state.regionalTransition && !state.italianTransition && !state.mediterraneanTransition && !state.hannibalicTransition && !state.metropolitanTransition && !state.strainTransition && !state.settlementTransition && !state.augustanTransition && !state.imperialCapitalTransition && !state.trajanicCapitalTransition ? calculateOutcome(state) : null, [state])
 
   useEffect(() => {
@@ -89,6 +95,24 @@ export default function App() {
     const timer = window.setTimeout(() => setToast(''), 2200)
     return () => window.clearTimeout(timer)
   }, [toast])
+
+  useEffect(() => {
+    if (!campaignStarted || screen !== 'game') return
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+      setHasSavedCampaign(true)
+      setSaveStatus('saved')
+    } catch {
+      setSaveStatus('error')
+    }
+  }, [state, campaignStarted, screen])
+
+  const goTo = (id) => {
+    const target = document.getElementById(id)
+    if (!target) return
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+  }
 
   const build = () => {
     const result = placeBuilding(state, state.selectedFamily, state.selectedDistrict)
@@ -111,8 +135,14 @@ export default function App() {
 
   const clearWork = (instanceId) => {
     const building = state.buildings.find((item) => item.instanceId === instanceId)
-    if (!building || !window.confirm(`Clear ${building.name}? Only a small part of its material will be recovered.`)) return
+    if (!building || !window.confirm(`Clear ${building.name}? Its plot will reopen for construction, but only a small part of its material will be recovered.`)) return
     applyWorkAction(removeBuilding, instanceId)
+  }
+
+  const inspectWork = (instanceId) => {
+    setState(selectBuilding(state, instanceId))
+    setMessage('Select Upgrade to rebuild this work in its newer form, or Clear to reopen the plot.')
+    requestAnimationFrame(() => goTo('building-redevelopment'))
   }
 
   const endSeason = () => {
@@ -122,6 +152,7 @@ export default function App() {
       return
     }
     setState(result.state)
+    if (result.state.turn > 1) setGuideActive(false)
     setReport(result.report)
     setMessage('')
   }
@@ -130,6 +161,7 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
     setHasSavedCampaign(true)
     setCampaignStarted(true)
+    setSaveStatus('saved')
     setToast('Campaign saved in this browser.')
   }
 
@@ -180,6 +212,12 @@ export default function App() {
   const closeWalkthrough = () => {
     localStorage.setItem('birth-of-rome-walkthrough-seen', 'true')
     setWalkthroughOpen(false)
+  }
+
+  const startGuidedTurn = () => {
+    localStorage.setItem('birth-of-rome-walkthrough-seen', 'true')
+    setWalkthroughOpen(false)
+    setGuideActive(true)
   }
 
   const consult = (noteId) => {
@@ -234,7 +272,16 @@ export default function App() {
               <strong>{getObjective(state.turn)}</strong>
             </div>
             <div className="progress-track" aria-label={`Campaign progress: turn ${state.turn} of ${TURN_YEARS.length}`}><i style={{ width: `${state.turn / TURN_YEARS.length * 100}%` }} /></div>
-            <button className="context-button" onClick={() => setHistoryOpen(true)} aria-haspopup="dialog" aria-expanded={historyOpen}><BookOpen /> Historical knowledge <span>{state.consultedNotes.length}</span></button>
+            <button className="context-button" onClick={() => setHistoryOpen(true)} aria-haspopup="dialog" aria-expanded={historyOpen}><BookOpen /> Historical knowledge <span>{readNotes}/{currentNotes.length} read</span></button>
+            <TurnGuide
+              state={state}
+              guided={guideActive}
+              saveStatus={saveStatus}
+              onGoToBuild={() => goTo('building-construction')}
+              onGoToCouncil={() => goTo('council-decision')}
+              onGoToAdvance={() => goTo('season-advance')}
+              onDismissGuide={() => setGuideActive(false)}
+            />
           </section>
           {state.regional && <div className="surface-switch" role="group" aria-label="Planning view">
             <button type="button" className={surface === 'city' ? 'active' : ''} onClick={() => setSurface('city')} aria-pressed={surface === 'city'}><Building2 /> City</button>
@@ -244,7 +291,7 @@ export default function App() {
             <RegionalMap state={state} onSelectCommunity={(id) => setState(selectRegionalCommunity(state, id))} onSelectRoute={(id) => setState(selectRegionalRoute(state, id))} />
             <RegionalInspector state={state} onCompact={(community, relationship) => applyRegionalAction(reviseRegionalCompact, community, relationship)} onStartRoad={(id) => applyRegionalAction(startRegionalRoad, id)} onContinueRoad={(id) => applyRegionalAction(continueRegionalRoad, id)} onFoundColony={(id) => applyRegionalAction(foundRegionalColony, id)} />
           </> : <>
-            <CityMap state={state} onSelectDistrict={(id) => { setState(selectDistrict(state, id)); setMessage('') }} />
+            <CityMap state={state} onSelectDistrict={(id) => { setState(selectDistrict(state, id)); setMessage('') }} onSelectBuilding={inspectWork} />
             <ProjectLedger state={state} onContinue={(id) => applyWorkAction(continueProject, id)} />
             <BuildingInspector state={state} onSelect={(id) => setState(selectBuilding(state, id))} onUpgrade={(id) => applyWorkAction(upgradeBuilding, id)} onRepair={(id) => applyWorkAction(repairBuilding, id)} onRemove={clearWork} />
             <BuildDock state={state} onSelectFamily={(id) => { setState(selectFamily(state, id)); setMessage('') }} onBuild={build} message={message} />
@@ -274,7 +321,7 @@ export default function App() {
           {state.era === 10 && <AugustanWorksPanel state={state} onWork={(id) => applyRegionalAction(workAugustanProject, id)} />}
           {state.era === 11 && <ImperialWorksPanel state={state} onWork={(id) => applyRegionalAction(workImperialProject, id)} />}
           {state.era === 12 && <TrajanicWorksPanel state={state} onWork={(id) => applyRegionalAction(workTrajanicProject, id)} />}
-          <section className="advance-section">
+          <section id="season-advance" className="advance-section">
             <div>
               <p className="eyebrow">Next</p>
               <strong>{state.turn === 76 ? 'Judge the Trajanic capital at AD 117' : state.turn === 70 ? 'Judge the imperial capital at AD 96' : state.turn === 61 ? 'Judge whether the Augustan system survives its founder' : state.turn === 54 ? 'Judge the operating settlement of 27 BC' : state.turn === 48 ? 'Judge the Republic at the civil-war threshold' : state.turn === 41 ? 'Judge the metropolitan Republic' : state.turn === 29 ? 'Judge the Italian system' : state.turn === 23 ? 'Recover from the Caudine Forks' : state.turn === 20 ? 'Enter regional planning' : state.turn === 16 ? 'Face the Gallic crisis' : state.turn === 10 ? 'Enter the Early Republic' : state.turn === 5 ? 'Enter the City of Kings' : 'Resolve the season'}</strong>
@@ -288,7 +335,7 @@ export default function App() {
       </main>
       {toast && <div className="toast" role="status">{toast}</div>}
       <HistoricalContextPanel open={historyOpen} turn={state.turn} consulted={state.consultedNotes} onConsult={consult} onClose={() => setHistoryOpen(false)} />
-      <WalkthroughOverlay open={walkthroughOpen} onClose={closeWalkthrough} />
+      <WalkthroughOverlay open={walkthroughOpen} onClose={closeWalkthrough} onStartGuide={startGuidedTurn} />
       <TurnReport report={report} onClose={() => setReport(null)} />
       <EraTransition
         open={(state.eraTransition || state.republicTransition || state.reconstructionTransition || state.regionalTransition || state.italianTransition || state.mediterraneanTransition || state.hannibalicTransition || state.metropolitanTransition || state.strainTransition || state.settlementTransition || state.augustanTransition || state.imperialCapitalTransition || state.trajanicCapitalTransition) && !report}

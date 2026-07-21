@@ -970,7 +970,8 @@ export function upgradeAvailability(state, instanceId) {
   const placed = state.buildings.find((building) => building.instanceId === instanceId)
   if (!placed) return { ok: false, reason: 'Select an existing work.' }
   const family = getFamily(placed.familyId)
-  const next = family?.tiers[placed.tier]
+  const current = definitionFor(placed.buildingId)
+  const next = family?.tiers.find((tier) => tier.era > (current?.era ?? -1))
   if (!next) return { ok: false, reason: 'This work is already at its highest current form.' }
   if (state.era < next.era) return { ok: false, reason: 'The next form belongs to a later era.' }
   const prerequisite = prerequisiteFailure(state, next, placed.districtId, placed.instanceId)

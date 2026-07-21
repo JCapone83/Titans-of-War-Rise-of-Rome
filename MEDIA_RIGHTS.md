@@ -2,7 +2,7 @@
 
 ## Code-native visual system
 
-The city map, terrain, roads, river, district markers, and fallback building forms are rendered from original HTML and CSS included in this repository. They do not bundle third-party photographs or paintings.
+The city map, river, district markers, network overlays, and fallback building forms are rendered from original HTML and CSS included in this repository. They do not bundle third-party photographs or paintings.
 
 The project code and these original interface assets are released under the MIT License.
 
@@ -192,3 +192,13 @@ This image is interface terrain, not archaeological evidence or a reconstruction
 - SHA-256: `b08cb66289fcb3527cc4f3a9c4a7a6ec6972e835ce76a945ec7bcbbe65628a73`
 
 This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. It was generated using only project-authored direction and the two existing project terrain plates as style and continuity references.
+
+### Caelian, Esquiline, and Viminal terrain
+
+- File: `src/game/easternHillsTerrain.js` (self-hosted WebP data URI)
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Rights basis: Original game artwork produced for this project; no source photograph is embedded or redistributed.
+- Historical scope: An interpretive view of undeveloped eastern ridges before dense urban construction. The open terraces and natural tracks are composed for strategy play rather than claimed as a surveyed early-Roman plan.
+- SHA-256: `2d5d1473c23086e8d7a6e28e9163a89f194c938e25c44336c6dc200bbca02f33`
+
+This image is interface terrain, not archaeological evidence or a reconstruction of one documented viewpoint. It was generated using only project-authored direction and the existing project terrain plates as style and continuity references. The hash above is for the decoded WebP payload, not the text module that carries it.

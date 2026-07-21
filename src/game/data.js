@@ -523,18 +523,24 @@ export const FACTIONS = {
 }
 
 export const DISTRICTS = [
-  { id: 'palatine', name: 'Palatine', x: 49, y: 43, terrain: ['hill', 'central'], capacity: 4, baseHousing: 500, startingPopulation: 450, favored: ['housing', 'shrine'], neighbors: ['capitoline', 'forum', 'aventine'], specialty: 'Households and common rites reinforce one another here.', note: 'Defensible ground associated by Roman tradition with the earliest settlement.' },
-  { id: 'capitoline', name: 'Capitoline', x: 35, y: 28, terrain: ['high', 'rock'], capacity: 3, baseHousing: 180, startingPopulation: 120, favored: ['shrine', 'defense'], neighbors: ['palatine', 'forum', 'quirinal'], specialty: 'Height strengthens sacred and defensive works.', note: 'A commanding height suited to citadel and cult.' },
-  { id: 'forum', name: 'Forum Valley', x: 43, y: 58, terrain: ['low', 'wet'], capacity: 4, baseHousing: 0, startingPopulation: 0, favored: ['drainage', 'market'], neighbors: ['palatine', 'capitoline', 'aventine', 'tiber', 'quirinal'], specialty: 'Drainage converts divided low ground into civic capacity.', note: 'Low ground between hills; useful only after sustained drainage.' },
-  { id: 'aventine', name: 'Aventine', x: 63, y: 65, terrain: ['hill', 'outer'], capacity: 4, baseHousing: 240, startingPopulation: 210, favored: ['grain', 'housing'], neighbors: ['palatine', 'forum', 'tiber'], specialty: 'Storage and housing protect the southern food road.', note: 'An outer hill watching the river road and food routes.' },
-  { id: 'tiber', name: 'Tiber Bank', x: 20, y: 60, terrain: ['river', 'floodplain'], capacity: 3, baseHousing: 120, startingPopulation: 90, favored: ['market', 'grain'], neighbors: ['forum', 'aventine'], specialty: 'Exchange and storage prosper together, but both face flood risk.', note: 'Trade and salt routes meet flood danger here.' },
-  { id: 'quirinal', name: 'Quirinal', x: 63, y: 25, terrain: ['high', 'outer'], capacity: 3, baseHousing: 180, startingPopulation: 160, favored: ['workshop', 'defense'], neighbors: ['capitoline', 'forum'], specialty: 'Craft and fortified approaches support the northern road.', note: 'A northern height tied to neighboring communities and approaches.' },
+  { id: 'palatine', name: 'Palatine', x: 47, y: 43, terrain: ['hill', 'central'], capacity: 4, baseHousing: 500, startingPopulation: 450, favored: ['housing', 'shrine'], neighbors: ['capitoline', 'forum', 'aventine', 'caelian'], specialty: 'Households and common rites reinforce one another here.', note: 'Defensible ground associated by Roman tradition with the earliest settlement.' },
+  { id: 'capitoline', name: 'Capitoline', x: 32, y: 27, terrain: ['high', 'rock'], capacity: 3, baseHousing: 180, startingPopulation: 120, favored: ['shrine', 'defense'], neighbors: ['palatine', 'forum', 'quirinal'], specialty: 'Height strengthens sacred and defensive works.', note: 'A commanding height suited to citadel and cult.' },
+  { id: 'forum', name: 'Forum Valley', x: 42, y: 59, terrain: ['low', 'wet'], capacity: 4, baseHousing: 0, startingPopulation: 0, favored: ['drainage', 'market'], neighbors: ['palatine', 'capitoline', 'aventine', 'tiber', 'quirinal', 'esquiline'], specialty: 'Drainage converts divided low ground into civic capacity.', note: 'Low ground between hills; useful only after sustained drainage.' },
+  { id: 'aventine', name: 'Aventine', x: 62, y: 69, terrain: ['hill', 'outer'], capacity: 4, baseHousing: 240, startingPopulation: 210, favored: ['grain', 'housing'], neighbors: ['palatine', 'forum', 'tiber', 'caelian'], specialty: 'Storage and housing protect the southern food road.', note: 'An outer hill watching the river road and food routes.' },
+  { id: 'tiber', name: 'Tiber Bank', x: 18, y: 64, terrain: ['river', 'floodplain'], capacity: 3, baseHousing: 120, startingPopulation: 90, favored: ['market', 'grain'], neighbors: ['forum', 'aventine'], specialty: 'Exchange and storage prosper together, but both face flood risk.', note: 'Trade and salt routes meet flood danger here.' },
+  { id: 'quirinal', name: 'Quirinal', x: 57, y: 22, terrain: ['high', 'outer'], capacity: 3, baseHousing: 180, startingPopulation: 160, favored: ['workshop', 'defense'], neighbors: ['capitoline', 'forum', 'esquiline', 'viminal'], specialty: 'Craft and fortified approaches support the northern road.', note: 'A northern height tied to neighboring communities and approaches.' },
+  { id: 'caelian', name: 'Caelian', x: 72, y: 56, terrain: ['hill', 'outer'], capacity: 4, baseHousing: 0, startingPopulation: 0, favored: ['housing', 'defense'], neighbors: ['palatine', 'aventine', 'esquiline'], specialty: 'A broad outer ridge rewards housing backed by guarded approaches.', note: 'An eastern hill that gives a growing city room beyond its earliest core.' },
+  { id: 'esquiline', name: 'Esquiline', x: 78, y: 39, terrain: ['high', 'outer'], capacity: 4, baseHousing: 0, startingPopulation: 0, favored: ['housing', 'workshop'], neighbors: ['forum', 'quirinal', 'caelian', 'viminal'], specialty: 'Dry open ground supports expansion when housing and craft are kept in balance.', note: 'A large eastern height whose incorporation widened the city beyond the oldest hills.' },
+  { id: 'viminal', name: 'Viminal', x: 76, y: 17, terrain: ['ridge', 'outer'], capacity: 4, baseHousing: 0, startingPopulation: 0, favored: ['workshop', 'grain'], neighbors: ['quirinal', 'esquiline'], specialty: 'A narrower ridge favors compact craft and storage rather than monumental crowding.', note: 'A northern ridge forming part of Rome\'s later urban expansion.' },
 ]
 
 export const DISTRICT_LINKS = [
   ['palatine', 'capitoline'], ['palatine', 'forum'], ['palatine', 'aventine'],
   ['capitoline', 'forum'], ['capitoline', 'quirinal'], ['forum', 'aventine'],
   ['forum', 'tiber'], ['forum', 'quirinal'], ['aventine', 'tiber'],
+  ['palatine', 'caelian'], ['aventine', 'caelian'], ['caelian', 'esquiline'],
+  ['forum', 'esquiline'], ['quirinal', 'esquiline'], ['quirinal', 'viminal'],
+  ['esquiline', 'viminal'],
 ]
 
 export const RELATIONSHIP_TYPES = {

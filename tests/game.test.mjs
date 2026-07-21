@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
-import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, ERAS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
+import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, ERAS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
 import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
@@ -12,7 +12,9 @@ import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCa
 import { HISTORICAL_NOTES, notesForTurn } from '../src/game/historicalContext.js'
 import { BUILDING_ART, artForBuilding } from '../src/game/buildingArt.js'
 import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_ART, IMPERIAL_PROJECT_ART, TRAJANIC_PROJECT_ART, artForAugustanProject, artForCivilSettlementProject, artForImperialProject, artForTrajanicProject, augustanCapitalLandmarks, augustanProjectStage, civilSettlementProjectStage } from '../src/game/projectArt.js'
-import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, districtGate, roadLinksForScene, sceneForId } from '../src/game/romeScenes.js'
+import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, sceneForId } from '../src/game/romeScenes.js'
+import { EASTERN_HILLS_TERRAIN } from '../src/game/easternHillsTerrain.js'
+import { turnGuideState } from '../src/game/turnGuidance.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
@@ -43,6 +45,28 @@ test('home screen recognizes in-memory campaign progress', () => {
   assert.equal(hasCampaignProgress({ ...initial, choiceLog: [{ turn: 1, optionId: 'a' }] }), true)
 })
 
+test('turn guide moves from construction through council to season advance', () => {
+  const initial = createInitialState()
+  const beforeBuild = turnGuideState(initial)
+  assert.equal(beforeBuild.current, 'build')
+  assert.equal(beforeBuild.build.label, '0/2 capacity')
+  assert.equal(beforeBuild.council.label, 'Decision needed')
+  assert.equal(beforeBuild.advance.ready, false)
+
+  const afterBuild = turnGuideState({ ...initial, actionsUsed: 1 })
+  assert.equal(afterBuild.current, 'council')
+  assert.equal(afterBuild.build.complete, true)
+
+  const ready = turnGuideState({ ...initial, actionsUsed: 1, councilResolved: true })
+  assert.equal(ready.current, 'advance')
+  assert.equal(ready.council.label, 'Resolved')
+  assert.equal(ready.advance.ready, true)
+
+  const quietTurn = turnGuideState({ ...initial, actionsUsed: 1, council: null, councilResolved: false })
+  assert.equal(quietTurn.current, 'advance')
+  assert.equal(quietTurn.council.label, 'No council')
+})
+
 test('terrain scene assigns Palatine and Capitoline buildings deterministically', () => {
   const state = createInitialState()
   state.buildings = [
@@ -60,35 +84,11 @@ test('terrain scene assigns Palatine and Capitoline buildings deterministically'
   assert.equal(new Set(first.map((item) => item.plot.id)).size, first.length)
   assert.deepEqual(second, first)
   assert.equal(state.buildings.length, 4)
-  assert.equal(districtGate(scene, 'palatine').id, 'palatine-gate')
-  assert.equal(districtGate(scene, 'forum'), null)
 })
 
-test('terrain scene road links connect occupied plots to district gates', () => {
-  const state = createInitialState()
-  state.buildings = [
-    { instanceId: 'p-1', districtId: 'palatine', buildingId: 'palatine-huts', name: 'Palatine Huts', familyId: 'housing', tier: 1, condition: 100 },
-    { instanceId: 'c-1', districtId: 'capitoline', buildingId: 'timber-shrine', name: 'Timber Shrine', familyId: 'shrine', tier: 1, condition: 100 },
-  ]
-  const plain = roadLinksForScene(state, 'palatine-capitoline')
-  assert.ok(plain.some((link) => link.to.id === 'palatine-gate'))
-  assert.ok(plain.some((link) => link.to.id === 'capitoline-gate'))
-  assert.equal(new Set(plain.map((link) => link.id)).size, plain.length)
-  assert.ok(plain.every((link) => link.improved === false))
-
-  const improved = roadLinksForScene({
-    ...state,
-    buildings: [
-      ...state.buildings,
-      { instanceId: 'p-2', districtId: 'palatine', buildingId: 'forum-market', name: 'Improved Market', familyId: 'market', tier: 2, condition: 100 },
-    ],
-  }, 'palatine-capitoline')
-  assert.ok(improved.filter((link) => link.districtId === 'palatine').every((link) => link.improved))
-})
-
-test('hill terrain is the default and the Tiber scene fills its seven district plots deterministically', () => {
+test('hill terrain is the default and all four land views are registered', () => {
   assert.equal(DEFAULT_SCENE_ID, 'palatine-capitoline')
-  assert.deepEqual(ROME_SCENES.map((scene) => scene.id), ['palatine-capitoline', 'tiber-aventine', 'forum-quirinal'])
+  assert.deepEqual(ROME_SCENES.map((scene) => scene.id), ['palatine-capitoline', 'tiber-aventine', 'forum-quirinal', 'eastern-hills'])
   assert.equal(sceneForId('unknown-scene').id, DEFAULT_SCENE_ID)
 
   const state = createInitialState()
@@ -104,10 +104,6 @@ test('hill terrain is the default and the Tiber scene fills its seven district p
   assert.equal(assignments.length, 7)
   assert.deepEqual(assignments.map(({ building }) => building.instanceId), ['t-0', 't-1', 't-2', 'a-0', 'a-1', 'a-2', 'a-3'])
   assert.equal(new Set(assignments.map(({ plot }) => plot.id)).size, 7)
-  assert.equal(districtGate(scene, 'tiber').id, 'tiber-gate')
-  assert.equal(districtGate(scene, 'aventine').id, 'aventine-gate')
-  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'tiber-gate'), true)
-  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'aventine-gate'), true)
 })
 
 test('Forum Valley and Quirinal complete deterministic terrain coverage for every construction district', () => {
@@ -124,13 +120,26 @@ test('Forum Valley and Quirinal complete deterministic terrain coverage for ever
   assert.deepEqual(scene.districts, ['forum', 'quirinal'])
   assert.deepEqual(assignments.map(({ building }) => building.instanceId), ['f-0', 'f-1', 'f-2', 'f-3', 'q-0', 'q-1', 'q-2'])
   assert.equal(new Set(assignments.map(({ plot }) => plot.id)).size, 7)
-  assert.equal(districtGate(scene, 'forum').id, 'forum-gate')
-  assert.equal(districtGate(scene, 'quirinal').id, 'quirinal-gate')
-  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'forum-gate'), true)
-  assert.equal(roadLinksForScene(state, scene.id).some((link) => link.to.id === 'quirinal-gate'), true)
-
   const coveredDistricts = new Set(ROME_SCENES.flatMap((item) => item.districts))
-  assert.deepEqual([...coveredDistricts].sort(), ['aventine', 'capitoline', 'forum', 'palatine', 'quirinal', 'tiber'])
+  assert.deepEqual([...coveredDistricts].sort(), ['aventine', 'caelian', 'capitoline', 'esquiline', 'forum', 'palatine', 'quirinal', 'tiber', 'viminal'])
+})
+
+test('eastern hills add twelve visible construction plots and raise city capacity to thirty-three', () => {
+  const state = createInitialState()
+  state.buildings = [
+    ...Array.from({ length: 4 }, (_, index) => ({ instanceId: `c-${index}`, districtId: 'caelian', buildingId: 'round-huts', name: 'Caelian Work', familyId: 'housing', tier: 1, condition: 100 })),
+    ...Array.from({ length: 4 }, (_, index) => ({ instanceId: `e-${index}`, districtId: 'esquiline', buildingId: 'kiln-smithy', name: 'Esquiline Work', familyId: 'workshop', tier: 1, condition: 100 })),
+    ...Array.from({ length: 4 }, (_, index) => ({ instanceId: `v-${index}`, districtId: 'viminal', buildingId: 'grain-pits', name: 'Viminal Work', familyId: 'grain', tier: 1, condition: 100 })),
+  ]
+  const scene = sceneForId('eastern-hills')
+  const assignments = assignBuildingsToScene(state, scene.id)
+  assert.equal(scene.plots.length, 12)
+  assert.equal(assignments.length, 12)
+  assert.equal(new Set(assignments.map(({ plot }) => plot.id)).size, 12)
+  assert.equal(DISTRICTS.reduce((sum, district) => sum + district.capacity, 0), 33)
+  assert.match(EASTERN_HILLS_TERRAIN, /^data:image\/webp;base64,/)
+  const terrainBytes = Buffer.from(EASTERN_HILLS_TERRAIN.split(',')[1], 'base64')
+  assert.equal(createHash('sha256').update(terrainBytes).digest('hex'), '2d5d1473c23086e8d7a6e28e9163a89f194c938e25c44336c6dc200bbca02f33')
 })
 
 test('soundtrack catalog contains six self-hosted verified recordings', () => {
@@ -276,6 +285,32 @@ test('an early work can be upgraded in place after prerequisites are met', () =>
   assert.equal(upgraded.state.buildings.length, 2)
 })
 
+test('later civic works can upgrade across nonconsecutive family array positions', () => {
+  const stores = { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 }
+  const comitium = { instanceId: 'forum-civic', districtId: 'forum', buildingId: 'comitium', name: 'Comitium', familyId: 'civic', tier: 3, condition: 100, appliedEffects: { order: 8, trade: 3 } }
+  const cloaca = { instanceId: 'forum-drain', districtId: 'forum', buildingId: 'cloaca-works', name: 'Cloaca Works', familyId: 'drainage', tier: 2, condition: 100, appliedEffects: { sanitation: 20 } }
+  const state = { ...createInitialState(), era: 3, resources: stores, actionsMax: 3, buildings: [comitium, cloaca] }
+  const upgraded = upgradeBuilding(state, comitium.instanceId)
+  assert.equal(upgraded.error, undefined)
+  assert.equal(upgraded.state.projects[0].buildingId, 'reconstruction-records')
+  assert.equal(upgraded.state.projects[0].replaceInstanceId, comitium.instanceId)
+  assert.equal(upgraded.state.buildings.length, 2)
+})
+
+test('current save migration adds empty eastern districts without changing population totals', () => {
+  const saved = createInitialState()
+  saved.population = {
+    ...saved.population,
+    districts: { palatine: 450, capitoline: 120, forum: 0, aventine: 210, tiber: 90, quirinal: 160 },
+  }
+  const migrated = migrateState(saved)
+  assert.equal(migrated.population.total, 1030)
+  assert.deepEqual(
+    { caelian: migrated.population.districts.caelian, esquiline: migrated.population.districts.esquiline, viminal: migrated.population.districts.viminal },
+    { caelian: 0, esquiline: 0, viminal: 0 },
+  )
+})
+
 test('linked districts produce an explicit adjacency bonus', () => {
   const stores = { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 }
   let state = { ...createInitialState(), resources: stores }
@@ -403,7 +438,7 @@ test('network overlays extend tier two water drainage and defense to linked dist
   assert.ok(coverage.water.includes('aventine'))
   assert.ok(coverage.drainage.includes('tiber'))
   assert.ok(coverage.defense.includes('capitoline'))
-  assert.equal(coverage.roads.length, 9)
+  assert.equal(coverage.roads.length, DISTRICT_LINKS.length)
 })
 
 test('storage and improved roads restore full market output', () => {
