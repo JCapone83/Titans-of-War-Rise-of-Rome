@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
 import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, ERAS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
-import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
+import { __test, activateCivicRecovery, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
 import { calculateAugustanCityScore, calculateCityViability, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runAllTrajanicCapitalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
@@ -15,6 +15,7 @@ import { AUGUSTAN_PROJECT_ART, AUGUSTAN_PROJECT_SITES, CIVIL_SETTLEMENT_PROJECT_
 import { DEFAULT_SCENE_ID, ROME_SCENES, assignBuildingsToScene, sceneForId } from '../src/game/romeScenes.js'
 import { EASTERN_HILLS_TERRAIN } from '../src/game/easternHillsTerrain.js'
 import { turnGuideState } from '../src/game/turnGuidance.js'
+import { nextWorkRecommendation, populationWarning } from '../src/game/cityGuidance.js'
 import { existsSync, readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
@@ -65,6 +66,80 @@ test('turn guide moves from construction through council to season advance', () 
   const quietTurn = turnGuideState({ ...initial, actionsUsed: 1, council: null, councilResolved: false })
   assert.equal(quietTurn.current, 'advance')
   assert.equal(quietTurn.council.label, 'No council')
+})
+
+test('guided opening asks for housing and water before council', () => {
+  const initial = createInitialState()
+  assert.equal(turnGuideState(initial, true).current, 'housing')
+
+  const housing = placeBuilding(initial, 'housing', 'palatine').state
+  const afterHousing = turnGuideState(housing, true)
+  assert.equal(afterHousing.housing.complete, true)
+  assert.equal(afterHousing.water.complete, false)
+  assert.equal(afterHousing.current, 'water')
+
+  const water = placeBuilding(housing, 'water', 'palatine').state
+  const afterWater = turnGuideState(water, true)
+  assert.equal(afterWater.water.complete, true)
+  assert.equal(afterWater.current, 'council')
+})
+
+test('next-work guidance prioritizes the largest essential deficit', () => {
+  const state = createInitialState()
+  state.metrics = { ...state.metrics, shelter: 8, water: 70, sanitation: 70, food: 70 }
+  const recommendation = nextWorkRecommendation(state)
+  assert.equal(recommendation.deficit, 'shelter')
+  assert.equal(recommendation.familyId, 'housing')
+  assert.ok(recommendation.building)
+  assert.ok(recommendation.districtId)
+  assert.equal(state.buildings.length, 0)
+})
+
+test('population warning reports the two largest forecast losses', () => {
+  const state = createInitialState()
+  state.population.total = 480
+  const warning = populationWarning(state, {
+    population: {
+      reasons: [
+        { key: 'births', label: 'Births', value: 20 },
+        { key: 'departures', label: 'Departures', value: 9 },
+        { key: 'illness', label: 'Illness', value: 7 },
+        { key: 'eventLosses', label: 'Crisis losses', value: 3 },
+      ],
+    },
+  })
+  assert.equal(warning.title, 'City viability at risk')
+  assert.deepEqual(warning.causes.map((cause) => cause.key), ['departures', 'illness'])
+})
+
+test('civic recovery grants one bounded elective season', () => {
+  const initial = createInitialState()
+  initial.population = {
+    ...initial.population,
+    total: 220,
+    districts: Object.fromEntries(DISTRICTS.map((district) => [district.id, district.id === 'palatine' ? 220 : 0])),
+  }
+  initial.metrics = { ...initial.metrics, food: 25, water: 25, shelter: 25, sanitation: 25 }
+  initial.council = null
+  initial.councilResolved = true
+  const offered = advanceTurn(initial).state
+  assert.equal(offered.recoverySupport.offered, true)
+  assert.equal(offered.recoverySupport.available, true)
+
+  const baseCapacity = offered.actionsMax
+  const activated = activateCivicRecovery(offered, 'housing')
+  assert.equal(activated.error, undefined)
+  assert.equal(activated.state.actionsMax, baseCapacity + 1)
+  assert.equal(activated.state.recoverySupport.active.family, 'housing')
+  const availability = buildingAvailability(activated.state, 'housing', 'palatine')
+  assert.equal(availability.recoveryDiscount, 'timber')
+  assert.equal(availability.effectiveCost.timber, 1)
+
+  const built = placeBuilding(activated.state, 'housing', 'palatine').state
+  assert.equal(built.recoverySupport.used, true)
+  assert.equal(built.recoverySupport.active, null)
+  assert.equal(built.recoverySupport.history.at(-1).type, 'consumed')
+  assert.match(activateCivicRecovery(built, 'water').error, /not available/i)
 })
 
 test('construction action precedes the building family catalog in the public interface', () => {

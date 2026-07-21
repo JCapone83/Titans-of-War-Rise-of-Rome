@@ -1,4 +1,5 @@
 import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, IMPERIAL_CAPITAL_PROJECTS, ITALIAN_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, REGIONAL_COMMUNITIES, REGIONAL_ROUTES, RELATIONSHIP_TYPES, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getDistrict, getFamily, getTier } from './data.js'
+import { calculateCityViability } from './cityViability.js'
 import { createAugustanState, createCivilSettlementState, createImperialCapitalState, createItalianState, createMediterraneanState, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createTrajanicCapitalState, createWarState } from './initialState.js'
 
 const BUILDINGS = BUILDING_FAMILIES.flatMap((family) => family.tiers)
@@ -897,6 +898,29 @@ function affordabilityFailure(state, cost) {
   return missing.length ? `Need ${missing.map(([key, amount]) => `${amount} ${key}`).join(', ')}.` : null
 }
 
+const RECOVERY_FAMILIES = new Set(['housing', 'water', 'drainage', 'grain'])
+
+function recoveryCost(state, familyId, cost) {
+  const active = state.recoverySupport?.active
+  if (!active || active.family !== familyId || !RECOVERY_FAMILIES.has(familyId)) return { cost, discountResource: null }
+  const discountResource = Object.entries(cost)
+    .filter(([, amount]) => amount > 0)
+    .sort(([leftKey, leftAmount], [rightKey, rightAmount]) => rightAmount - leftAmount || leftKey.localeCompare(rightKey))[0]?.[0]
+  if (!discountResource) return { cost, discountResource: null }
+  return { cost: { ...cost, [discountResource]: Math.max(0, cost[discountResource] - 1) }, discountResource }
+}
+
+function consumeRecovery(state, familyId, buildingName) {
+  const support = state.recoverySupport
+  if (!support?.active || support.active.family !== familyId) return state
+  const event = { type: 'consumed', turn: state.turn, family: familyId, building: buildingName }
+  return {
+    ...state,
+    recoverySupport: { ...support, active: null, available: false, used: true, history: [...(support.history ?? []), event] },
+    actionLog: appendAction(state, { type: 'civic-recovery-used', family: familyId, building: buildingName }),
+  }
+}
+
 export function buildingAvailability(state, familyId, districtId) {
   const family = getFamily(familyId)
   const district = getDistrict(districtId)
@@ -910,9 +934,10 @@ export function buildingAvailability(state, familyId, districtId) {
   if (occupied >= district.capacity) return { ok: false, reason: 'This district has no open plots.' }
   const capacityCost = building.projectTurns ? 1 : building.actionCost
   if (actionRemaining(state) < capacityCost) return { ok: false, reason: `Requires ${capacityCost} public-works capacity; ${actionRemaining(state)} remains.` }
-  const affordability = affordabilityFailure(state, building.cost)
-  if (affordability) return { ok: false, reason: affordability }
-  return { ok: true, building, district, family, site: siteAnalysis(state, familyId, districtId, building) }
+  const recovery = recoveryCost(state, familyId, building.cost)
+  const affordability = affordabilityFailure(state, recovery.cost)
+  if (affordability) return { ok: false, reason: affordability, effectiveCost: recovery.cost, recoveryDiscount: recovery.discountResource }
+  return { ok: true, building, district, family, site: siteAnalysis(state, familyId, districtId, building), effectiveCost: recovery.cost, recoveryDiscount: recovery.discountResource }
 }
 
 function appliedEffectsFor(state, familyId, districtId, building) {
@@ -966,25 +991,26 @@ function startProject(state, building, familyId, districtId, cost, replaceInstan
 export function placeBuilding(state, familyId, districtId) {
   const availability = buildingAvailability(state, familyId, districtId)
   if (!availability.ok) return { state, error: availability.reason }
-  const { building, district, site } = availability
-  const cost = reverseChanges(building.cost)
+  const { building, district, site, effectiveCost } = availability
+  const cost = reverseChanges(effectiveCost)
   if (building.projectTurns) {
+    const started = startProject(state, building, familyId, districtId, effectiveCost)
     return {
-      state: startProject(state, building, familyId, districtId, building.cost),
+      state: consumeRecovery(started, familyId, building.name),
       message: `${building.name} begun on the ${district.name}. Work stands at 1 of ${building.projectTurns} seasons and may be resumed later.`,
     }
   }
   const instance = createBuildingInstance(state, familyId, districtId, building)
   return {
-    state: {
+    state: consumeRecovery({
       ...state,
       resources: addResources(state.resources, cost),
       metrics: addMap(state.metrics, instance.appliedEffects),
       buildings: [...state.buildings, instance],
       selectedBuildingId: instance.instanceId,
       actionsUsed: (state.actionsUsed ?? 0) + building.actionCost,
-      actionLog: appendAction(state, { type: 'build', building: building.name, district: district.name }),
-    },
+      actionLog: appendAction(state, { type: 'build', building: building.name, familyId, district: district.name }),
+    }, familyId, building.name),
     message: `${building.name} established on the ${district.name}${site.bonuses.length ? `; ${site.bonuses.length} site bonus${site.bonuses.length === 1 ? '' : 'es'} applied` : ''}.`,
   }
 }
@@ -2400,6 +2426,23 @@ function applyFireExposure(buildings, risks) {
   return { buildings: next, damaged }
 }
 
+export function activateCivicRecovery(state, family) {
+  if (!RECOVERY_FAMILIES.has(family)) return { state, error: 'Choose housing, water, drainage, or food storage.' }
+  const support = state.recoverySupport
+  if (!support?.available || support.used || support.active) return { state, error: 'Civic Recovery is not available.' }
+  const active = { family, activationTurn: state.turn }
+  const event = { type: 'activated', turn: state.turn, family }
+  return {
+    state: {
+      ...state,
+      actionsMax: (state.actionsMax ?? 0) + 1,
+      recoverySupport: { ...support, available: false, active, history: [...(support.history ?? []), event] },
+      actionLog: appendAction(state, { type: 'civic-recovery', family }),
+    },
+    message: 'Civic Recovery activated: one temporary public-works capacity and one material discount are reserved for the chosen essential work.',
+  }
+}
+
 export function advanceTurn(state) {
   if (state.outcome) return { state, error: 'The campaign is complete.' }
   if (state.council && !state.councilResolved) return { state, error: 'The council must reach a decision before the season ends.' }
@@ -2480,6 +2523,22 @@ export function advanceTurn(state) {
   }
   report.riskLabel = event?.riskLabel ?? (event?.resolvedRisk !== undefined && event?.resolvedRisk !== null ? 'Resolved flood exposure' : null)
   const shared = { resources: nextResources, metrics: nextMetrics, buildings: fireDamage.buildings, projects, population: population.nextPopulation, republic: nextRepublic, war: nextWar, reconstruction: nextReconstruction, regional: nextRegional, italian: nextItalian, mediterranean: nextMediterranean, metropolitan: nextMetropolitan, republicStrain: nextRepublicStrain, civilSettlement: nextCivilSettlement, augustanCity: nextAugustanCity, imperialCapital: nextImperialCapital, trajanicCapital: forecast.trajanicCapital?.projected ?? state.trajanicCapital, reports: [...state.reports, report] }
+  const support = state.recoverySupport ?? { offered: false, available: false, used: false, active: null, history: [] }
+  let recoverySupport = { ...support, history: [...(support.history ?? [])] }
+  let actionLog = state.actionLog ?? []
+  if (support.active?.activationTurn === state.turn) {
+    const event = { type: 'expired', turn: state.turn, family: support.active.family }
+    recoverySupport = { ...recoverySupport, active: null, available: false, used: true, history: [...recoverySupport.history, event] }
+    actionLog = [...actionLog, { turn: state.turn, type: 'civic-recovery-expired', family: support.active.family }]
+  }
+  const postSeasonStatus = calculateCityViability({ ...state, ...shared }).status
+  if (!recoverySupport.offered && state.turn < 76 && ['Fragile', 'Hollowed'].includes(postSeasonStatus)) {
+    const event = { type: 'offered', turn: state.turn + 1, status: postSeasonStatus }
+    recoverySupport = { ...recoverySupport, offered: true, available: true, history: [...recoverySupport.history, event] }
+    report.notes.push(`Civic Recovery is available next season because city viability is ${postSeasonStatus.toLowerCase()}.`)
+  }
+  shared.recoverySupport = recoverySupport
+  shared.actionLog = actionLog
   if (forecast.mediterranean?.publicWorks) {
     shared.mediterranean = { ...nextMediterranean, projects: structuredClone(state.mediterranean.projects) }
     report.publicWorks = forecast.mediterranean.publicWorks

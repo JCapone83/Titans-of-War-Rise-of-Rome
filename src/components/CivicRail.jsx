@@ -1,10 +1,12 @@
 import { DISTRICTS, FACTIONS, METRIC_META, RESOURCE_META } from '../game/data.js'
 import { forecastSeason } from '../game/simulation.js'
+import { populationWarning, recoveryFamilyLabel } from '../game/cityGuidance.js'
 import { calculateCityViability } from '../game/outcomes.js'
 import { LaborAllocationPanel } from './LaborAllocationPanel.jsx'
 
-export function CivicRail({ state, onAllocate }) {
+export function CivicRail({ state, recommendation, onAllocate, onRecover }) {
   const forecast = forecastSeason(state)
+  const warning = populationWarning(state, forecast)
   const cityViability = calculateCityViability(state)
   const highestRisks = Object.values(forecast.risks).sort((a, b) => Math.max(b.fire, b.disease, b.flood) - Math.max(a.fire, a.disease, a.flood)).slice(0, 2)
   return (
@@ -19,6 +21,9 @@ export function CivicRail({ state, onAllocate }) {
           ))}
         </div>
       </section>
+      {warning && <section className={`population-warning ${warning.band}`} aria-label="Population warning"><strong>{warning.title}</strong><p>{warning.detail}</p>{warning.causes.length > 0 && <ul>{warning.causes.map((cause) => <li key={cause.key}>{cause.label}: {cause.value}</li>)}</ul>}</section>}
+      {state.recoverySupport?.available && <section className="recovery-section" aria-label="Civic recovery"><div className="section-heading"><p className="eyebrow">One elective season</p><h2>Civic recovery</h2></div><p>Choose one essential family for one temporary public-works capacity and a one-resource discount. Nothing builds automatically.</p><div className="recovery-actions">{['housing', 'water', 'drainage', 'grain'].map((family) => <button key={family} type="button" className="secondary-button" onClick={() => onRecover(family)}>Choose {recoveryFamilyLabel(family)}</button>)}</div></section>}
+      {state.recoverySupport?.active && <section className="recovery-section active" aria-label="Civic recovery active"><strong>Civic recovery active</strong><p>Establish one {recoveryFamilyLabel(state.recoverySupport.active.family)} work this season to use the extra capacity and material relief.</p></section>}
       <section className="population-section">
         <div className="section-heading"><p className="eyebrow">Households on the hills</p><h2>Population</h2></div>
         <div className="population-total">

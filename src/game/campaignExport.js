@@ -228,6 +228,18 @@ export function campaignMarkdown(state) {
     '- Judgment date: AD 117',
   ]))
 
+  if (state.recoverySupport?.offered) output.push(section('Civic Recovery', [
+    `- Offered: yes`,
+    `- Used: ${state.recoverySupport.used ? 'yes' : 'no'}`,
+    `- Available now: ${state.recoverySupport.available ? 'yes' : 'no'}`,
+    ...((state.recoverySupport.history ?? []).map((entry) => entry.type === 'offered'
+      ? `- Turn ${entry.turn}: recovery offered at ${entry.status} viability.`
+      : entry.type === 'activated'
+        ? `- Turn ${entry.turn}: ${entry.family} recovery activated.`
+        : entry.type === 'consumed'
+          ? `- Turn ${entry.turn}: assistance used on ${entry.building}.`
+          : `- Turn ${entry.turn}: unused ${entry.family} assistance expired.`)),
+  ]))
   const consultedIds = [...new Set(state.consultedNotes ?? [])]
   const consultedNotes = consultedIds.map((id) => HISTORICAL_NOTES.find((note) => note.id === id)).filter(Boolean)
   if (consultedNotes.length) output.push(section('Historical Knowledge Consulted', consultedNotes.flatMap((note) => [

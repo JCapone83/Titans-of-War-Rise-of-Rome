@@ -38,11 +38,12 @@ import { WalkthroughOverlay } from './components/WalkthroughOverlay.jsx'
 import { ERAS, TURN_YEARS, getObjective } from './game/data.js'
 import { campaignMarkdown, downloadText } from './game/campaignExport.js'
 import { createInitialState } from './game/initialState.js'
+import { nextWorkRecommendation } from './game/cityGuidance.js'
 import { describeCampaign, hasCampaignProgress, parseCampaignSnapshot } from './game/homeScreen.js'
 import { notesForTurn } from './game/historicalContext.js'
 import { continueToAugustanCity, continueToCivilSettlement, continueToImperialCapital, continueToMediterranean, continueToMetropolis, continueToRepublicUnderStrain, continueToTrajanicCapital, enterAugustanCity, enterCivilSettlement, enterHannibalicEmergency, enterImperialCapital, enterMediterranean, enterMetropolis, enterRepublicUnderStrain, enterTrajanicCapital } from './game/continuation.js'
 import { calculateOutcome } from './game/outcomes.js'
-import { advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from './game/simulation.js'
+import { activateCivicRecovery, advanceTurn, allocateWorkforce, continueProject, continueRegionalRoad, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, enterRegionalStrategy, foundRegionalColony, placeBuilding, removeBuilding, repairBuilding, resolveCouncil, reviseRegionalCompact, selectBuilding, selectDistrict, selectFamily, selectRegionalCommunity, selectRegionalRoute, startRegionalRoad, upgradeBuilding, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from './game/simulation.js'
 
 const STORAGE_KEY = 'titans-of-war-birth-of-rome-v1'
 
@@ -71,6 +72,7 @@ export default function App() {
   const [surface, setSurface] = useState('city')
   const era = ERAS[state.era]
   const homeCampaign = useMemo(() => describeCampaign(state), [state])
+  const recommendation = useMemo(() => nextWorkRecommendation(state), [state])
   const canContinue = hasSavedCampaign || campaignStarted || hasCampaignProgress(state)
   const chosenId = state.choiceLog.find((entry) => entry.turn === state.turn)?.optionId
   const currentNotes = notesForTurn(state.turn)
@@ -116,6 +118,25 @@ export default function App() {
 
   const build = () => {
     const result = placeBuilding(state, state.selectedFamily, state.selectedDistrict)
+    setState(result.state)
+    setMessage(result.error ?? result.message)
+  }
+
+  const onUseRecommendation = () => {
+    if (!recommendation.familyId || !recommendation.districtId) return
+    setState(selectDistrict(selectFamily(state, recommendation.familyId), recommendation.districtId))
+    setMessage(`Selected ${recommendation.building} in ${recommendation.district}. Review it before building.`)
+    requestAnimationFrame(() => goTo('building-construction'))
+  }
+
+  const showGuidedBuild = (familyId) => {
+    setState(selectFamily(state, familyId))
+    setMessage(`Review the selected ${familyId} work. You decide whether to establish it.`)
+    requestAnimationFrame(() => goTo('building-construction'))
+  }
+
+  const recover = (family) => {
+    const result = activateCivicRecovery(state, family)
     setState(result.state)
     setMessage(result.error ?? result.message)
   }
@@ -264,7 +285,7 @@ export default function App() {
       />
       <SoundtrackControl open={soundtrackOpen} turn={state.turn} onClose={() => setSoundtrackOpen(false)} />
       <main className="game-layout">
-        <CivicRail state={state} onAllocate={(lane, delta) => setState(allocateWorkforce(state, lane, delta))} />
+        <CivicRail state={state} recommendation={recommendation} onAllocate={(lane, delta) => setState(allocateWorkforce(state, lane, delta))} onRecover={recover} />
         <div className="game-center">
           <section className="campaign-strip">
             <div>
@@ -277,9 +298,12 @@ export default function App() {
               state={state}
               guided={guideActive}
               saveStatus={saveStatus}
+              recommendation={recommendation}
               onGoToBuild={() => goTo('building-construction')}
+              onGoToGuidedBuild={showGuidedBuild}
               onGoToCouncil={() => goTo('council-decision')}
               onGoToAdvance={() => goTo('season-advance')}
+              onUseRecommendation={onUseRecommendation}
               onDismissGuide={() => setGuideActive(false)}
             />
           </section>

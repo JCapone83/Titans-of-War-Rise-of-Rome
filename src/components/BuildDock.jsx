@@ -14,6 +14,7 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
   const district = getDistrict(state.selectedDistrict)
   const selected = constructionTier(state, state.selectedFamily, state.selectedDistrict)
   const availability = buildingAvailability(state, state.selectedFamily, state.selectedDistrict)
+  const displayedCost = availability.effectiveCost ?? selected.cost
   const site = siteAnalysis(state, state.selectedFamily, state.selectedDistrict, selected)
   const risk = districtRiskReport(state)[district.id]
   const network = districtNetworkReport(state)[district.id]
@@ -58,7 +59,8 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
         </div>
         <p className="build-caption">{selected.caption}</p>
         <div className="build-costs">
-          <Cost cost={selected.cost} />
+          <Cost cost={displayedCost} />
+          {availability.recoveryDiscount && <span className="recovery-discount">Civic recovery: -1 {availability.recoveryDiscount}</span>}
           <span className="action-cost">{selected.projectTurns ? `${selected.projectTurns}-season project · uses 1 capacity when worked` : `Uses ${selected.actionCost} of ${state.actionsMax} seasonal capacity`}</span>
         </div>
         <p className={`build-message${availability.ok ? '' : ' warning'}`} aria-live="polite">{message || (availability.ok ? 'Ground and stores are ready.' : availability.reason)}</p>
