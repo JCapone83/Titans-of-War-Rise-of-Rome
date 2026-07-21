@@ -20,9 +20,27 @@ export const actionRemaining = (state) => Math.max(0, (state.actionsMax ?? workf
 export const countFamily = (state, familyId) => state.buildings.filter((building) => building.familyId === familyId).length
 export const hasBuilding = (state, buildingId) => state.buildings.some((building) => building.buildingId === buildingId)
 
-export function constructionTier(state, familyId) {
+function hardPrerequisiteFailure(state, building, districtId, ignoreInstanceId = null) {
+  if (building.unique && (
+    state.buildings.some((item) => item.buildingId === building.id && item.instanceId !== ignoreInstanceId)
+    || (state.projects ?? []).some((project) => project.buildingId === building.id)
+  )) return 'Only one may be built.'
+  if (building.district && building.district !== districtId) return `Must be built in ${getDistrict(building.district).name}.`
+  if (building.requiresBuilding && !hasBuilding(state, building.requiresBuilding)) return `Requires ${definitionFor(building.requiresBuilding)?.name}.`
+  if (building.requiresSenate && (state.republic?.senateStanding ?? 0) < building.requiresSenate) return `Requires Senate standing of ${building.requiresSenate} to sustain public credit.`
+  if (building.requiresReconstruction && state.era < 3) return 'This work belongs to the reconstruction of the damaged city.'
+  const district = getDistrict(districtId)
+  if (building.forbiddenTerrain?.some((terrain) => district?.terrain.includes(terrain))) return 'The ground is unsuitable for this work.'
+  return null
+}
+
+export function constructionTier(state, familyId, districtId = null) {
   const family = getFamily(familyId)
   let building = getTier(familyId, state.era)
+  if (districtId && family) {
+    const availableTiers = family.tiers.filter((tier) => tier.era <= state.era).sort((a, b) => b.era - a.era)
+    return availableTiers.find((tier) => !hardPrerequisiteFailure(state, tier, districtId)) ?? building
+  }
   while (building?.requiresBuilding && !hasBuilding(state, building.requiresBuilding)) {
     const requiredTier = family?.tiers.find((tier) => tier.id === building.requiresBuilding)
     if (!requiredTier || requiredTier.era > state.era) break
@@ -848,6 +866,15 @@ export function siteAnalysis(state, familyId, districtId, definition = getTier(f
   } else {
     warnings.push(`This work does not match ${district.name}'s primary specialties.`)
   }
+  if (definition.requiresFamily && countFamily(state, definition.requiresFamily) === 0) {
+    const support = getFamily(definition.requiresFamily)
+    const supportPenalty = Object.fromEntries(Object.entries(definition.effects).map(([key, value]) => [
+      key,
+      value > 0 ? -Math.max(1, Math.ceil(value * 0.2)) : value < 0 ? Math.floor(value * 0.5) : 0,
+    ]))
+    effects = mergeChanges(effects, supportPenalty)
+    warnings.push(`Built without ${support.name.toLowerCase()} support: initial benefits fall and operating risk rises.`)
+  }
   for (const rule of adjacencyRules) {
     const appliesForward = rule.family === familyId && linkedFamilyCount(state, districtId, rule.partner) > 0
     const appliesReverse = rule.partner === familyId && linkedFamilyCount(state, districtId, rule.family) > 0
@@ -862,18 +889,7 @@ export function siteAnalysis(state, familyId, districtId, definition = getTier(f
 }
 
 function prerequisiteFailure(state, building, districtId, ignoreInstanceId = null) {
-  if (building.unique && (
-    state.buildings.some((item) => item.buildingId === building.id && item.instanceId !== ignoreInstanceId)
-    || (state.projects ?? []).some((project) => project.buildingId === building.id)
-  )) return 'Only one may be built.'
-  if (building.district && building.district !== districtId) return `Must be built in ${getDistrict(building.district).name}.`
-  if (building.requiresFamily && countFamily(state, building.requiresFamily) === 0) return `Requires ${getFamily(building.requiresFamily).name.toLowerCase()} first.`
-  if (building.requiresBuilding && !hasBuilding(state, building.requiresBuilding)) return `Requires ${definitionFor(building.requiresBuilding)?.name}.`
-  if (building.requiresSenate && (state.republic?.senateStanding ?? 0) < building.requiresSenate) return `Requires Senate standing of ${building.requiresSenate} to sustain public credit.`
-  if (building.requiresReconstruction && state.era < 3) return 'This work belongs to the reconstruction of the damaged city.'
-  const district = getDistrict(districtId)
-  if (building.forbiddenTerrain?.some((terrain) => district.terrain.includes(terrain))) return 'The ground is unsuitable for this work.'
-  return null
+  return hardPrerequisiteFailure(state, building, districtId, ignoreInstanceId)
 }
 
 function affordabilityFailure(state, cost) {
@@ -884,7 +900,7 @@ function affordabilityFailure(state, cost) {
 export function buildingAvailability(state, familyId, districtId) {
   const family = getFamily(familyId)
   const district = getDistrict(districtId)
-  const building = constructionTier(state, familyId)
+  const building = constructionTier(state, familyId, districtId)
   if (!family || !district || !building) return { ok: false, reason: 'Select a district and building.' }
   if (state.outcome) return { ok: false, reason: 'The campaign is complete.' }
   if (state.era < building.era) return { ok: false, reason: 'This form belongs to a later era.' }

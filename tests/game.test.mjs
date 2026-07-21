@@ -67,6 +67,11 @@ test('turn guide moves from construction through council to season advance', () 
   assert.equal(quietTurn.council.label, 'No council')
 })
 
+test('construction action precedes the building family catalog in the public interface', () => {
+  const source = readFileSync(resolve('src/components/BuildDock.jsx'), 'utf8')
+  assert.ok(source.indexOf('className="build-action"') < source.indexOf('className="building-catalog"'))
+})
+
 test('terrain scene assigns Palatine and Capitoline buildings deterministically', () => {
   const state = createInitialState()
   state.buildings = [
@@ -265,11 +270,41 @@ test('terrain blocks shallow wells in the wet Forum valley', () => {
   assert.match(availability.reason, /ground/i)
 })
 
-test('tier two buildings remain gated before the era transition', () => {
-  const state = { ...createInitialState(), era: 1 }
+test('advanced eras retain a viable basic form when a landmark does not fit the selected site', () => {
+  const stores = { grain: 30, timber: 30, stone: 30, bronze: 30, treasury: 30 }
+  const state = { ...createInitialState(), era: 1, resources: stores, actionsMax: 4 }
+  const shrine = buildingAvailability(state, 'shrine', 'quirinal')
+  const market = buildingAvailability(state, 'market', 'aventine')
+  assert.equal(shrine.ok, true)
+  assert.equal(shrine.building.id, 'timber-shrine')
+  assert.equal(market.ok, true)
+  assert.equal(market.building.id, 'cattle-market')
+})
+
+test('ordinary support requirements reduce benefits instead of blocking construction', () => {
+  const stores = { grain: 30, timber: 30, stone: 30, bronze: 30, treasury: 30 }
+  const state = { ...createInitialState(), era: 1, resources: stores, actionsMax: 4 }
+  const housing = buildingAvailability(state, 'housing', 'caelian')
+  assert.equal(housing.ok, true)
+  assert.equal(housing.building.id, 'courtyard-housing')
+  assert.match(housing.site.warnings.join(' '), /without drainage support/i)
+  assert.ok(housing.site.effects.shelter < 0)
+})
+
+test('resources plots workforce terrain and major institutional prerequisites remain hard limits', () => {
+  const state = { ...createInitialState(), era: 2, resources: { grain: 0, timber: 0, stone: 0, bronze: 0, treasury: 0 }, actionsMax: 0 }
+  assert.equal(buildingAvailability(state, 'grain', 'aventine').ok, false)
+  assert.equal(buildingAvailability({ ...state, actionsMax: 4 }, 'water', 'forum').ok, false)
+  const treasury = buildingAvailability({ ...state, actionsMax: 4, resources: { grain: 30, timber: 30, stone: 30, bronze: 30, treasury: 30 }, republic: createRepublicState() }, 'treasury', 'forum')
+  assert.equal(treasury.ok, false)
+  assert.match(treasury.reason, /Comitium|Senate standing/i)
+})
+
+test('advanced building forms remain gated before their era transition', () => {
+  const state = { ...createInitialState(), era: 0, resources: { grain: 30, timber: 30, stone: 30, bronze: 30, treasury: 30 } }
   const availability = buildingAvailability(state, 'shrine', 'capitoline')
-  assert.equal(availability.ok, false)
-  assert.match(availability.reason, /drainage/i)
+  assert.equal(availability.ok, true)
+  assert.equal(availability.building.id, 'timber-shrine')
 })
 
 test('a missing same-family foundation remains buildable after the era advances', () => {

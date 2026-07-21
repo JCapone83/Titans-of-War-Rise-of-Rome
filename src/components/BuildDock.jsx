@@ -12,7 +12,7 @@ function Cost({ cost }) {
 
 export function BuildDock({ state, onSelectFamily, onBuild, message }) {
   const district = getDistrict(state.selectedDistrict)
-  const selected = constructionTier(state, state.selectedFamily)
+  const selected = constructionTier(state, state.selectedFamily, state.selectedDistrict)
   const availability = buildingAvailability(state, state.selectedFamily, state.selectedDistrict)
   const site = siteAnalysis(state, state.selectedFamily, state.selectedDistrict, selected)
   const risk = districtRiskReport(state)[district.id]
@@ -22,30 +22,54 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
   return (
     <section id="building-construction" className="build-dock" aria-labelledby="build-title">
       <div className="selected-work">
-        <p className="eyebrow">Selected district</p>
-        <h2 id="build-title">{district.name}</h2>
-        <p className="district-land-status"><strong>{occupied}/{district.capacity} plots used.</strong> Upgrade keeps a plot; Clear reopens it.</p>
-        <p>{district.note}</p>
-        <p className="district-specialty">{district.specialty}</p>
-        <div className="terrain-tags">{district.terrain.map((tag) => <span key={tag}>{tag}</span>)}</div>
-        <div className="district-risk" aria-label={`${district.name} structural risk`}>
-          <span className={risk.fire >= 65 ? 'high' : ''}>Fire <strong>{risk.fire}</strong></span>
-          <span className={risk.disease >= 55 ? 'high' : ''}>Disease <strong>{risk.disease}</strong></span>
-          <span className={risk.flood >= 45 ? 'high' : ''}>Flood <strong>{risk.flood}</strong></span>
+        <div className="district-identity">
+          <p className="eyebrow">Selected district</p>
+          <h2 id="build-title">{district.name}</h2>
+          <p className="district-land-status"><strong>{occupied}/{district.capacity} plots used.</strong> Upgrade keeps a plot; Clear reopens it.</p>
         </div>
-        <p className="risk-drivers">{risk.drivers.length ? risk.drivers.join(' · ') : 'Low occupancy and terrain exposure.'}</p>
-        <div className="network-status" aria-label={`${district.name} network services`}>
-          <span className={network.water ? 'connected' : ''}>Water <strong>{network.water ? 'Served' : 'Open'}</strong></span>
-          <span className={network.drainage ? 'connected' : ''}>Drainage <strong>{network.drainage ? 'Served' : 'Open'}</strong></span>
-          <span className={network.improvedRoad ? 'connected' : ''}>Access <strong>{network.improvedRoad ? 'Improved' : 'Basic'}</strong></span>
-          <span className={network.connectedStorage ? 'connected' : ''}>Storage <strong>{network.connectedStorage ? 'Linked' : 'Unlinked'}</strong></span>
+        <div className="district-summary">
+          <p>{district.note}</p>
+          <p className="district-specialty">{district.specialty}</p>
+          <div className="terrain-tags">{district.terrain.map((tag) => <span key={tag}>{tag}</span>)}</div>
         </div>
-        {state.selectedFamily === 'market' && <p className="network-effect">Market network output: {Math.round(network.marketOutputFactor * 100)}%</p>}
-        {state.selectedFamily === 'housing' && state.era >= 1 && <p className="network-effect">Dense housing support: {Math.round(network.housingCapacityFactor * 100)}%</p>}
+        <div className="district-diagnostics">
+          <div className="district-risk" aria-label={`${district.name} structural risk`}>
+            <span className={risk.fire >= 65 ? 'high' : ''}>Fire <strong>{risk.fire}</strong></span>
+            <span className={risk.disease >= 55 ? 'high' : ''}>Disease <strong>{risk.disease}</strong></span>
+            <span className={risk.flood >= 45 ? 'high' : ''}>Flood <strong>{risk.flood}</strong></span>
+          </div>
+          <p className="risk-drivers">{risk.drivers.length ? risk.drivers.join(' · ') : 'Low occupancy and terrain exposure.'}</p>
+        </div>
+        <div className="district-services">
+          <div className="network-status" aria-label={`${district.name} network services`}>
+            <span className={network.water ? 'connected' : ''}>Water <strong>{network.water ? 'Served' : 'Open'}</strong></span>
+            <span className={network.drainage ? 'connected' : ''}>Drainage <strong>{network.drainage ? 'Served' : 'Open'}</strong></span>
+            <span className={network.improvedRoad ? 'connected' : ''}>Access <strong>{network.improvedRoad ? 'Improved' : 'Basic'}</strong></span>
+            <span className={network.connectedStorage ? 'connected' : ''}>Storage <strong>{network.connectedStorage ? 'Linked' : 'Unlinked'}</strong></span>
+          </div>
+          {state.selectedFamily === 'market' && <p className="network-effect">Market network output: {Math.round(network.marketOutputFactor * 100)}%</p>}
+          {state.selectedFamily === 'housing' && state.era >= 1 && <p className="network-effect">Dense housing support: {Math.round(network.housingCapacityFactor * 100)}%</p>}
+        </div>
+      </div>
+      <div className="build-action">
+        <div className="build-action-heading">
+          <strong>{selected.name}</strong>
+          <button type="button" className="primary-button" onClick={onBuild} disabled={!availability.ok}>{selected.projectTurns ? 'Begin project' : 'Establish work'}</button>
+        </div>
+        <p className="build-caption">{selected.caption}</p>
+        <div className="build-costs">
+          <Cost cost={selected.cost} />
+          <span className="action-cost">{selected.projectTurns ? `${selected.projectTurns}-season project · uses 1 capacity when worked` : `Uses ${selected.actionCost} of ${state.actionsMax} seasonal capacity`}</span>
+        </div>
+        <p className={`build-message${availability.ok ? '' : ' warning'}`} aria-live="polite">{message || (availability.ok ? 'Ground and stores are ready.' : availability.reason)}</p>
+        <div className="site-forecast" aria-label="Site forecast">
+          {site.bonuses.map((bonus) => <span className="site-bonus" key={bonus}>+ {bonus}</span>)}
+          {site.warnings.map((warning) => <span className="site-warning" key={warning}>! {warning}</span>)}
+        </div>
       </div>
       <div className="building-catalog" role="list" aria-label="Available building families">
         {BUILDING_FAMILIES.filter((family) => constructionTier(state, family.id)).map((family) => {
-          const building = constructionTier(state, family.id)
+          const building = constructionTier(state, family.id, state.selectedDistrict)
           const iconMap = { House, Landmark, Columns3, Droplets, Waves, Scale, Wheat, Hammer, Shield }
           const Icon = iconMap[family.icon] ?? Building2
           const active = family.id === state.selectedFamily
@@ -62,20 +86,6 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
             </button>
           )
         })}
-      </div>
-      <div className="build-action">
-        <div>
-          <strong>{selected.name}</strong>
-          <p>{selected.caption}</p>
-          <Cost cost={selected.cost} />
-          <span className="action-cost">{selected.projectTurns ? `${selected.projectTurns}-season project · uses 1 capacity when worked` : `Uses ${selected.actionCost} of ${state.actionsMax} seasonal capacity`}</span>
-        </div>
-        <button type="button" className="primary-button" onClick={onBuild} disabled={!availability.ok}>{selected.projectTurns ? 'Begin project' : 'Establish work'}</button>
-        <p className={`build-message${availability.ok ? '' : ' warning'}`} aria-live="polite">{message || (availability.ok ? 'Ground and stores are ready.' : availability.reason)}</p>
-        <div className="site-forecast" aria-label="Site forecast">
-          {site.bonuses.map((bonus) => <span className="site-bonus" key={bonus}>+ {bonus}</span>)}
-          {site.warnings.map((warning) => <span className="site-warning" key={warning}>! {warning}</span>)}
-        </div>
       </div>
     </section>
   )

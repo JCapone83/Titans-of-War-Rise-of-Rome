@@ -229,22 +229,27 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .project-ledger { padding: 16px 20px; background: #191a17; border-bottom: 1px solid var(--line); }.project-ledger-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }.project-ledger-heading h2 { margin: 0; font-size: 20px; }.project-ledger-heading > span { display: flex; align-items: center; gap: 6px; color: var(--gold); font-size: 10px; text-transform: uppercase; }.project-ledger-heading svg { width: 15px; }
 .project-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 12px; }.project-list article { padding: 12px; border: 1px solid var(--line); background: #23241f; }.project-title { display: flex; justify-content: space-between; gap: 8px; }.project-title strong { font-family: Georgia, serif; font-size: 13px; }.project-title span { color: var(--muted); font-size: 9px; }.project-progress { height: 7px; margin: 10px 0 6px; background: #35362f; }.project-progress i { display: block; height: 100%; background: var(--gold); }.project-status { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 9px; color: var(--muted); font-size: 9px; }.project-status span { display: inline-flex; align-items: center; gap: 4px; }.project-status svg { width: 11px; }.project-list .secondary-button { width: 100%; min-height: 34px; font-size: 10px; }.project-list .secondary-button svg { width: 13px; }
 
-.build-dock { display: grid; grid-template-columns: 240px minmax(420px, 1fr) 260px; min-height: 248px; background: #1a1b18; border-bottom: 1px solid var(--line); }
-.selected-work, .build-action { padding: 18px; }
-.selected-work { border-right: 1px solid var(--line); }
-.selected-work > p:not(.eyebrow), .build-action p { color: var(--muted); font-size: 12px; line-height: 1.45; }
+.build-dock { display: grid; grid-template-columns: minmax(440px, .85fr) minmax(520px, 1.15fr); background: #1a1b18; border-bottom: 1px solid var(--line); }
+.selected-work, .build-action { padding: 14px 16px; }
+.selected-work { display: grid; grid-template-columns: minmax(150px, .9fr) minmax(0, 1.1fr); gap: 10px 14px; align-content: start; border-right: 1px solid var(--line); }
+.selected-work p:not(.eyebrow), .build-action p { color: var(--muted); font-size: 11px; line-height: 1.35; }
+.district-identity h2 { font-size: 19px; }
+.district-summary p { margin: 0 0 7px; }
+.district-identity, .district-summary, .district-diagnostics, .district-services, .build-action { min-width: 0; }
+.selected-work p, .build-action p, .build-action strong { overflow-wrap: anywhere; }
 .selected-work .district-land-status { margin: 8px 0 10px; padding: 7px 8px; border-left: 3px solid var(--gold); background: #25251f; color: #d6c99f !important; font-size: 10px !important; }.district-land-status strong { color: var(--paper); }
 .selected-work .district-specialty { color: #d6bd79 !important; }
 .district-risk { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; }.district-risk span { padding: 5px 4px; border: 1px solid var(--line); background: #20221e; color: var(--muted); font-size: 8px; text-transform: uppercase; text-align: center; }.district-risk strong { display: block; margin-top: 2px; color: var(--paper); font-size: 12px; }.district-risk span.high { border-color: var(--danger); color: #e39a87; }.risk-drivers { margin: 7px 0 0 !important; color: #c3b889 !important; font-size: 9px !important; }
-.network-status { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 9px; }.network-status span { padding: 4px 5px; border-left: 2px solid #55574e; background: #20221e; color: var(--muted); font-size: 8px; text-transform: uppercase; }.network-status span.connected { border-color: var(--success); }.network-status strong { float: right; color: var(--paper); }.network-effect { margin: 6px 0 0 !important; color: var(--gold) !important; font-size: 9px !important; }
+.network-status { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 9px; }.network-status span { min-width: 0; display: grid; gap: 2px; padding: 4px 5px; border-left: 2px solid #55574e; background: #20221e; color: var(--muted); font-size: 8px; text-transform: uppercase; }.network-status span.connected { border-color: var(--success); }.network-status strong { min-width: 0; color: var(--paper); font-size: 8px; line-height: 1.15; overflow-wrap: anywhere; }.network-effect { margin: 6px 0 0 !important; color: var(--gold) !important; font-size: 9px !important; }
 .terrain-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }.terrain-tags span { padding: 3px 6px; border: 1px solid var(--line-bright); color: var(--muted); font-size: 9px; text-transform: uppercase; }
-.building-catalog { display: grid; grid-template-columns: repeat(4, minmax(105px, 1fr)); gap: 1px; padding: 1px; background: var(--line); }
+.building-catalog { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(105px, 1fr)); gap: 1px; padding: 1px; background: var(--line); }
 .building-choice { min-height: 112px; padding: 12px 8px; border: 0; background: #20221e; color: var(--paper); cursor: pointer; text-align: left; }
 .building-choice:hover, .building-choice.active { background: #2b2c26; box-shadow: inset 0 -3px var(--gold); }
 .building-choice svg { width: 22px; height: 22px; margin-bottom: 10px; }.building-choice span, .building-choice strong, .building-choice small { display: block; }.building-choice strong { font-family: Georgia, serif; font-size: 12px; line-height: 1.15; }.building-choice small { margin-top: 4px; color: var(--muted); font-size: 9px; }
-.build-action { border-left: 1px solid var(--line); display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+.build-action { display: grid; gap: 8px; align-content: start; border-left: 1px solid var(--line); }
+.build-action-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, 180px); gap: 12px; align-items: center; }.build-action-heading .primary-button { width: 100%; }.build-caption { margin: 0; }.build-costs { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; }.build-action .site-forecast { display: flex; flex-wrap: wrap; gap: 5px 14px; }
 .build-action strong { font-family: Georgia, serif; font-size: 18px; }.cost-list { display: flex; flex-wrap: wrap; gap: 5px; }.cost-list span { padding: 3px 5px; background: #292a25; color: #d1cec4; font-size: 9px; }
-.action-cost { display: block; margin-top: 8px; color: var(--gold); font-size: 10px; text-transform: uppercase; }
+.action-cost { display: block; color: var(--gold); font-size: 10px; text-transform: uppercase; }
 .primary-button, .advance-button { min-height: 46px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e3bd5d; background: var(--gold); color: #171815; font-weight: 800; cursor: pointer; }
 .primary-button:hover, .advance-button:hover { background: #e4c56f; }.primary-button svg, .advance-button svg, .secondary-button svg { width: 17px; }
 .build-message { min-height: 30px; margin: 0 !important; color: var(--success) !important; }.build-message.warning { color: #d2a56d !important; }
@@ -374,7 +379,7 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 }
 
 @media (max-width: 1600px) {
-  .build-dock { grid-template-columns: 200px minmax(0, 1fr); }.build-action { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) auto; }.build-action .build-message, .build-action .site-forecast { grid-column: 1 / -1; }
+  .build-dock { grid-template-columns: minmax(400px, .8fr) minmax(0, 1.2fr); }
 }
 
 @media (max-width: 1100px) {
@@ -397,6 +402,7 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 }
 
 @media (max-width: 720px) {
+  .selected-work { display: block; }.district-summary, .district-diagnostics, .district-services { margin-top: 12px; }
   .era-overlay-art { place-items: end center; padding: 12px; }
   .era-transition-art { object-position: 66% center; }
   .era-overlay-art::before { background: linear-gradient(180deg, #090a0814 0%, #090a084d 36%, #090a08e6 60%, #090a08fc 100%); }
@@ -440,7 +446,7 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
   .scene-plot-marker { width: 64px; height: 30px; }
   .scene-plot-label { min-width: 116px; bottom: -18px; }
   .terrain-scene-legend { left: 8px; right: 8px; bottom: 7px; justify-content: center; }
-  .build-dock { display: block; }.selected-work { border-right: 0; border-bottom: 1px solid var(--line); }.building-catalog { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }.building-choice { flex: 0 0 125px; scroll-snap-align: start; }.build-action { display: block; border-left: 0; }.build-action .primary-button { width: 100%; margin: 12px 0; }
+  .build-dock { display: block; }.selected-work { border-right: 0; border-bottom: 1px solid var(--line); }.building-catalog { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }.building-choice { flex: 0 0 125px; scroll-snap-align: start; }.build-action { display: block; border-left: 0; }.build-action-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(138px, 46%); }.build-action .primary-button { width: 100%; }.build-caption, .build-costs, .build-message, .build-action .site-forecast { margin-top: 10px !important; }.build-action .site-forecast { display: grid; }
   .building-inspector { display: block; }.inspector-list, .inspector-detail { padding: 16px; }.work-list button { flex-basis: 175px; }.inspector-actions { display: grid; grid-template-columns: repeat(3, 1fr); }.inspector-actions button { padding: 0 5px; font-size: 11px; }
   .council-options button { min-height: 88px; }.civic-rail section { border-right: 0; }
   .report-modal, .era-modal, .outcome-modal, .walkthrough-modal { padding: 26px 20px; }.report-modal h2, .era-modal h2, .outcome-modal h2, .walkthrough-modal h2 { font-size: 29px; }.grade-grid { grid-template-columns: repeat(2, 1fr); }.grade-grid > div:last-child { grid-column: 1 / -1; }.era-unlocks { grid-template-columns: 1fr; }.outcome-actions { flex-direction: column; }
