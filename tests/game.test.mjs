@@ -272,6 +272,22 @@ test('tier two buildings remain gated before the era transition', () => {
   assert.match(availability.reason, /drainage/i)
 })
 
+test('a missing same-family foundation remains buildable after the era advances', () => {
+  const stores = { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 }
+  const state = { ...createInitialState(), era: 1, resources: stores, actionsMax: 4 }
+  const foundation = buildingAvailability(state, 'drainage', 'forum')
+  assert.equal(foundation.ok, true)
+  assert.equal(foundation.building.id, 'drainage-ditch')
+
+  const established = placeBuilding(state, 'drainage', 'forum')
+  assert.equal(established.error, undefined)
+  assert.equal(established.state.buildings[0].buildingId, 'drainage-ditch')
+
+  const laterWork = buildingAvailability({ ...established.state, actionsUsed: 0 }, 'drainage', 'forum')
+  assert.equal(laterWork.ok, true)
+  assert.equal(laterWork.building.id, 'cloaca-works')
+})
+
 test('an early work can be upgraded in place after prerequisites are met', () => {
   const stores = { grain: 50, timber: 50, stone: 50, bronze: 50, treasury: 50 }
   let state = { ...createInitialState(), resources: stores }

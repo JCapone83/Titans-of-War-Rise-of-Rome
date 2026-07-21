@@ -1,6 +1,6 @@
 import { Building2, Columns3, Droplets, Hammer, House, Landmark, Scale, Shield, Waves, Wheat } from 'lucide-react'
-import { BUILDING_FAMILIES, getDistrict, getTier } from '../game/data.js'
-import { buildingAvailability, districtNetworkReport, districtRiskReport, siteAnalysis } from '../game/simulation.js'
+import { BUILDING_FAMILIES, getDistrict } from '../game/data.js'
+import { buildingAvailability, constructionTier, districtNetworkReport, districtRiskReport, siteAnalysis } from '../game/simulation.js'
 
 function Cost({ cost }) {
   return (
@@ -12,7 +12,7 @@ function Cost({ cost }) {
 
 export function BuildDock({ state, onSelectFamily, onBuild, message }) {
   const district = getDistrict(state.selectedDistrict)
-  const selected = getTier(state.selectedFamily, state.era)
+  const selected = constructionTier(state, state.selectedFamily)
   const availability = buildingAvailability(state, state.selectedFamily, state.selectedDistrict)
   const site = siteAnalysis(state, state.selectedFamily, state.selectedDistrict, selected)
   const risk = districtRiskReport(state)[district.id]
@@ -44,8 +44,8 @@ export function BuildDock({ state, onSelectFamily, onBuild, message }) {
         {state.selectedFamily === 'housing' && state.era >= 1 && <p className="network-effect">Dense housing support: {Math.round(network.housingCapacityFactor * 100)}%</p>}
       </div>
       <div className="building-catalog" role="list" aria-label="Available building families">
-        {BUILDING_FAMILIES.filter((family) => getTier(family.id, state.era)).map((family) => {
-          const building = getTier(family.id, state.era)
+        {BUILDING_FAMILIES.filter((family) => constructionTier(state, family.id)).map((family) => {
+          const building = constructionTier(state, family.id)
           const iconMap = { House, Landmark, Columns3, Droplets, Waves, Scale, Wheat, Hammer, Shield }
           const Icon = iconMap[family.icon] ?? Building2
           const active = family.id === state.selectedFamily

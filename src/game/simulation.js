@@ -20,6 +20,17 @@ export const actionRemaining = (state) => Math.max(0, (state.actionsMax ?? workf
 export const countFamily = (state, familyId) => state.buildings.filter((building) => building.familyId === familyId).length
 export const hasBuilding = (state, buildingId) => state.buildings.some((building) => building.buildingId === buildingId)
 
+export function constructionTier(state, familyId) {
+  const family = getFamily(familyId)
+  let building = getTier(familyId, state.era)
+  while (building?.requiresBuilding && !hasBuilding(state, building.requiresBuilding)) {
+    const requiredTier = family?.tiers.find((tier) => tier.id === building.requiresBuilding)
+    if (!requiredTier || requiredTier.era > state.era) break
+    building = requiredTier
+  }
+  return building
+}
+
 function republicanCapacity(state, baseCapacity) {
   if (state.era < 2 || !state.republic) return baseCapacity
   const mode = state.flags?.magistrateMode ?? 'paired'
@@ -873,7 +884,7 @@ function affordabilityFailure(state, cost) {
 export function buildingAvailability(state, familyId, districtId) {
   const family = getFamily(familyId)
   const district = getDistrict(districtId)
-  const building = getTier(familyId, state.era)
+  const building = constructionTier(state, familyId)
   if (!family || !district || !building) return { ok: false, reason: 'Select a district and building.' }
   if (state.outcome) return { ok: false, reason: 'The campaign is complete.' }
   if (state.era < building.era) return { ok: false, reason: 'This form belongs to a later era.' }
