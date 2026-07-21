@@ -202,6 +202,94 @@ export function calculateTrajanicCapitalScore(state) {
   return { score, grade: grade(score), operatingForm, succession: Math.round(succession), frontier: Math.round(frontier), treasury: Math.round(treasury), provision: Math.round(provision), maintenance: Math.round(maintenance), administration: Math.round(administration), physical: Math.round(physical), completed, active, stages, strengths, risks }
 }
 
+const CAPITAL_PROJECT_KEYS = ['italian', 'mediterranean', 'metropolitan', 'republicStrain', 'civilSettlement', 'augustanCity', 'imperialCapital', 'trajanicCapital']
+
+const clampScore = (value) => Math.max(0, Math.min(100, Math.round(value)))
+
+function projectPortfolio(state) {
+  const ordinaryProjects = Array.isArray(state.projects) ? state.projects : []
+  const eraProjects = CAPITAL_PROJECT_KEYS.flatMap((key) => Object.values(state[key]?.projects ?? {}))
+  return [...ordinaryProjects, ...eraProjects]
+}
+
+function physicalExpectation(turn) {
+  if (turn <= 10) return 4
+  if (turn <= 20) return 6
+  if (turn <= 29) return 8
+  if (turn <= 36) return 10
+  if (turn <= 48) return 12
+  if (turn <= 61) return 15
+  if (turn <= 70) return 18
+  return 22
+}
+
+export function calculateCityViability(state) {
+  const metrics = state.metrics ?? {}
+  const populationTotal = Math.max(0, state.population?.total ?? 0)
+  const populationStability = clampScore(populationTotal / 1030 * 100)
+  const services = Object.fromEntries(['food', 'water', 'shelter', 'sanitation'].map((key) => [key, clampScore(metrics[key] ?? 0)]))
+  const serviceValues = Object.values(services)
+  const serviceAverage = serviceValues.reduce((sum, value) => sum + value, 0) / serviceValues.length
+  const weakestService = Math.min(...serviceValues)
+  const essentialServices = clampScore(serviceAverage * 0.85 + weakestService * 0.15)
+  const projects = projectPortfolio(state)
+  const buildingCredit = (state.buildings ?? []).reduce((sum, building) => sum + 1 + Math.max(0, (building.tier ?? 1) - 1) * 0.5, 0)
+  const projectCredit = projects.reduce((sum, project) => {
+    if (project.completed) return sum + 2.5
+    const required = Math.max(1, project.requiredSeasons ?? 1)
+    return sum + Math.min(1.5, Math.max(0, project.progress ?? 0) / required * 1.5)
+  }, 0)
+  const physicalFoundation = clampScore((buildingCredit + projectCredit) / physicalExpectation(state.turn ?? 1) * 100)
+  const score = clampScore(populationStability * 0.4 + essentialServices * 0.35 + physicalFoundation * 0.25)
+  const status = score >= 70 ? 'Flourishing' : score >= 50 ? 'Viable' : score >= 30 ? 'Fragile' : 'Hollowed'
+  const weakestKey = Object.entries(services).sort((left, right) => left[1] - right[1])[0]?.[0] ?? 'services'
+  const recoveryCue = populationStability < 50
+    ? 'Stabilize essential services and housing so households can return.'
+    : essentialServices < 50
+      ? `Restore ${weakestKey} before adding another prestige work.`
+      : physicalFoundation < 50
+        ? 'Complete a modest public work or advance an era project.'
+        : 'Maintain population, services, and the works already operating.'
+  const explanation = `${status} city: population ${populationStability}, essential services ${essentialServices}, physical foundation ${physicalFoundation}.`
+  return {
+    score,
+    grade: grade(score),
+    status,
+    explanation,
+    recoveryCue,
+    populationStability,
+    essentialServices,
+    physicalFoundation,
+    services,
+    weakestService,
+    completedWorks: projects.filter((project) => project.completed).length,
+    activeWorks: projects.filter((project) => !project.completed && (project.progress ?? 0) > 0).length,
+  }
+}
+
+function capitalTitleEligible(state, cityViability, turn) {
+  const populationReady = (state.population?.total ?? 0) >= 500
+  const cityReady = cityViability.score >= 55 && cityViability.essentialServices >= 50
+  const substantial = (project) => project.completed || (project.progress ?? 0) / Math.max(1, project.requiredSeasons ?? 1) >= 0.6
+  const augustanOrImperialOperating = [...Object.values(state.augustanCity?.projects ?? {}), ...Object.values(state.imperialCapital?.projects ?? {})].some((project) => project.completed)
+  const trajanicAdvanced = Object.values(state.trajanicCapital?.projects ?? {}).some(substantial)
+  if (turn >= 76) {
+    const systemsReady = (state.metrics?.water ?? 0) >= 50 && (state.trajanicCapital?.publicProvision ?? 0) >= 50 && (state.trajanicCapital?.maintenanceCapacity ?? 0) >= 50
+    return populationReady && cityReady && augustanOrImperialOperating && trajanicAdvanced && systemsReady
+  }
+  const relevantProjects = turn >= 70
+    ? [...Object.values(state.augustanCity?.projects ?? {}), ...Object.values(state.imperialCapital?.projects ?? {})]
+    : Object.values(state.augustanCity?.projects ?? {})
+  return populationReady && cityReady && relevantProjects.some(substantial)
+}
+
+function mixedCapitalTitle(state, cityViability, strategicSettlement) {
+  if (cityViability.score < 30 || (state.population?.total ?? 0) < 250) return 'Administrative State, Hollow Capital'
+  if (cityViability.physicalFoundation >= 70 && strategicSettlement < 60) return 'Monumental City, Brittle Settlement'
+  if (strategicSettlement >= 70 && cityViability.score < 50) return 'Provincial Power With a Fragile Metropolis'
+  return 'Recovering Imperial Capital'
+}
+
 export function calculateOutcome(state) {
   const average = (keys) => keys.reduce((sum, key) => sum + state.metrics[key], 0) / keys.length
   const drainage = hasBuilding(state, 'cloaca-works') ? 12 : hasBuilding(state, 'drainage-ditch') ? 5 : -10
@@ -257,13 +345,16 @@ export function calculateOutcome(state) {
   if (imperialCapitalScore && state.turn >= 62) scores['Imperial Capital'] = imperialCapitalScore.score
   const trajanicCapitalScore = calculateTrajanicCapitalScore(state)
   if (trajanicCapitalScore && state.turn >= 71) scores['Trajanic Capital'] = trajanicCapitalScore.score
-  const overall = Math.round(Object.values(scores).reduce((sum, value) => sum + value, 0) / Object.keys(scores).length)
+  const strategicScores = Object.entries(scores).filter(([name]) => !['Urban Design', 'Physical Systems'].includes(name)).map(([, value]) => value)
+  const strategicSettlement = Math.round(strategicScores.reduce((sum, value) => sum + value, 0) / strategicScores.length)
+  const cityViability = calculateCityViability(state)
+  const overall = Math.round(strategicSettlement * 0.55 + cityViability.score * 0.45)
   const operatingFormName = civilSettlementScore?.operatingForm.toLowerCase()
   const operatingFormArticle = operatingFormName?.startsWith('augustan') ? 'an' : 'a'
   let title = 'A City Still Becoming'
-  if (state.turn >= 76) title = trajanicCapitalScore.operatingForm
-  else if (state.turn >= 70) title = imperialCapitalScore.operatingForm
-  else if (state.turn >= 61) title = augustanCityScore.operatingForm
+  if (state.turn >= 76) title = capitalTitleEligible(state, cityViability, 76) ? trajanicCapitalScore.operatingForm : mixedCapitalTitle(state, cityViability, strategicSettlement)
+  else if (state.turn >= 70) title = capitalTitleEligible(state, cityViability, 70) ? imperialCapitalScore.operatingForm : mixedCapitalTitle(state, cityViability, strategicSettlement)
+  else if (state.turn >= 61) title = capitalTitleEligible(state, cityViability, 61) ? augustanCityScore.operatingForm : mixedCapitalTitle(state, cityViability, strategicSettlement)
   else if (state.turn >= 54) title = civilSettlementScore.operatingForm
   else if (state.turn >= 48) title = scores['Republic Under Strain'] >= 70 ? 'A Republic Still Capable of Settlement' : 'Command Outruns the Republic'
   else if (state.turn >= 41) title = scores['Conquest and Metropolis'] >= 70 ? 'A Metropolitan Republic With Working Limits' : 'Conquest Outruns the Republican City'
@@ -295,7 +386,16 @@ export function calculateOutcome(state) {
   return {
     title,
     overall,
-    summary: overall >= 72
+    strategicSettlement,
+    strategicGrade: grade(strategicSettlement),
+    cityViability,
+    summary: state.turn >= 76
+      ? `Rome reaches AD 117 under the judgment “${title}.” Strategic settlement scores ${strategicSettlement}; city viability scores ${cityViability.score} (${cityViability.status.toLowerCase()}). ${cityViability.recoveryCue}`
+      : state.turn >= 70
+        ? `Rome reaches AD 96 under the judgment “${title}.” Strategic settlement scores ${strategicSettlement}; city viability scores ${cityViability.score} (${cityViability.status.toLowerCase()}). ${cityViability.recoveryCue}`
+        : state.turn >= 61
+          ? `Rome reaches AD 14 under the judgment “${title}.” Strategic settlement scores ${strategicSettlement}; city viability scores ${cityViability.score} (${cityViability.status.toLowerCase()}). ${cityViability.recoveryCue}`
+          : overall >= 72
       ? state.turn >= 76 ? `Rome reaches AD 117 as a ${trajanicCapitalScore.operatingForm.toLowerCase()}. Frontier reach, provincial trust, treasury resilience, conquest dependence, capital provision, maintenance, administration, succession, and constitutional continuity are judged as separate operating obligations.` : state.turn >= 70 ? `Rome reaches AD 96 as a ${imperialCapitalScore.operatingForm.toLowerCase()}. The Colosseum and palace stand within separate judgments of succession, military recognition, public provision, fire resilience, maintenance, provincial trust, and access to the city.` : state.turn >= 61 ? `Rome reaches AD 14 as a ${augustanCityScore.operatingForm.toLowerCase()}. Authority, Senate and magistrates, public access, provincial command, maintenance, fire response, memory, and succession are judged as separate operating systems.` : state.turn >= 54 ? `Rome reaches 27 BC as ${operatingFormArticle} ${operatingFormName}, with constitutional language judged separately from command, demobilization, courts, finance, Italian titles, public provision, and succession.` : state.turn >= 48 ? 'Rome reaches 49 BC with citizenship, land titles, courts, archives, assemblies, demobilization, emergency precedent, and military loyalty judged separately. The campaign stops at the civil-war threshold rather than deciding Caesar\'s crossing or the constitutional settlement in advance.' : state.turn >= 41 ? 'Rome reaches 133 BC with conquest, migration, law, contracts, grain, service, patronage, legal status, and metropolitan works judged as connected but separate obligations. The campaign stops at the Gracchan threshold rather than resolving the next constitutional struggle in advance.' : state.turn >= 36 ? 'Rome reaches 201 BC after maritime war and invasion with its fleet, credit, Italian compact, emergency reserves, provincial obligations, grain supply, and veteran settlement judged separately.' : state.turn >= 32 ? 'Rome opens a Mediterranean command in 241 BC with bounded fleet capacity, maritime losses, war credit, contractor exposure, provincial trust, grain dependence, allied exhaustion, and overseas command duration visible in the ledger.' : state.turn >= 29 ? 'Rome reaches 264 BC with an Italian system measured by roads, water, allied depth, reserves, repeated armies, and the maintenance burdens that victory cannot erase.' : state.turn >= 23 ? 'Rome links city capacity to differentiated allies, roads, and obligations without allowing expansion to become costless.' : 'Rome enters its next age with institutions, works, and obligations strong enough to outlive a single ruler.'
       : state.turn >= 76 ? `Rome reaches AD 117, but the ${trajanicCapitalScore.operatingForm.toLowerCase()} leaves unresolved burdens in conquest finance, provincial trust, supply, maintenance, succession, or constitutional continuity.` : 'The settlement survives, but later generations inherit debts in water, trust, defense, or food that stone alone cannot solve.',
     grades: Object.fromEntries(Object.entries(scores).map(([key, value]) => [key, { score: value, grade: grade(value) }])),

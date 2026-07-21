@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { createAugustanProjects, createAugustanState, createCivilSettlementState, createImperialCapitalProjects, createImperialCapitalState, createInitialState, createTrajanicCapitalProjects, createTrajanicCapitalState, createItalianState, createMediterraneanState, createMetropolitanProjects, createMetropolitanState, createReconstructionState, createRegionalState, createRepublicState, createRepublicStrainState, createWarState, migrateState } from '../src/game/initialState.js'
 import { AUGUSTAN_PROJECTS, BUILDING_FAMILIES, CIVIL_SETTLEMENT_PROJECTS, DISTRICTS, DISTRICT_LINKS, ERAS, IMPERIAL_CAPITAL_PROJECTS, MEDITERRANEAN_PROJECTS, METROPOLITAN_PROJECTS, REPUBLIC_STRAIN_PROJECTS, TRAJANIC_CAPITAL_PROJECTS, TURN_YEARS, formatYear, getCouncil, getObjective } from '../src/game/data.js'
 import { __test, advanceTurn, allocateWorkforce, augustanCapitalSystems, augustanCityForecast, augustanProjectAvailability, buildingAvailability, civilSettlementForecast, civilSettlementProjectAvailability, continueProject, continueRegionalRoad, districtNetworkReport, districtRiskReport, enterCityOfKings, enterEarlyRepublic, enterItalianStrategy, enterReconstruction, forecastSeason, foundRegionalColony, gallicCrisis, gallicReadiness, imperialCapitalForecast, imperialCapitalSystems, imperialProjectAvailability, italianForecast, italianProjectAvailability, mediterraneanForecast, mediterraneanProjectAvailability, metropolitanForecast, metropolitanProjectAvailability, networkCoverage, placeBuilding, populationCapacity, projectPopulation, reconstructionForecast, regionalForecast, removeBuilding, repairBuilding, republicForecast, republicStrainForecast, republicStrainProjectAvailability, resolveCouncil, reviseRegionalCompact, ritualWorkforceBurden, siteAnalysis, startRegionalRoad, trajanicCapitalForecast, trajanicCapitalSystems, trajanicProjectAvailability, upgradeBuilding, warForecast, workforceSummary, workAugustanProject, workCivilSettlementProject, workImperialProject, workItalianProject, workMediterraneanProject, workMetropolitanProject, workRepublicStrainProject, workTrajanicProject } from '../src/game/simulation.js'
-import { calculateAugustanCityScore, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
+import { calculateAugustanCityScore, calculateCityViability, calculateCivilSettlementScore, calculateImperialCapitalScore, calculateItalianScore, calculateMetropolitanScore, calculateOutcome, calculateRegionalScore, calculateRepublicStrainScore, calculateTrajanicCapitalScore } from '../src/game/outcomes.js'
 import { campaignMarkdown } from '../src/game/campaignExport.js'
 import { TRAJANIC_CAPITAL_STRATEGIES, runAllActFiveStrategies, runAllActFourStrategies, runAllActThreeStrategies, runAllAugustanCityStrategies, runAllCivilSettlementStrategies, runAllImperialCapitalStrategies, runAllMediterraneanStrategies, runAllMetropolitanOpeningStrategies, runAllMetropolitanStrategies, runAllReferenceStrategies, runAllRegionalStrategies, runAllRepublicStrainStrategies, runAllTrajanicCapitalStrategies, runRecoveryStrategy } from '../src/game/referenceStrategies.js'
 import { parseStoredMuted, parseStoredVolume, soundtrackTrackIdForTurn, soundtrackTracks } from '../src/game/soundtrack.js'
@@ -1985,6 +1985,58 @@ test('Act XII bath context explains the palaestra and bathing sequence', () => {
   assert.match(note.text, /status, sex, hour, and period/i)
   assert.ok(note.evidence.length >= 100)
   assert.doesNotMatch(`${note.title} ${note.text}`, /systemic racism|equity|marginalized|whiteness/i)
+})
+
+function ad117Profile({ population, service, clearWorks = false }) {
+  const state = structuredClone(runAllTrajanicCapitalStrategies()[0].state)
+  state.population.total = population
+  state.metrics = { ...state.metrics, food: service, water: service, shelter: service, sanitation: service }
+  if (clearWorks) {
+    state.buildings = []
+    state.projects = []
+    for (const key of ['italian', 'mediterranean', 'metropolitan', 'republicStrain', 'civilSettlement', 'augustanCity', 'imperialCapital', 'trajanicCapital']) {
+      for (const project of Object.values(state[key]?.projects ?? {})) {
+        project.progress = 0
+        project.completed = false
+      }
+    }
+  }
+  return state
+}
+
+test('zero-build campaign reaches AD 117 but receives a hollow-capital outcome', () => {
+  const state = ad117Profile({ population: 100, service: 35, clearWorks: true })
+  const outcome = calculateOutcome(state)
+  assert.equal(state.turn, 76)
+  assert.equal(state.outcome, 'trajanic-capital-complete')
+  assert.equal(outcome.cityViability.status, 'Hollowed')
+  assert.equal(outcome.cityViability.physicalFoundation, 0)
+  assert.ok(outcome.overall < 60)
+  assert.equal(outcome.title, 'Administrative State, Hollow Capital')
+})
+
+test('guided novice remains viable and can earn a C', () => {
+  const state = ad117Profile({ population: 650, service: 65 })
+  const outcome = calculateOutcome(state)
+  assert.ok(state.population.total >= 500)
+  assert.ok(outcome.cityViability.score >= 70)
+  assert.ok(outcome.overall >= 70)
+})
+
+test('political specialist keeps strategic credit without an elite capital title', () => {
+  const state = structuredClone(runAllTrajanicCapitalStrategies()[1].state)
+  const outcome = calculateOutcome(state)
+  assert.ok(outcome.strategicSettlement >= 70)
+  assert.ok(outcome.cityViability.score < 50)
+  assert.notEqual(outcome.title, calculateTrajanicCapitalScore(state).operatingForm)
+})
+
+test('integrated builder can earn the strongest eligible title', () => {
+  const state = ad117Profile({ population: 1030, service: 85 })
+  const outcome = calculateOutcome(state)
+  assert.ok(outcome.cityViability.score >= 70)
+  assert.equal(outcome.title, calculateTrajanicCapitalScore(state).operatingForm)
+  assert.match(outcome.title, /Integrated Administrative Capital/)
 })
 
 test('Act XII chronicle records the Trajanic settlement and consulted knowledge', () => {

@@ -29,7 +29,16 @@ export function campaignMarkdown(state) {
     '',
     outcome.summary,
     '',
-    section('Final Grades', Object.entries(outcome.grades).map(([name, value]) => `- ${name}: **${value.grade}** (${value.score})`)),
+    section('Headline Judgments', [
+      `- Overall: **${outcome.overall}**`,
+      `- Strategic Settlement: **${outcome.strategicGrade}** (${outcome.strategicSettlement}; 55% of overall)`,
+      `- City Viability: **${outcome.cityViability.grade}** (${outcome.cityViability.score}; ${outcome.cityViability.status}; 45% of overall)`,
+      `- Population stability: ${outcome.cityViability.populationStability}`,
+      `- Essential services: ${outcome.cityViability.essentialServices}`,
+      `- Physical foundation: ${outcome.cityViability.physicalFoundation}`,
+      `- Recovery judgment: ${outcome.cityViability.recoveryCue}`,
+    ]),
+    section('Diagnostic Grades', Object.entries(outcome.grades).map(([name, value]) => `- ${name}: **${value.grade}** (${value.score})`)),
     section('Population', state.population ? [
       `- Total population: **${state.population.total.toLocaleString()}**`,
       `- Households: ${state.population.households}`,

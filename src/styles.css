@@ -502,6 +502,24 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
   .terrain-scene-legend { display: none; }
 }
 
+.viability-score { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 12px; }
+.viability-score strong { color: var(--gold); font-family: Georgia, serif; font-size: 34px; }
+.viability-score span { color: var(--text); font-size: 12px; text-transform: uppercase; }
+.viability-components { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 10px; }
+.viability-components span { min-width: 0; padding: 7px 4px; border: 1px solid var(--line); color: var(--muted); font-size: 8px; text-align: center; text-transform: uppercase; overflow-wrap: anywhere; }
+.viability-components b { display: block; color: var(--text); font-size: 13px; }
+.viability-section > p, .outcome-recovery-cue { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.headline-judgment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 18px 0 10px; }
+.headline-judgment-grid > div { min-width: 0; padding: 12px; border: 1px solid var(--line-bright); background: #1a1b18; text-align: center; }
+.headline-judgment-grid span, .headline-judgment-grid strong, .headline-judgment-grid small { display: block; }
+.headline-judgment-grid span { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.headline-judgment-grid strong { color: var(--gold); font-family: Georgia, serif; font-size: 32px; }
+.headline-judgment-grid small { color: var(--muted); overflow-wrap: anywhere; }
+
+@media (max-width: 540px) {
+  .headline-judgment-grid { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }

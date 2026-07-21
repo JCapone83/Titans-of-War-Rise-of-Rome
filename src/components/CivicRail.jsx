@@ -1,9 +1,11 @@
 import { DISTRICTS, FACTIONS, METRIC_META, RESOURCE_META } from '../game/data.js'
 import { forecastSeason } from '../game/simulation.js'
+import { calculateCityViability } from '../game/outcomes.js'
 import { LaborAllocationPanel } from './LaborAllocationPanel.jsx'
 
 export function CivicRail({ state, onAllocate }) {
   const forecast = forecastSeason(state)
+  const cityViability = calculateCityViability(state)
   const highestRisks = Object.values(forecast.risks).sort((a, b) => Math.max(b.fire, b.disease, b.flood) - Math.max(a.fire, a.disease, a.flood)).slice(0, 2)
   return (
     <aside className="civic-rail" aria-label="City condition">
@@ -43,6 +45,16 @@ export function CivicRail({ state, onAllocate }) {
             )
           })}
         </div>
+      </section>
+      <section className="viability-section" aria-label="City viability">
+        <div className="section-heading"><p className="eyebrow">Population, services, and works</p><h2>City viability</h2></div>
+        <div className="viability-score"><strong>{cityViability.score}</strong><span>{cityViability.status}</span></div>
+        <div className="viability-components">
+          <span><b>{cityViability.populationStability}</b> Population</span>
+          <span><b>{cityViability.essentialServices}</b> Services</span>
+          <span><b>{cityViability.physicalFoundation}</b> Foundation</span>
+        </div>
+        <p>{cityViability.recoveryCue}</p>
       </section>
       <LaborAllocationPanel state={state} onAllocate={onAllocate} />
       <section className="forecast-section">

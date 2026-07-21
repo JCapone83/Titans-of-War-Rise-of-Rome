@@ -9,6 +9,11 @@ export function OutcomeOverlay({ outcome, onExport, onRestart, onContinue, conti
         <h2 id="outcome-title">{outcome.title}</h2>
         <p className="outcome-summary">{outcome.summary}</p>
         <div className="overall-score"><span>Overall</span><strong>{outcome.overall}</strong></div>
+        <div className="headline-judgment-grid" aria-label="Headline judgments">
+          <div><span>Strategic settlement</span><strong>{outcome.strategicGrade}</strong><small>{outcome.strategicSettlement}/100 · 55% of overall</small></div>
+          <div><span>City viability</span><strong>{outcome.cityViability.grade}</strong><small>{outcome.cityViability.score}/100 · {outcome.cityViability.status} · 45% of overall</small></div>
+        </div>
+        <p className="outcome-recovery-cue">{outcome.cityViability.explanation} {outcome.cityViability.recoveryCue}</p>
         <div className="grade-grid">
           {Object.entries(outcome.grades).map(([name, value]) => (
             <div key={name}><strong>{value.grade}</strong><span>{name}</span><small>{value.score}/100</small></div>
