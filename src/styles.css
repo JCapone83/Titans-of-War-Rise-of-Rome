@@ -286,6 +286,12 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 .resolved-risk { padding: 8px 10px; border: 1px solid var(--line); color: var(--muted); font-size: 11px; }.resolved-risk strong { color: var(--gold); }
 .report-population { display: grid; grid-template-columns: 130px 1fr; gap: 16px; margin: 0 0 22px; padding: 14px; border: 1px solid var(--line); background: #191a17; }.report-population > div:first-child span, .report-population > div:first-child strong { display: block; }.report-population > div:first-child span { color: var(--muted); font-size: 10px; text-transform: uppercase; }.report-population > div:first-child strong { font-family: Georgia, serif; font-size: 28px; }.report-population-causes { display: flex; flex-wrap: wrap; align-content: center; gap: 5px; }.report-population-causes span { padding: 4px 6px; background: #292a25; font-size: 9px; }
 .era-modal { border-color: var(--gold); text-align: center; }.era-modal > svg { width: 48px; height: 48px; color: var(--gold); }.era-unlocks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 22px 0; }.era-unlocks span { padding: 12px 8px; border: 1px solid var(--line); color: var(--gold); font-size: 11px; }
+.era-overlay-art { isolation: isolate; place-items: center start; overflow: hidden; padding: clamp(24px, 5vw, 80px); background: #090a08; }
+.era-transition-art { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.era-overlay-art::before { position: absolute; inset: 0; z-index: -1; content: ''; background: linear-gradient(90deg, #090a08f7 0%, #090a08e8 27%, #090a08a8 46%, #090a0833 72%, #090a0866 100%); }
+.era-overlay-art .era-modal { width: min(560px, calc(100vw - 48px)); margin-left: clamp(0px, 3vw, 56px); border-color: #d6ad4f; background: #1b1c18ed; box-shadow: 14px 14px 0 #090a08b8; text-align: left; backdrop-filter: blur(3px); }
+.era-overlay-art .era-modal > svg { width: 42px; height: 42px; }
+.era-overlay-art .era-unlocks span { display: grid; place-items: center; min-height: 58px; text-align: center; }
 .overall-score { width: 120px; height: 120px; margin: 20px auto; display: grid; place-items: center; align-content: center; border: 2px solid var(--gold); }.overall-score span, .overall-score strong { display: block; }.overall-score span { color: var(--muted); font-size: 11px; text-transform: uppercase; }.overall-score strong { font-family: Georgia, serif; font-size: 42px; }
 .grade-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }.grade-grid > div { min-height: 100px; padding: 10px 5px; border: 1px solid var(--line); text-align: center; }.grade-grid strong, .grade-grid span, .grade-grid small { display: block; }.grade-grid strong { color: var(--gold); font-family: Georgia, serif; font-size: 30px; }.grade-grid span { min-height: 30px; font-size: 10px; }.grade-grid small { color: var(--muted); }
 .outcome-actions { display: flex; gap: 10px; justify-content: center; margin-top: 22px; }.outcome-actions button { flex: 1; }
@@ -391,6 +397,15 @@ h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 600; l
 }
 
 @media (max-width: 720px) {
+  .era-overlay-art { place-items: end center; padding: 12px; }
+  .era-transition-art { object-position: 66% center; }
+  .era-overlay-art::before { background: linear-gradient(180deg, #090a0814 0%, #090a084d 36%, #090a08e6 60%, #090a08fc 100%); }
+  .era-overlay-art .era-modal { width: 100%; max-height: 70svh; margin: 0; padding: 22px 18px; box-shadow: 8px 8px 0 #090a08b8; }
+  .era-overlay-art .era-modal > svg { width: 34px; height: 34px; }
+  .era-overlay-art .era-modal h2 { margin-bottom: 10px; }
+  .era-overlay-art .era-modal > p:not(.eyebrow) { font-size: 15px; line-height: 1.45; }
+  .era-overlay-art .era-unlocks { gap: 5px; margin: 15px 0; }
+  .era-overlay-art .era-unlocks span { min-height: 40px; padding: 8px; }
   .home-screen { min-height: 100svh; gap: 14px; padding: 16px 14px 14px; }
   .home-background { object-position: 66% center; filter: brightness(.78); }
   .home-header { gap: 10px; }

@@ -56,6 +56,7 @@ def main() -> None:
         "src/components/BuildingInspector.jsx": "Upgrade",
         "src/components/DecisionCouncil.jsx": "council-options",
         "src/components/HistoricalContextPanel.jsx": "Evidence before certainty",
+        "src/components/EraTransition.jsx": "imperial-capital-v1.webp",
         "tests/game.test.mjs": "major works consume materials once",
         "scripts/run-balance.mjs": "runAllActFiveStrategies",
         "README.md": "Hill Settlements",
@@ -75,6 +76,10 @@ def main() -> None:
     }
     for path, marker in checks.items():
         require(path, marker)
+    require("public/images/transitions/early-republic-v1.webp")
+    require("public/images/transitions/mediterranean-republic-v1.webp")
+    require("public/images/transitions/augustan-city-v1.webp")
+    require("public/images/transitions/imperial-capital-v1.webp")
     require("public/images/buildings/palatine-huts-v1.png")
     require("public/images/buildings/timber-shrine-v1.png")
     require("public/images/buildings/shallow-well-v1.png")

@@ -161,6 +161,38 @@ Future maps, music, generated art, or public-domain historical material must be 
 
 The image is interface background art rather than archaeological evidence. It must not be presented as a reconstruction of one documented view or named event.
 
+## Era transition concept art
+
+These full-screen plates were produced for Titans Forge with OpenAI image-generation assistance on July 20, 2026. They are project-authored visual interpretations, not archaeological evidence or reconstructions of one documented viewpoint. No source photograph is embedded or redistributed.
+
+### Early Republican Rome
+
+- File: `public/images/transitions/early-republic-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Historical scope: A bounded late-sixth- to early-fifth-century BC interpretation of a drained Forum valley, timber and tufa civic structures, the Capitoline cult center, public business, and citizen levy. It intentionally excludes later imperial monuments.
+- SHA-256: `e5b857d1da4a03859540231911aa216051785c6b6441ef2c376e47ee495743d8`
+
+### Mediterranean Republic
+
+- File: `public/images/transitions/mediterranean-republic-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Historical scope: A compressed visual synthesis of the Tiber port, shipbuilding, contracts, grain, allied supply, and naval mobilization during Rome's expansion from 264 to 201 BC. It depicts operating capacity rather than one named departure.
+- SHA-256: `24d725bc5c7e32599bc7ebb8b9cd27e0edb340509601cf48f3b5f20293740b8a`
+
+### Augustan City
+
+- File: `public/images/transitions/augustan-city-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Historical scope: A layered interpretation of Rome around 10 BC, combining older neighborhoods with Augustan temples, paved streets, administration, and public water. It intentionally excludes the Colosseum and the later Hadrianic Pantheon.
+- SHA-256: `5d25df4661c192c1dbe36888225db393b3cf67de4eed6d0fcc355ff3a8f44ef3`
+
+### Imperial Capital
+
+- File: `public/images/transitions/imperial-capital-v1.webp`
+- Creator: Titans Forge with OpenAI image-generation assistance
+- Historical scope: A bounded Flavian-era interpretation of Rome around AD 80-96, with an operating amphitheatre, palace, water, housing, public works, maintenance, and supply. It intentionally excludes Trajanic and Hadrianic monuments.
+- SHA-256: `dccfe774c24c0ff4544737fdec096502e78b1a55eb81229970dfc21c6e7e8246`
+
 ## Playable terrain artwork
 
 ### Palatine and Capitoline hill terrain

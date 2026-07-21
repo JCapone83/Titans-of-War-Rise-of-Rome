@@ -14,6 +14,8 @@ const CONTENT = {
     text: 'Royal command has ended, but its army, cults, debts, and public works remain. Annual magistrates must now act through Senate credit and citizen consent while campaign service presses the households that sustain both.',
     unlocks: ['Annual offices', 'Debt and levy pressure', 'Republican civic works'],
     action: 'Found the Republic',
+    art: '/images/transitions/early-republic-v1.webp',
+    artAlt: 'Early Republican Rome gathering around the drained Forum valley and Capitoline temple.',
   },
   reconstruction: {
     eyebrow: '390 BC - the city after defeat',
@@ -35,6 +37,8 @@ const CONTENT = {
     text: 'Italy has supplied depth; the sea now demands a different ledger. Fleet capacity, maritime losses, credit, local trust, grain, allies, and command duration become visible obligations.',
     unlocks: ['Fleet acquisition', 'Maritime learning', 'Sicilian settlement'],
     action: 'Enter the Mediterranean',
+    art: '/images/transitions/mediterranean-republic-v1.webp',
+    artAlt: 'Republican Rome building warships and organizing Mediterranean supply at the Tiber port.',
   },
   hannibalic: {
     eyebrow: '241-218 BC - the interwar ledger',
@@ -70,6 +74,8 @@ const CONTENT = {
     text: 'Civil war has ended, but the first settlement is already changing. Command, Senate and magistrates, household succession, provincial review, water, fire, grain, public access, and monumental memory must now operate together through AD 14.',
     unlocks: ['Augustan operating ledger', 'Eight evidence-labeled projects', 'The first succession test'],
     action: 'Enter the Augustan City',
+    art: '/images/transitions/augustan-city-v1.webp',
+    artAlt: 'Augustan Rome combining older neighborhoods with new temples, paved streets, and public water.',
   },
   imperial: {
     eyebrow: 'AD 14 - the founder is gone',
@@ -77,6 +83,8 @@ const CONTENT = {
     text: 'The principate has survived one transfer, but succession now joins guards, provincial armies, Senate recognition, palace access, grain, harbor, water, fire, and public land. Rome will become visually magnificent while those operating relationships grow harder to govern.',
     unlocks: ['Imperial operating ledger', 'Eight staged capital projects', 'Fire, army, palace, and succession crises'],
     action: 'Enter the Imperial Capital',
+    art: '/images/transitions/imperial-capital-v1.webp',
+    artAlt: 'Flavian Rome operating around the new amphitheatre, aqueducts, dense housing, and public works.',
   },
   trajanic: {
     eyebrow: 'AD 96-117 - adoption, conquest, and inherited obligations',
@@ -98,7 +106,8 @@ export function EraTransition({ open, kind = 'kings', onContinue }) {
   if (!open) return null
   const content = CONTENT[kind]
   return (
-    <div className="overlay era-overlay">
+    <div className={`overlay era-overlay${content.art ? ' era-overlay-art' : ''}`}>
+      {content.art && <img className="era-transition-art" src={content.art} alt={content.artAlt} />}
       <section className="era-modal" role="dialog" aria-modal="true" aria-labelledby="era-title">
         <Columns3 />
         <p className="eyebrow">{content.eyebrow}</p>
